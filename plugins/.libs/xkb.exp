@@ -1,0 +1,15 @@
+fm_module_init_lxpanel_gtk
+module_lxpanel_gtk_version
+module_name
+xkb_active_window_changed
+xkb_change_group
+xkb_get_current_group_name
+xkb_get_current_group_xkb_no
+xkb_get_current_symbol_name
+xkb_get_current_symbol_name_lowercase
+xkb_get_group_count
+xkb_get_symbol_name_by_res_no
+xkb_mechanism_constructor
+xkb_mechanism_destructor
+xkb_redraw
+xkb_setxkbmap

@@ -1,0 +1,12 @@
+{ global:
+battery_free;
+battery_get;
+battery_get_remaining;
+battery_is_charging;
+battery_new;
+battery_print;
+battery_update;
+fm_module_init_lxpanel_gtk;
+module_lxpanel_gtk_version;
+module_name;
+local: *; };

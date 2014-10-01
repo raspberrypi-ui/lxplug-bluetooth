@@ -1,0 +1,5 @@
+{ global:
+fm_module_init_lxpanel_gtk;
+module_lxpanel_gtk_version;
+module_name;
+local: *; };

@@ -1,0 +1,28 @@
+{ global:
+create_statusicon;
+fm_module_init_lxpanel_gtk;
+lxnm_close;
+lxnm_send_command;
+lxnm_socket;
+lxnm_wireless_command_make;
+module_lxpanel_gtk_version;
+module_name;
+netproc_close;
+netproc_devicelist_clear;
+netproc_listener;
+netproc_netdevlist_clear;
+netproc_open;
+netproc_scandevice;
+passwd_gui_destroy;
+passwd_gui_new;
+passwd_gui_set_style;
+set_statusicon_image_from_file;
+set_statusicon_tooltips;
+set_statusicon_visible;
+statusicon_destroy;
+wireless_aplist_free;
+wireless_gen_ie;
+wireless_parse_scanning_event;
+wireless_refresh;
+wireless_scanning;
+local: *; };
