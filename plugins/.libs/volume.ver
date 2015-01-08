@@ -1,8 +1,0 @@
-{ global:
-create_volume_window;
-fm_module_init_lxpanel_gtk;
-mixer_fd;
-module_lxpanel_gtk_version;
-module_name;
-vol_spin;
-local: *; };

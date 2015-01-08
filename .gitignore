@@ -4,4 +4,9 @@
 *.a
 *.gmo
 .DS_Store
+lxpanel
+lxpanelctl
+config.log
+.deps/
+.libs/
 
