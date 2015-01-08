@@ -3,6 +3,8 @@
 *.la
 *.a
 *.gmo
+*.lo
+.dirstamp
 .DS_Store
 lxpanel
 lxpanelctl
