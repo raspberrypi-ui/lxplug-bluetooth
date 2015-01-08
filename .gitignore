@@ -1,0 +1,7 @@
+*.o
+*.so
+*.la
+*.a
+*.gmo
+.DS_Store
+
