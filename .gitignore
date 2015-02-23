@@ -11,4 +11,5 @@ lxpanelctl
 config.log
 .deps/
 .libs/
+libtool
 

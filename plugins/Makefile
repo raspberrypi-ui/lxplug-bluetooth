@@ -77,8 +77,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-build_triplet = armv6l-unknown-linux-gnueabihf
-host_triplet = armv6l-unknown-linux-gnueabihf
+build_triplet = armv7l-unknown-linux-gnueabihf
+host_triplet = armv7l-unknown-linux-gnueabihf
 subdir = plugins
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
@@ -419,7 +419,7 @@ PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
 PKG_CONFIG_PATH = 
-PLUGINS_LIST =     netstatus.la     netstat.la     volume.la          cpu.la     deskno.la     batt.la     kbled.la     xkb.la     thermal.la     cpufreq.la     monitors.la          weather.la
+PLUGINS_LIST =     netstatus.la     netstat.la          volumealsa.la     cpu.la     deskno.la     batt.la     kbled.la     xkb.la     thermal.la     cpufreq.la     monitors.la          weather.la
 POFILES = 
 POSUB = po
 PO_IN_DATADIR_FALSE = 
@@ -448,9 +448,9 @@ am__quote =
 am__tar = $${TAR-tar} chof - "$$tardir"
 am__untar = $${TAR-tar} xf -
 bindir = ${exec_prefix}/bin
-build = armv6l-unknown-linux-gnueabihf
+build = armv7l-unknown-linux-gnueabihf
 build_alias = 
-build_cpu = armv6l
+build_cpu = armv7l
 build_os = linux-gnueabihf
 build_vendor = unknown
 builddir = .
@@ -459,9 +459,9 @@ datarootdir = ${prefix}/share
 docdir = ${datarootdir}/doc/${PACKAGE_TARNAME}
 dvidir = ${docdir}
 exec_prefix = ${prefix}
-host = armv6l-unknown-linux-gnueabihf
+host = armv7l-unknown-linux-gnueabihf
 host_alias = 
-host_cpu = armv6l
+host_cpu = armv7l
 host_os = linux-gnueabihf
 host_vendor = unknown
 htmldir = ${docdir}
@@ -628,8 +628,8 @@ volume_la_LDFLAGS = -module -avoid-version -rpath $(libdir)/lxpanel/plugins -no-
 
 # volumealsa
 volumealsa_la_SOURCES = volumealsa/volumealsa.c
-volumealsa_la_CFLAGS = -DPACKAGE_DATA_DIR=\""$(datadir)/lxpanel"\"
-volumealsa_la_LDFLAGS = -module -avoid-version -rpath $(libdir)/lxpanel/plugins -no-undefined -export-symbols-regex "^[^_].*" -lasound
+volumealsa_la_CFLAGS = -DPACKAGE_DATA_DIR=\""$(datadir)/lxpanel"\" -I/usr/include/gstreamer-0.10 -I/usr/include/libxml2
+volumealsa_la_LDFLAGS = -module -avoid-version -rpath $(libdir)/lxpanel/plugins -no-undefined -export-symbols-regex "^[^_].*" -lasound -lgstreamer-0.10 -lxml2 -lgstaudio-0.10
 
 # weather
 weather_la_SOURCES = \
