@@ -150,7 +150,7 @@ DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = ${SHELL} /home/pi/lxpanel-0.7.1/missing aclocal-1.14
 ADDITIONAL_FLAGS = 
 ALL_LINGUAS = 
-ALL_PLUGINS_LIST = netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather
+ALL_PLUGINS_LIST = netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather dhcpcdui
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 0
 APPLET_CFLAGS = 
@@ -240,7 +240,7 @@ PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
 PKG_CONFIG_PATH = 
-PLUGINS_LIST =     netstatus.la     netstat.la          volumealsa.la     cpu.la     deskno.la     batt.la     kbled.la     xkb.la     thermal.la     cpufreq.la     monitors.la          weather.la
+PLUGINS_LIST =     netstatus.la     netstat.la          volumealsa.la     cpu.la     deskno.la     batt.la     kbled.la     xkb.la     thermal.la     cpufreq.la     monitors.la          dhcpcdui.la     weather.la
 POFILES = 
 POSUB = po
 PO_IN_DATADIR_FALSE = 
@@ -374,7 +374,22 @@ lxpanel_images_DATA = \
 	images/scrllock-off.png \
 	images/window-manager.png \
 	images/clock.png \
-	images/cpufreq-icon.png
+	images/cpufreq-icon.png \
+	images/network-wireless-connected-25.png \
+	images/network-wireless-connected-50.png \
+	images/network-wireless-connected-75.png \
+	images/network-wireless-connected-100.png \
+	images/dialog-ok-apply.png \
+	images/network-error.png \
+	images/network-idle.png \
+	images/network-offline.png \
+	images/network-receive.png \
+	images/network-transmit-receive.png \
+	images/network-transmit.png \
+	images/network-wired.png \
+	images/network-wireless-connected-00.png \
+	images/network-wireless-encrypted.png \
+	images/network-wireless.png
 
 lxpanel_imagesdir = $(datadir)/lxpanel/images
 EXTRA_DIST = \

@@ -175,6 +175,15 @@ deskno_la_OBJECTS = $(am_deskno_la_OBJECTS)
 deskno_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(deskno_la_LDFLAGS) $(LDFLAGS) -o $@
+dhcpcdui_la_LIBADD =
+am_dhcpcdui_la_OBJECTS = dhcpcd-gtk/dhcpcdui_la-main.lo \
+	dhcpcd-gtk/dhcpcdui_la-menu.lo dhcpcd-gtk/dhcpcdui_la-prefs.lo \
+	dhcpcd-gtk/dhcpcdui_la-wpa.lo libdhcpcd/dhcpcdui_la-dhcpcd.lo \
+	libdhcpcd/dhcpcdui_la-config.lo libdhcpcd/dhcpcdui_la-wpa.lo
+dhcpcdui_la_OBJECTS = $(am_dhcpcdui_la_OBJECTS)
+dhcpcdui_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(dhcpcdui_la_CFLAGS) \
+	$(CFLAGS) $(dhcpcdui_la_LDFLAGS) $(LDFLAGS) -o $@
 indicator_la_LIBADD =
 am_indicator_la_OBJECTS = indicator/indicator_la-indicator.lo
 indicator_la_OBJECTS = $(am_indicator_la_OBJECTS)
@@ -286,19 +295,20 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libbuiltin_plugins_a_SOURCES) $(batt_la_SOURCES) \
 	$(cpu_la_SOURCES) $(cpufreq_la_SOURCES) $(deskno_la_SOURCES) \
-	$(indicator_la_SOURCES) $(kbled_la_SOURCES) \
-	$(monitors_la_SOURCES) $(netstat_la_SOURCES) \
-	$(netstatus_la_SOURCES) $(thermal_la_SOURCES) \
-	$(volume_la_SOURCES) $(volumealsa_la_SOURCES) \
-	$(weather_la_SOURCES) $(xkb_la_SOURCES)
-DIST_SOURCES = $(am__libbuiltin_plugins_a_SOURCES_DIST) \
-	$(batt_la_SOURCES) $(cpu_la_SOURCES) $(cpufreq_la_SOURCES) \
-	$(deskno_la_SOURCES) $(indicator_la_SOURCES) \
+	$(dhcpcdui_la_SOURCES) $(indicator_la_SOURCES) \
 	$(kbled_la_SOURCES) $(monitors_la_SOURCES) \
 	$(netstat_la_SOURCES) $(netstatus_la_SOURCES) \
 	$(thermal_la_SOURCES) $(volume_la_SOURCES) \
 	$(volumealsa_la_SOURCES) $(weather_la_SOURCES) \
 	$(xkb_la_SOURCES)
+DIST_SOURCES = $(am__libbuiltin_plugins_a_SOURCES_DIST) \
+	$(batt_la_SOURCES) $(cpu_la_SOURCES) $(cpufreq_la_SOURCES) \
+	$(deskno_la_SOURCES) $(dhcpcdui_la_SOURCES) \
+	$(indicator_la_SOURCES) $(kbled_la_SOURCES) \
+	$(monitors_la_SOURCES) $(netstat_la_SOURCES) \
+	$(netstatus_la_SOURCES) $(thermal_la_SOURCES) \
+	$(volume_la_SOURCES) $(volumealsa_la_SOURCES) \
+	$(weather_la_SOURCES) $(xkb_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -329,7 +339,7 @@ pkglibdir = $(libdir)/lxpanel/plugins
 ACLOCAL = ${SHELL} /home/pi/lxpanel-0.7.1/missing aclocal-1.14
 ADDITIONAL_FLAGS = 
 ALL_LINGUAS = 
-ALL_PLUGINS_LIST = netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather
+ALL_PLUGINS_LIST = netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather dhcpcdui
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 0
 APPLET_CFLAGS = 
@@ -408,7 +418,7 @@ OTOOL =
 OTOOL64 = 
 PACKAGE = lxpanel
 PACKAGE_BUGREPORT = http://lxde.org/
-PACKAGE_CFLAGS = -Wall -pthread -I/usr/local/include -I/usr/include/gtk-2.0 -I/usr/lib/arm-linux-gnueabihf/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/pango-1.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng12 -I/usr/include/harfbuzz -I/usr/include/libwnck-1.0 -I/usr/include/startup-notification-1.0   -I/usr/include/menu-cache -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include   
+PACKAGE_CFLAGS = -pthread -I/usr/local/include -I/usr/include/gtk-2.0 -I/usr/lib/arm-linux-gnueabihf/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/pango-1.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng12 -I/usr/include/harfbuzz -I/usr/include/libwnck-1.0 -I/usr/include/startup-notification-1.0   -I/usr/include/menu-cache -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include   
 PACKAGE_LIBS = -pthread -Wl,--export-dynamic -L/usr/local/lib -lfm-gtk -lfm -lwnck-1 -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lpangoft2-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgio-2.0 -lgobject-2.0 -lgthread-2.0 -lgmodule-2.0 -lrt -lglib-2.0   -lmenu-cache -lglib-2.0  
 PACKAGE_NAME = lxpanel
 PACKAGE_STRING = lxpanel 0.7.1
@@ -419,7 +429,7 @@ PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
 PKG_CONFIG_PATH = 
-PLUGINS_LIST =     netstatus.la     netstat.la          volumealsa.la     cpu.la     deskno.la     batt.la     kbled.la     xkb.la     thermal.la     cpufreq.la     monitors.la          weather.la
+PLUGINS_LIST =     netstatus.la     netstat.la          volumealsa.la     cpu.la     deskno.la     batt.la     kbled.la     xkb.la     thermal.la     cpufreq.la     monitors.la          dhcpcdui.la     weather.la
 POFILES = 
 POSUB = po
 PO_IN_DATADIR_FALSE = 
@@ -540,7 +550,8 @@ EXTRA_LTLIBRARIES = \
 	volume.la \
 	volumealsa.la \
 	weather.la \
-	xkb.la
+	xkb.la \
+	dhcpcdui.la
 
 
 # batt
@@ -665,6 +676,19 @@ xkeyboardconfig_DATA = \
 	xkb/xkeyboardconfig/layouts.cfg \
 	xkb/xkeyboardconfig/toggle.cfg
 
+
+# dhcpcdui
+dhcpcdui_la_SOURCES = \
+	dhcpcd-gtk/main.c \
+	dhcpcd-gtk/menu.c \
+	dhcpcd-gtk/prefs.c \
+	dhcpcd-gtk/wpa.c \
+	libdhcpcd/dhcpcd.c \
+	libdhcpcd/config.c \
+	libdhcpcd/wpa.c
+
+dhcpcdui_la_CFLAGS = -DPACKAGE_DATA_DIR=\""$(datadir)/lxpanel"\" -I$(srcdir)/dhcpcd-gtk  -I$(srcdir)/libdhcpcd
+dhcpcdui_la_LDFLAGS = -module -avoid-version -rpath $(libdir)/lxpanel/plugins -no-undefined -export-symbols-regex "^[^_].*"
 flagsdir = $(datadir)/lxpanel/images/xkb-flags
 flags_DATA = \
 	xkb/flags/ad.png \
@@ -946,6 +970,35 @@ deskno/deskno.lo: deskno/$(am__dirstamp) \
 
 deskno.la: $(deskno_la_OBJECTS) $(deskno_la_DEPENDENCIES) $(EXTRA_deskno_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(deskno_la_LINK)  $(deskno_la_OBJECTS) $(deskno_la_LIBADD) $(LIBS)
+dhcpcd-gtk/$(am__dirstamp):
+	@$(MKDIR_P) dhcpcd-gtk
+	@: > dhcpcd-gtk/$(am__dirstamp)
+dhcpcd-gtk/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) dhcpcd-gtk/$(DEPDIR)
+	@: > dhcpcd-gtk/$(DEPDIR)/$(am__dirstamp)
+dhcpcd-gtk/dhcpcdui_la-main.lo: dhcpcd-gtk/$(am__dirstamp) \
+	dhcpcd-gtk/$(DEPDIR)/$(am__dirstamp)
+dhcpcd-gtk/dhcpcdui_la-menu.lo: dhcpcd-gtk/$(am__dirstamp) \
+	dhcpcd-gtk/$(DEPDIR)/$(am__dirstamp)
+dhcpcd-gtk/dhcpcdui_la-prefs.lo: dhcpcd-gtk/$(am__dirstamp) \
+	dhcpcd-gtk/$(DEPDIR)/$(am__dirstamp)
+dhcpcd-gtk/dhcpcdui_la-wpa.lo: dhcpcd-gtk/$(am__dirstamp) \
+	dhcpcd-gtk/$(DEPDIR)/$(am__dirstamp)
+libdhcpcd/$(am__dirstamp):
+	@$(MKDIR_P) libdhcpcd
+	@: > libdhcpcd/$(am__dirstamp)
+libdhcpcd/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) libdhcpcd/$(DEPDIR)
+	@: > libdhcpcd/$(DEPDIR)/$(am__dirstamp)
+libdhcpcd/dhcpcdui_la-dhcpcd.lo: libdhcpcd/$(am__dirstamp) \
+	libdhcpcd/$(DEPDIR)/$(am__dirstamp)
+libdhcpcd/dhcpcdui_la-config.lo: libdhcpcd/$(am__dirstamp) \
+	libdhcpcd/$(DEPDIR)/$(am__dirstamp)
+libdhcpcd/dhcpcdui_la-wpa.lo: libdhcpcd/$(am__dirstamp) \
+	libdhcpcd/$(DEPDIR)/$(am__dirstamp)
+
+dhcpcdui.la: $(dhcpcdui_la_OBJECTS) $(dhcpcdui_la_DEPENDENCIES) $(EXTRA_dhcpcdui_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(dhcpcdui_la_LINK)  $(dhcpcdui_la_OBJECTS) $(dhcpcdui_la_LIBADD) $(LIBS)
 indicator/$(am__dirstamp):
 	@$(MKDIR_P) indicator
 	@: > indicator/$(am__dirstamp)
@@ -1104,10 +1157,14 @@ mostlyclean-compile:
 	-rm -f cpufreq/*.lo
 	-rm -f deskno/*.$(OBJEXT)
 	-rm -f deskno/*.lo
+	-rm -f dhcpcd-gtk/*.$(OBJEXT)
+	-rm -f dhcpcd-gtk/*.lo
 	-rm -f indicator/*.$(OBJEXT)
 	-rm -f indicator/*.lo
 	-rm -f kbled/*.$(OBJEXT)
 	-rm -f kbled/*.lo
+	-rm -f libdhcpcd/*.$(OBJEXT)
+	-rm -f libdhcpcd/*.lo
 	-rm -f monitors/*.$(OBJEXT)
 	-rm -f monitors/*.lo
 	-rm -f netstat/*.$(OBJEXT)
@@ -1142,8 +1199,15 @@ include batt/$(DEPDIR)/batt_la-batt_sys.Plo
 include cpu/$(DEPDIR)/cpu.Plo
 include cpufreq/$(DEPDIR)/cpufreq_la-cpufreq.Plo
 include deskno/$(DEPDIR)/deskno.Plo
+include dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-main.Plo
+include dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-menu.Plo
+include dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-prefs.Plo
+include dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-wpa.Plo
 include indicator/$(DEPDIR)/indicator_la-indicator.Plo
 include kbled/$(DEPDIR)/kbled_la-kbled.Plo
+include libdhcpcd/$(DEPDIR)/dhcpcdui_la-config.Plo
+include libdhcpcd/$(DEPDIR)/dhcpcdui_la-dhcpcd.Plo
+include libdhcpcd/$(DEPDIR)/dhcpcdui_la-wpa.Plo
 include monitors/$(DEPDIR)/monitors.Plo
 include netstat/$(DEPDIR)/netstat_la-devproc.Plo
 include netstat/$(DEPDIR)/netstat_la-lxnm_client.Plo
@@ -1343,6 +1407,55 @@ cpufreq/cpufreq_la-cpufreq.lo: cpufreq/cpufreq.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(cpufreq_la_CFLAGS) $(CFLAGS) -c -o cpufreq/cpufreq_la-cpufreq.lo `test -f 'cpufreq/cpufreq.c' || echo '$(srcdir)/'`cpufreq/cpufreq.c
 
+dhcpcd-gtk/dhcpcdui_la-main.lo: dhcpcd-gtk/main.c
+	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -MT dhcpcd-gtk/dhcpcdui_la-main.lo -MD -MP -MF dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-main.Tpo -c -o dhcpcd-gtk/dhcpcdui_la-main.lo `test -f 'dhcpcd-gtk/main.c' || echo '$(srcdir)/'`dhcpcd-gtk/main.c
+	$(AM_V_at)$(am__mv) dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-main.Tpo dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-main.Plo
+#	$(AM_V_CC)source='dhcpcd-gtk/main.c' object='dhcpcd-gtk/dhcpcdui_la-main.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -c -o dhcpcd-gtk/dhcpcdui_la-main.lo `test -f 'dhcpcd-gtk/main.c' || echo '$(srcdir)/'`dhcpcd-gtk/main.c
+
+dhcpcd-gtk/dhcpcdui_la-menu.lo: dhcpcd-gtk/menu.c
+	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -MT dhcpcd-gtk/dhcpcdui_la-menu.lo -MD -MP -MF dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-menu.Tpo -c -o dhcpcd-gtk/dhcpcdui_la-menu.lo `test -f 'dhcpcd-gtk/menu.c' || echo '$(srcdir)/'`dhcpcd-gtk/menu.c
+	$(AM_V_at)$(am__mv) dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-menu.Tpo dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-menu.Plo
+#	$(AM_V_CC)source='dhcpcd-gtk/menu.c' object='dhcpcd-gtk/dhcpcdui_la-menu.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -c -o dhcpcd-gtk/dhcpcdui_la-menu.lo `test -f 'dhcpcd-gtk/menu.c' || echo '$(srcdir)/'`dhcpcd-gtk/menu.c
+
+dhcpcd-gtk/dhcpcdui_la-prefs.lo: dhcpcd-gtk/prefs.c
+	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -MT dhcpcd-gtk/dhcpcdui_la-prefs.lo -MD -MP -MF dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-prefs.Tpo -c -o dhcpcd-gtk/dhcpcdui_la-prefs.lo `test -f 'dhcpcd-gtk/prefs.c' || echo '$(srcdir)/'`dhcpcd-gtk/prefs.c
+	$(AM_V_at)$(am__mv) dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-prefs.Tpo dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-prefs.Plo
+#	$(AM_V_CC)source='dhcpcd-gtk/prefs.c' object='dhcpcd-gtk/dhcpcdui_la-prefs.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -c -o dhcpcd-gtk/dhcpcdui_la-prefs.lo `test -f 'dhcpcd-gtk/prefs.c' || echo '$(srcdir)/'`dhcpcd-gtk/prefs.c
+
+dhcpcd-gtk/dhcpcdui_la-wpa.lo: dhcpcd-gtk/wpa.c
+	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -MT dhcpcd-gtk/dhcpcdui_la-wpa.lo -MD -MP -MF dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-wpa.Tpo -c -o dhcpcd-gtk/dhcpcdui_la-wpa.lo `test -f 'dhcpcd-gtk/wpa.c' || echo '$(srcdir)/'`dhcpcd-gtk/wpa.c
+	$(AM_V_at)$(am__mv) dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-wpa.Tpo dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-wpa.Plo
+#	$(AM_V_CC)source='dhcpcd-gtk/wpa.c' object='dhcpcd-gtk/dhcpcdui_la-wpa.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -c -o dhcpcd-gtk/dhcpcdui_la-wpa.lo `test -f 'dhcpcd-gtk/wpa.c' || echo '$(srcdir)/'`dhcpcd-gtk/wpa.c
+
+libdhcpcd/dhcpcdui_la-dhcpcd.lo: libdhcpcd/dhcpcd.c
+	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -MT libdhcpcd/dhcpcdui_la-dhcpcd.lo -MD -MP -MF libdhcpcd/$(DEPDIR)/dhcpcdui_la-dhcpcd.Tpo -c -o libdhcpcd/dhcpcdui_la-dhcpcd.lo `test -f 'libdhcpcd/dhcpcd.c' || echo '$(srcdir)/'`libdhcpcd/dhcpcd.c
+	$(AM_V_at)$(am__mv) libdhcpcd/$(DEPDIR)/dhcpcdui_la-dhcpcd.Tpo libdhcpcd/$(DEPDIR)/dhcpcdui_la-dhcpcd.Plo
+#	$(AM_V_CC)source='libdhcpcd/dhcpcd.c' object='libdhcpcd/dhcpcdui_la-dhcpcd.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -c -o libdhcpcd/dhcpcdui_la-dhcpcd.lo `test -f 'libdhcpcd/dhcpcd.c' || echo '$(srcdir)/'`libdhcpcd/dhcpcd.c
+
+libdhcpcd/dhcpcdui_la-config.lo: libdhcpcd/config.c
+	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -MT libdhcpcd/dhcpcdui_la-config.lo -MD -MP -MF libdhcpcd/$(DEPDIR)/dhcpcdui_la-config.Tpo -c -o libdhcpcd/dhcpcdui_la-config.lo `test -f 'libdhcpcd/config.c' || echo '$(srcdir)/'`libdhcpcd/config.c
+	$(AM_V_at)$(am__mv) libdhcpcd/$(DEPDIR)/dhcpcdui_la-config.Tpo libdhcpcd/$(DEPDIR)/dhcpcdui_la-config.Plo
+#	$(AM_V_CC)source='libdhcpcd/config.c' object='libdhcpcd/dhcpcdui_la-config.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -c -o libdhcpcd/dhcpcdui_la-config.lo `test -f 'libdhcpcd/config.c' || echo '$(srcdir)/'`libdhcpcd/config.c
+
+libdhcpcd/dhcpcdui_la-wpa.lo: libdhcpcd/wpa.c
+	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -MT libdhcpcd/dhcpcdui_la-wpa.lo -MD -MP -MF libdhcpcd/$(DEPDIR)/dhcpcdui_la-wpa.Tpo -c -o libdhcpcd/dhcpcdui_la-wpa.lo `test -f 'libdhcpcd/wpa.c' || echo '$(srcdir)/'`libdhcpcd/wpa.c
+	$(AM_V_at)$(am__mv) libdhcpcd/$(DEPDIR)/dhcpcdui_la-wpa.Tpo libdhcpcd/$(DEPDIR)/dhcpcdui_la-wpa.Plo
+#	$(AM_V_CC)source='libdhcpcd/wpa.c' object='libdhcpcd/dhcpcdui_la-wpa.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -c -o libdhcpcd/dhcpcdui_la-wpa.lo `test -f 'libdhcpcd/wpa.c' || echo '$(srcdir)/'`libdhcpcd/wpa.c
+
 indicator/indicator_la-indicator.lo: indicator/indicator.c
 	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_la_CFLAGS) $(CFLAGS) -MT indicator/indicator_la-indicator.lo -MD -MP -MF indicator/$(DEPDIR)/indicator_la-indicator.Tpo -c -o indicator/indicator_la-indicator.lo `test -f 'indicator/indicator.c' || echo '$(srcdir)/'`indicator/indicator.c
 	$(AM_V_at)$(am__mv) indicator/$(DEPDIR)/indicator_la-indicator.Tpo indicator/$(DEPDIR)/indicator_la-indicator.Plo
@@ -1541,8 +1654,10 @@ clean-libtool:
 	-rm -rf cpu/.libs cpu/_libs
 	-rm -rf cpufreq/.libs cpufreq/_libs
 	-rm -rf deskno/.libs deskno/_libs
+	-rm -rf dhcpcd-gtk/.libs dhcpcd-gtk/_libs
 	-rm -rf indicator/.libs indicator/_libs
 	-rm -rf kbled/.libs kbled/_libs
+	-rm -rf libdhcpcd/.libs libdhcpcd/_libs
 	-rm -rf monitors/.libs monitors/_libs
 	-rm -rf netstat/.libs netstat/_libs
 	-rm -rf netstatus/.libs netstatus/_libs
@@ -1717,10 +1832,14 @@ distclean-generic:
 	-rm -f cpufreq/$(am__dirstamp)
 	-rm -f deskno/$(DEPDIR)/$(am__dirstamp)
 	-rm -f deskno/$(am__dirstamp)
+	-rm -f dhcpcd-gtk/$(DEPDIR)/$(am__dirstamp)
+	-rm -f dhcpcd-gtk/$(am__dirstamp)
 	-rm -f indicator/$(DEPDIR)/$(am__dirstamp)
 	-rm -f indicator/$(am__dirstamp)
 	-rm -f kbled/$(DEPDIR)/$(am__dirstamp)
 	-rm -f kbled/$(am__dirstamp)
+	-rm -f libdhcpcd/$(DEPDIR)/$(am__dirstamp)
+	-rm -f libdhcpcd/$(am__dirstamp)
 	-rm -f monitors/$(DEPDIR)/$(am__dirstamp)
 	-rm -f monitors/$(am__dirstamp)
 	-rm -f netstat/$(DEPDIR)/$(am__dirstamp)
@@ -1748,7 +1867,7 @@ clean-am: clean-generic clean-libtool clean-noinstLIBRARIES \
 	clean-pkglibLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) batt/$(DEPDIR) cpu/$(DEPDIR) cpufreq/$(DEPDIR) deskno/$(DEPDIR) indicator/$(DEPDIR) kbled/$(DEPDIR) monitors/$(DEPDIR) netstat/$(DEPDIR) netstatus/$(DEPDIR) thermal/$(DEPDIR) volume/$(DEPDIR) volumealsa/$(DEPDIR) weather/$(DEPDIR) xkb/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) batt/$(DEPDIR) cpu/$(DEPDIR) cpufreq/$(DEPDIR) deskno/$(DEPDIR) dhcpcd-gtk/$(DEPDIR) indicator/$(DEPDIR) kbled/$(DEPDIR) libdhcpcd/$(DEPDIR) monitors/$(DEPDIR) netstat/$(DEPDIR) netstatus/$(DEPDIR) thermal/$(DEPDIR) volume/$(DEPDIR) volumealsa/$(DEPDIR) weather/$(DEPDIR) xkb/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1795,7 +1914,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) batt/$(DEPDIR) cpu/$(DEPDIR) cpufreq/$(DEPDIR) deskno/$(DEPDIR) indicator/$(DEPDIR) kbled/$(DEPDIR) monitors/$(DEPDIR) netstat/$(DEPDIR) netstatus/$(DEPDIR) thermal/$(DEPDIR) volume/$(DEPDIR) volumealsa/$(DEPDIR) weather/$(DEPDIR) xkb/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) batt/$(DEPDIR) cpu/$(DEPDIR) cpufreq/$(DEPDIR) deskno/$(DEPDIR) dhcpcd-gtk/$(DEPDIR) indicator/$(DEPDIR) kbled/$(DEPDIR) libdhcpcd/$(DEPDIR) monitors/$(DEPDIR) netstat/$(DEPDIR) netstatus/$(DEPDIR) thermal/$(DEPDIR) volume/$(DEPDIR) volumealsa/$(DEPDIR) weather/$(DEPDIR) xkb/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
