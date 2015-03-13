@@ -12,4 +12,5 @@ config.log
 .deps/
 .libs/
 libtool
+autom4te.cache/*
 
