@@ -19,7 +19,7 @@
 
 GETTEXT_PACKAGE = lxpanel
 PACKAGE = lxpanel
-VERSION = 0.7.1
+VERSION = 0.7.2
 
 SHELL = /bin/bash
 

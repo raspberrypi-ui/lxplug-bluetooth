@@ -19,7 +19,7 @@
 
 GETTEXT_PACKAGE = lxpanel
 PACKAGE = lxpanel
-VERSION = 0.7.1
+VERSION = 0.7.2
 
 SHELL = /bin/bash
 
@@ -107,7 +107,11 @@ POTFILES = \
 	../plugins/indicator/indicator.c \
 	../plugins/monitors/monitors.c \
 	../plugins/weather/weatherwidget.c \
-	../plugins/weather/weather.c
+	../plugins/weather/weather.c \
+	../plugins/dhcpcd-gtk/main.c \
+	../plugins/dhcpcd-gtk/menu.c \
+	../plugins/dhcpcd-gtk/prefs.c \
+	../plugins/dhcpcd-gtk/wpa.c
 
 CATALOGS=$(shell LINGUAS="$(USE_LINGUAS)"; for lang in $$LINGUAS; do printf "$$lang.gmo "; done)
 
