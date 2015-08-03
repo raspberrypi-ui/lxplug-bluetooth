@@ -184,6 +184,12 @@ dhcpcdui_la_OBJECTS = $(am_dhcpcdui_la_OBJECTS)
 dhcpcdui_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(dhcpcdui_la_CFLAGS) \
 	$(CFLAGS) $(dhcpcdui_la_LDFLAGS) $(LDFLAGS) -o $@
+ejecter_la_LIBADD =
+am_ejecter_la_OBJECTS = ejecter/ejecter_la-ejecter.lo
+ejecter_la_OBJECTS = $(am_ejecter_la_OBJECTS)
+ejecter_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(ejecter_la_CFLAGS) \
+	$(CFLAGS) $(ejecter_la_LDFLAGS) $(LDFLAGS) -o $@
 indicator_la_LIBADD =
 am_indicator_la_OBJECTS = indicator/indicator_la-indicator.lo
 indicator_la_OBJECTS = $(am_indicator_la_OBJECTS)
@@ -295,20 +301,21 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libbuiltin_plugins_a_SOURCES) $(batt_la_SOURCES) \
 	$(cpu_la_SOURCES) $(cpufreq_la_SOURCES) $(deskno_la_SOURCES) \
-	$(dhcpcdui_la_SOURCES) $(indicator_la_SOURCES) \
-	$(kbled_la_SOURCES) $(monitors_la_SOURCES) \
-	$(netstat_la_SOURCES) $(netstatus_la_SOURCES) \
-	$(thermal_la_SOURCES) $(volume_la_SOURCES) \
-	$(volumealsa_la_SOURCES) $(weather_la_SOURCES) \
-	$(xkb_la_SOURCES)
-DIST_SOURCES = $(am__libbuiltin_plugins_a_SOURCES_DIST) \
-	$(batt_la_SOURCES) $(cpu_la_SOURCES) $(cpufreq_la_SOURCES) \
-	$(deskno_la_SOURCES) $(dhcpcdui_la_SOURCES) \
+	$(dhcpcdui_la_SOURCES) $(ejecter_la_SOURCES) \
 	$(indicator_la_SOURCES) $(kbled_la_SOURCES) \
 	$(monitors_la_SOURCES) $(netstat_la_SOURCES) \
 	$(netstatus_la_SOURCES) $(thermal_la_SOURCES) \
 	$(volume_la_SOURCES) $(volumealsa_la_SOURCES) \
 	$(weather_la_SOURCES) $(xkb_la_SOURCES)
+DIST_SOURCES = $(am__libbuiltin_plugins_a_SOURCES_DIST) \
+	$(batt_la_SOURCES) $(cpu_la_SOURCES) $(cpufreq_la_SOURCES) \
+	$(deskno_la_SOURCES) $(dhcpcdui_la_SOURCES) \
+	$(ejecter_la_SOURCES) $(indicator_la_SOURCES) \
+	$(kbled_la_SOURCES) $(monitors_la_SOURCES) \
+	$(netstat_la_SOURCES) $(netstatus_la_SOURCES) \
+	$(thermal_la_SOURCES) $(volume_la_SOURCES) \
+	$(volumealsa_la_SOURCES) $(weather_la_SOURCES) \
+	$(xkb_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -336,18 +343,18 @@ ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkglibdir = $(libdir)/lxpanel/plugins
-ACLOCAL = ${SHELL} /home/pi/lxpanel-0.7.1/missing aclocal-1.14
+ACLOCAL = ${SHELL} /home/pi/lxpanel/missing aclocal-1.14
 ADDITIONAL_FLAGS = 
 ALL_LINGUAS = 
-ALL_PLUGINS_LIST = netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather dhcpcdui
+ALL_PLUGINS_LIST = netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather dhcpcdui ejecter
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 0
 APPLET_CFLAGS = 
 APPLET_LIBS = 
 AR = ar
-AUTOCONF = ${SHELL} /home/pi/lxpanel-0.7.1/missing autoconf
-AUTOHEADER = ${SHELL} /home/pi/lxpanel-0.7.1/missing autoheader
-AUTOMAKE = ${SHELL} /home/pi/lxpanel-0.7.1/missing automake-1.14
+AUTOCONF = ${SHELL} /home/pi/lxpanel/missing autoconf
+AUTOHEADER = ${SHELL} /home/pi/lxpanel/missing autoheader
+AUTOMAKE = ${SHELL} /home/pi/lxpanel/missing automake-1.14
 AWK = mawk
 CATALOGS = 
 CATOBJEXT = .gmo
@@ -395,16 +402,16 @@ LDFLAGS =  -Wl,--as-needed -Wl,-O1 -Wl,-Bsymbolic-functions -Wl,--sort-common
 LIBOBJS = 
 LIBS = 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
-LIBXML2_CFLAGS = -I/usr/include/libxml2  
-LIBXML2_LIBS = -lxml2  
+LIBXML2_CFLAGS = -I/usr/include/libxml2 
+LIBXML2_LIBS = -lxml2 
 LIPO = 
 LN_S = ln -s
 LTLIBOBJS = 
 LXPANEL_MODULE = -avoid-version -rpath $(libdir)/lxpanel/plugins -no-undefined -export-symbols-regex "^[^_].*"
-MAKEINFO = ${SHELL} /home/pi/lxpanel-0.7.1/missing makeinfo
+MAKEINFO = ${SHELL} /home/pi/lxpanel/missing makeinfo
 MANIFEST_TOOL = :
-MENU_CACHE_CFLAGS = -I/usr/include/menu-cache -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include  
-MENU_CACHE_LIBS = -lmenu-cache -lglib-2.0  
+MENU_CACHE_CFLAGS = -I/usr/include/menu-cache -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include 
+MENU_CACHE_LIBS = -lmenu-cache -lglib-2.0 
 MKDIR_P = /bin/mkdir -p
 MKINSTALLDIRS = ./mkinstalldirs
 MSGFMT = /usr/bin/msgfmt
@@ -418,8 +425,8 @@ OTOOL =
 OTOOL64 = 
 PACKAGE = lxpanel
 PACKAGE_BUGREPORT = http://lxde.org/
-PACKAGE_CFLAGS = -pthread -I/usr/include/gtk-2.0 -I/usr/lib/arm-linux-gnueabihf/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/pango-1.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng12 -I/usr/include/harfbuzz -I/usr/include/libwnck-1.0 -I/usr/include/startup-notification-1.0   -I/usr/include/menu-cache -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include   
-PACKAGE_LIBS = -pthread -Wl,--export-dynamic -lfm-gtk -lfm -lwnck-1 -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lpangoft2-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgio-2.0 -lgobject-2.0 -lgthread-2.0 -lgmodule-2.0 -lrt -lglib-2.0   -lmenu-cache -lglib-2.0  
+PACKAGE_CFLAGS = -pthread -I/usr/local/include/gtk-2.0 -I/usr/local/lib/gtk-2.0/include -I/usr/local/include/pango-1.0 -I/usr/include/startup-notification-1.0 -I/usr/include/cairo -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/libpng12 -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/libpng12 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include -I/usr/include/libwnck-1.0  -I/usr/include/menu-cache -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include  
+PACKAGE_LIBS = -L/usr/local/lib -lfm-gtk -lfm -lwnck-1 -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lpangoft2-1.0 -lpango-1.0 -lfontconfig -lfreetype -lgio-2.0 -lgobject-2.0 -lgthread-2.0 -pthread -Wl,--export-dynamic -lgmodule-2.0 -pthread -lglib-2.0  -lmenu-cache -lglib-2.0 
 PACKAGE_NAME = lxpanel
 PACKAGE_STRING = lxpanel 0.7.2
 PACKAGE_TARNAME = lxpanel
@@ -429,7 +436,7 @@ PATH_SEPARATOR = :
 PKG_CONFIG = /usr/bin/pkg-config
 PKG_CONFIG_LIBDIR = 
 PKG_CONFIG_PATH = 
-PLUGINS_LIST =     netstatus.la     netstat.la          volumealsa.la     cpu.la     deskno.la     batt.la     kbled.la     xkb.la     thermal.la     cpufreq.la     monitors.la          dhcpcdui.la     weather.la
+PLUGINS_LIST =     netstatus.la     netstat.la          volumealsa.la     cpu.la     deskno.la     batt.la     kbled.la     xkb.la     thermal.la     cpufreq.la     monitors.la          dhcpcdui.la     ejecter.la     weather.la
 POFILES = 
 POSUB = po
 PO_IN_DATADIR_FALSE = 
@@ -441,14 +448,14 @@ SHELL = /bin/bash
 STRIP = strip
 USE_NLS = yes
 VERSION = 0.7.2
-X11_CFLAGS =  
-X11_LIBS = -lX11  
+X11_CFLAGS = 
+X11_LIBS = -lX11 
 XGETTEXT = /usr/bin/xgettext
 XMKMF = 
-abs_builddir = /home/pi/lxpanel-0.7.1/plugins
-abs_srcdir = /home/pi/lxpanel-0.7.1/plugins
-abs_top_builddir = /home/pi/lxpanel-0.7.1
-abs_top_srcdir = /home/pi/lxpanel-0.7.1
+abs_builddir = /home/pi/lxpanel/plugins
+abs_srcdir = /home/pi/lxpanel/plugins
+abs_top_builddir = /home/pi/lxpanel
+abs_top_srcdir = /home/pi/lxpanel
 ac_ct_AR = ar
 ac_ct_CC = gcc
 ac_ct_DUMPBIN = 
@@ -477,7 +484,7 @@ host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/pi/lxpanel-0.7.1/install-sh
+install_sh = ${SHELL} /home/pi/lxpanel/install-sh
 intltool__v_merge_options_ = $(intltool__v_merge_options_$(AM_DEFAULT_VERBOSITY))
 intltool__v_merge_options_0 = -q
 libdir = ${exec_prefix}/lib
@@ -551,7 +558,8 @@ EXTRA_LTLIBRARIES = \
 	volumealsa.la \
 	weather.la \
 	xkb.la \
-	dhcpcdui.la
+	dhcpcdui.la \
+	ejecter.la
 
 
 # batt
@@ -689,6 +697,13 @@ dhcpcdui_la_SOURCES = \
 
 dhcpcdui_la_CFLAGS = -DPACKAGE_DATA_DIR=\""$(datadir)/lxpanel"\" -I$(srcdir)/dhcpcd-gtk  -I$(srcdir)/libdhcpcd
 dhcpcdui_la_LDFLAGS = -module -avoid-version -rpath $(libdir)/lxpanel/plugins -no-undefined -export-symbols-regex "^[^_].*"
+
+# ejecter
+ejecter_la_SOURCES = \
+	ejecter/ejecter.c
+
+ejecter_la_CFLAGS = -DPACKAGE_DATA_DIR=\""$(datadir)/lxpanel"\" -I$(srcdir)/ejecter -I/usr/local/include/gnome-disk-utility
+ejecter_la_LDFLAGS = -module -avoid-version -rpath $(libdir)/lxpanel/plugins -no-undefined -export-symbols-regex "^[^_].*" -lgdu
 flagsdir = $(datadir)/lxpanel/images/xkb-flags
 flags_DATA = \
 	xkb/flags/ad.png \
@@ -999,6 +1014,17 @@ libdhcpcd/dhcpcdui_la-wpa.lo: libdhcpcd/$(am__dirstamp) \
 
 dhcpcdui.la: $(dhcpcdui_la_OBJECTS) $(dhcpcdui_la_DEPENDENCIES) $(EXTRA_dhcpcdui_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(dhcpcdui_la_LINK)  $(dhcpcdui_la_OBJECTS) $(dhcpcdui_la_LIBADD) $(LIBS)
+ejecter/$(am__dirstamp):
+	@$(MKDIR_P) ejecter
+	@: > ejecter/$(am__dirstamp)
+ejecter/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) ejecter/$(DEPDIR)
+	@: > ejecter/$(DEPDIR)/$(am__dirstamp)
+ejecter/ejecter_la-ejecter.lo: ejecter/$(am__dirstamp) \
+	ejecter/$(DEPDIR)/$(am__dirstamp)
+
+ejecter.la: $(ejecter_la_OBJECTS) $(ejecter_la_DEPENDENCIES) $(EXTRA_ejecter_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(ejecter_la_LINK)  $(ejecter_la_OBJECTS) $(ejecter_la_LIBADD) $(LIBS)
 indicator/$(am__dirstamp):
 	@$(MKDIR_P) indicator
 	@: > indicator/$(am__dirstamp)
@@ -1159,6 +1185,8 @@ mostlyclean-compile:
 	-rm -f deskno/*.lo
 	-rm -f dhcpcd-gtk/*.$(OBJEXT)
 	-rm -f dhcpcd-gtk/*.lo
+	-rm -f ejecter/*.$(OBJEXT)
+	-rm -f ejecter/*.lo
 	-rm -f indicator/*.$(OBJEXT)
 	-rm -f indicator/*.lo
 	-rm -f kbled/*.$(OBJEXT)
@@ -1203,6 +1231,7 @@ include dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-main.Plo
 include dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-menu.Plo
 include dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-prefs.Plo
 include dhcpcd-gtk/$(DEPDIR)/dhcpcdui_la-wpa.Plo
+include ejecter/$(DEPDIR)/ejecter_la-ejecter.Plo
 include indicator/$(DEPDIR)/indicator_la-indicator.Plo
 include kbled/$(DEPDIR)/kbled_la-kbled.Plo
 include libdhcpcd/$(DEPDIR)/dhcpcdui_la-config.Plo
@@ -1456,6 +1485,13 @@ libdhcpcd/dhcpcdui_la-wpa.lo: libdhcpcd/wpa.c
 #	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
 #	$(AM_V_CC_no)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dhcpcdui_la_CFLAGS) $(CFLAGS) -c -o libdhcpcd/dhcpcdui_la-wpa.lo `test -f 'libdhcpcd/wpa.c' || echo '$(srcdir)/'`libdhcpcd/wpa.c
 
+ejecter/ejecter_la-ejecter.lo: ejecter/ejecter.c
+	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ejecter_la_CFLAGS) $(CFLAGS) -MT ejecter/ejecter_la-ejecter.lo -MD -MP -MF ejecter/$(DEPDIR)/ejecter_la-ejecter.Tpo -c -o ejecter/ejecter_la-ejecter.lo `test -f 'ejecter/ejecter.c' || echo '$(srcdir)/'`ejecter/ejecter.c
+	$(AM_V_at)$(am__mv) ejecter/$(DEPDIR)/ejecter_la-ejecter.Tpo ejecter/$(DEPDIR)/ejecter_la-ejecter.Plo
+#	$(AM_V_CC)source='ejecter/ejecter.c' object='ejecter/ejecter_la-ejecter.lo' libtool=yes \
+#	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) \
+#	$(AM_V_CC_no)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(ejecter_la_CFLAGS) $(CFLAGS) -c -o ejecter/ejecter_la-ejecter.lo `test -f 'ejecter/ejecter.c' || echo '$(srcdir)/'`ejecter/ejecter.c
+
 indicator/indicator_la-indicator.lo: indicator/indicator.c
 	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(indicator_la_CFLAGS) $(CFLAGS) -MT indicator/indicator_la-indicator.lo -MD -MP -MF indicator/$(DEPDIR)/indicator_la-indicator.Tpo -c -o indicator/indicator_la-indicator.lo `test -f 'indicator/indicator.c' || echo '$(srcdir)/'`indicator/indicator.c
 	$(AM_V_at)$(am__mv) indicator/$(DEPDIR)/indicator_la-indicator.Tpo indicator/$(DEPDIR)/indicator_la-indicator.Plo
@@ -1655,6 +1691,7 @@ clean-libtool:
 	-rm -rf cpufreq/.libs cpufreq/_libs
 	-rm -rf deskno/.libs deskno/_libs
 	-rm -rf dhcpcd-gtk/.libs dhcpcd-gtk/_libs
+	-rm -rf ejecter/.libs ejecter/_libs
 	-rm -rf indicator/.libs indicator/_libs
 	-rm -rf kbled/.libs kbled/_libs
 	-rm -rf libdhcpcd/.libs libdhcpcd/_libs
@@ -1834,6 +1871,8 @@ distclean-generic:
 	-rm -f deskno/$(am__dirstamp)
 	-rm -f dhcpcd-gtk/$(DEPDIR)/$(am__dirstamp)
 	-rm -f dhcpcd-gtk/$(am__dirstamp)
+	-rm -f ejecter/$(DEPDIR)/$(am__dirstamp)
+	-rm -f ejecter/$(am__dirstamp)
 	-rm -f indicator/$(DEPDIR)/$(am__dirstamp)
 	-rm -f indicator/$(am__dirstamp)
 	-rm -f kbled/$(DEPDIR)/$(am__dirstamp)
@@ -1867,7 +1906,7 @@ clean-am: clean-generic clean-libtool clean-noinstLIBRARIES \
 	clean-pkglibLTLIBRARIES mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf ./$(DEPDIR) batt/$(DEPDIR) cpu/$(DEPDIR) cpufreq/$(DEPDIR) deskno/$(DEPDIR) dhcpcd-gtk/$(DEPDIR) indicator/$(DEPDIR) kbled/$(DEPDIR) libdhcpcd/$(DEPDIR) monitors/$(DEPDIR) netstat/$(DEPDIR) netstatus/$(DEPDIR) thermal/$(DEPDIR) volume/$(DEPDIR) volumealsa/$(DEPDIR) weather/$(DEPDIR) xkb/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) batt/$(DEPDIR) cpu/$(DEPDIR) cpufreq/$(DEPDIR) deskno/$(DEPDIR) dhcpcd-gtk/$(DEPDIR) ejecter/$(DEPDIR) indicator/$(DEPDIR) kbled/$(DEPDIR) libdhcpcd/$(DEPDIR) monitors/$(DEPDIR) netstat/$(DEPDIR) netstatus/$(DEPDIR) thermal/$(DEPDIR) volume/$(DEPDIR) volumealsa/$(DEPDIR) weather/$(DEPDIR) xkb/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -1914,7 +1953,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf ./$(DEPDIR) batt/$(DEPDIR) cpu/$(DEPDIR) cpufreq/$(DEPDIR) deskno/$(DEPDIR) dhcpcd-gtk/$(DEPDIR) indicator/$(DEPDIR) kbled/$(DEPDIR) libdhcpcd/$(DEPDIR) monitors/$(DEPDIR) netstat/$(DEPDIR) netstatus/$(DEPDIR) thermal/$(DEPDIR) volume/$(DEPDIR) volumealsa/$(DEPDIR) weather/$(DEPDIR) xkb/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) batt/$(DEPDIR) cpu/$(DEPDIR) cpufreq/$(DEPDIR) deskno/$(DEPDIR) dhcpcd-gtk/$(DEPDIR) ejecter/$(DEPDIR) indicator/$(DEPDIR) kbled/$(DEPDIR) libdhcpcd/$(DEPDIR) monitors/$(DEPDIR) netstat/$(DEPDIR) netstatus/$(DEPDIR) thermal/$(DEPDIR) volume/$(DEPDIR) volumealsa/$(DEPDIR) weather/$(DEPDIR) xkb/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

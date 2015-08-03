@@ -437,7 +437,7 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/pi/lxpanel-0.7.1'
+ac_pwd='/home/pi/lxpanel'
 srcdir='.'
 INSTALL='/usr/bin/install -c'
 MKDIR_P='/bin/mkdir -p'
@@ -674,8 +674,8 @@ postuninstall_cmds=''
 finish_cmds='PATH="\$PATH:/sbin" ldconfig -n $libdir'
 finish_eval=''
 hardcode_into_libs='yes'
-sys_lib_search_path_spec='/usr/lib/gcc/arm-linux-gnueabihf/4.6 /usr/lib/arm-linux-gnueabihf /usr/lib /lib/arm-linux-gnueabihf /lib '
-sys_lib_dlsearch_path_spec='/lib /usr/lib /opt/vc/lib /lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf /usr/local/lib '
+sys_lib_search_path_spec='/usr/lib/gcc/arm-linux-gnueabihf/4.9 /usr/lib/arm-linux-gnueabihf /usr/lib /lib/arm-linux-gnueabihf /lib '
+sys_lib_dlsearch_path_spec='/lib /usr/lib /opt/vc/lib /usr/local/lib /lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf /usr/lib/arm-linux-gnueabihf/libfakeroot /usr/local/lib /home/pi/libreoffice-4.3.3/workdir/UnpackedTarball/icu/source/lib '
 hardcode_action='immediate'
 enable_dlopen='unknown'
 enable_dlopen_self='unknown'
@@ -842,11 +842,11 @@ S["MSGFMT_OPTS"]="-c"
 S["GETTEXT_PACKAGE"]="lxpanel"
 S["LIBOBJS"]=""
 S["XMKMF"]=""
-S["LIBXML2_LIBS"]="-lxml2  "
-S["LIBXML2_CFLAGS"]="-I/usr/include/libxml2  "
+S["LIBXML2_LIBS"]="-lxml2 "
+S["LIBXML2_CFLAGS"]="-I/usr/include/libxml2 "
 S["PLUGINS_LIST"]="    netstatus.la     netstat.la          volumealsa.la     cpu.la     deskno.la     batt.la     kbled.la     xkb.la     thermal.la     cpufreq.la   "\
-"  monitors.la          dhcpcdui.la     weather.la"
-S["ALL_PLUGINS_LIST"]="netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather dhcpcdui"
+"  monitors.la          dhcpcdui.la     ejecter.la     weather.la"
+S["ALL_PLUGINS_LIST"]="netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather dhcpcdui ejecter"
 S["BUILD_PLUGIN_LOADER_FALSE"]="#"
 S["BUILD_PLUGIN_LOADER_TRUE"]=""
 S["BUILD_OSS_PLUGINS_FALSE"]=""
@@ -857,22 +857,23 @@ S["LXPANEL_MODULE"]="-avoid-version -rpath $(libdir)/lxpanel/plugins -no-undefin
 S["ADDITIONAL_FLAGS"]=""
 S["ENABLE_MENU_CACHE_FALSE"]="#"
 S["ENABLE_MENU_CACHE_TRUE"]=""
-S["MENU_CACHE_LIBS"]="-lmenu-cache -lglib-2.0  "
-S["MENU_CACHE_CFLAGS"]="-I/usr/include/menu-cache -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include  "
-S["X11_LIBS"]="-lX11  "
-S["X11_CFLAGS"]=" "
+S["MENU_CACHE_LIBS"]="-lmenu-cache -lglib-2.0 "
+S["MENU_CACHE_CFLAGS"]="-I/usr/include/menu-cache -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include "
+S["X11_LIBS"]="-lX11 "
+S["X11_CFLAGS"]=""
 S["INDICATORICONSDIR"]=""
 S["INDICATORDIR"]=""
 S["APPLET_LIBS"]=""
 S["APPLET_CFLAGS"]=""
 S["ENABLE_INDICATOR_SUPPORT_FALSE"]=""
 S["ENABLE_INDICATOR_SUPPORT_TRUE"]="#"
-S["PACKAGE_LIBS"]="-pthread -Wl,--export-dynamic -lfm-gtk -lfm -lwnck-1 -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lpangoft2-1.0 -lpangocairo-1.0 -lgdk_pixbuf-2.0 -lcairo "\
-"-lpango-1.0 -lfreetype -lfontconfig -lgio-2.0 -lgobject-2.0 -lgthread-2.0 -lgmodule-2.0 -lrt -lglib-2.0   -lmenu-cache -lglib-2.0  "
-S["PACKAGE_CFLAGS"]="-pthread -I/usr/include/gtk-2.0 -I/usr/lib/arm-linux-gnueabihf/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/gdk-pixbuf"\
-"-2.0 -I/usr/include/pango-1.0 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include -I/usr/include/pi"\
-"xman-1 -I/usr/include/freetype2 -I/usr/include/libpng12 -I/usr/include/harfbuzz -I/usr/include/libwnck-1.0 -I/usr/include/startup-notification-1.0  "\
-" -I/usr/include/menu-cache -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include   "
+S["PACKAGE_LIBS"]="-L/usr/local/lib -lfm-gtk -lfm -lwnck-1 -lgtk-x11-2.0 -lgdk-x11-2.0 -lpangocairo-1.0 -latk-1.0 -lcairo -lgdk_pixbuf-2.0 -lpangoft2-1.0 -lpango-1.0 -"\
+"lfontconfig -lfreetype -lgio-2.0 -lgobject-2.0 -lgthread-2.0 -pthread -Wl,--export-dynamic -lgmodule-2.0 -pthread -lglib-2.0  -lmenu-cache -lglib-2."\
+"0 "
+S["PACKAGE_CFLAGS"]="-pthread -I/usr/local/include/gtk-2.0 -I/usr/local/lib/gtk-2.0/include -I/usr/local/include/pango-1.0 -I/usr/include/startup-notification-1.0 -I/usr"\
+"/include/cairo -I/usr/include/atk-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/libpng12 -I/usr/include/gdk-pixbuf-2.0 -I/usr/incl"\
+"ude/libpng12 -I/usr/include/harfbuzz -I/usr/include/freetype2 -I/usr/include/gio-unix-2.0/ -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/gl"\
+"ib-2.0/include -I/usr/include/libwnck-1.0  -I/usr/include/menu-cache -I/usr/include/glib-2.0 -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include  "
 S["PKG_CONFIG_LIBDIR"]=""
 S["PKG_CONFIG_PATH"]=""
 S["PKG_CONFIG"]="/usr/bin/pkg-config"
@@ -992,12 +993,12 @@ S["mkdir_p"]="$(MKDIR_P)"
 S["MKDIR_P"]="/bin/mkdir -p"
 S["INSTALL_STRIP_PROGRAM"]="$(install_sh) -c -s"
 S["STRIP"]="strip"
-S["install_sh"]="${SHELL} /home/pi/lxpanel-0.7.1/install-sh"
-S["MAKEINFO"]="${SHELL} /home/pi/lxpanel-0.7.1/missing makeinfo"
-S["AUTOHEADER"]="${SHELL} /home/pi/lxpanel-0.7.1/missing autoheader"
-S["AUTOMAKE"]="${SHELL} /home/pi/lxpanel-0.7.1/missing automake-1.14"
-S["AUTOCONF"]="${SHELL} /home/pi/lxpanel-0.7.1/missing autoconf"
-S["ACLOCAL"]="${SHELL} /home/pi/lxpanel-0.7.1/missing aclocal-1.14"
+S["install_sh"]="${SHELL} /home/pi/lxpanel/install-sh"
+S["MAKEINFO"]="${SHELL} /home/pi/lxpanel/missing makeinfo"
+S["AUTOHEADER"]="${SHELL} /home/pi/lxpanel/missing autoheader"
+S["AUTOMAKE"]="${SHELL} /home/pi/lxpanel/missing automake-1.14"
+S["AUTOCONF"]="${SHELL} /home/pi/lxpanel/missing autoconf"
+S["ACLOCAL"]="${SHELL} /home/pi/lxpanel/missing aclocal-1.14"
 S["VERSION"]="0.7.2"
 S["PACKAGE"]="lxpanel"
 S["CYGPATH_W"]="echo"
@@ -1122,6 +1123,7 @@ D["HAVE_MEMSET"]=" 1"
 D["HAVE_MKDIR"]=" 1"
 D["HAVE_SETLOCALE"]=" 1"
 D["HAVE_STRCHR"]=" 1"
+D["HAVE_MENU_CACHE_DIR_LIST_CHILDREN"]=" 1"
 D["GETTEXT_PACKAGE"]=" \"lxpanel\""
 D["HAVE_LOCALE_H"]=" 1"
 D["HAVE_LC_MESSAGES"]=" 1"
