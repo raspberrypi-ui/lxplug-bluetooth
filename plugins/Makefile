@@ -703,7 +703,7 @@ ejecter_la_SOURCES = \
 	ejecter/ejecter.c
 
 ejecter_la_CFLAGS = -DPACKAGE_DATA_DIR=\""$(datadir)/lxpanel"\" -I$(srcdir)/ejecter -I/usr/local/include/gnome-disk-utility
-ejecter_la_LDFLAGS = -module -avoid-version -rpath $(libdir)/lxpanel/plugins -no-undefined -export-symbols-regex "^[^_].*" -lgdu
+ejecter_la_LDFLAGS = -module -avoid-version -rpath $(libdir)/lxpanel/plugins -no-undefined -export-symbols-regex "^[^_].*"
 flagsdir = $(datadir)/lxpanel/images/xkb-flags
 flags_DATA = \
 	xkb/flags/ad.png \
