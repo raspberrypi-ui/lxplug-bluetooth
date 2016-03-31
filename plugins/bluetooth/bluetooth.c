@@ -1,0 +1,1099 @@
+#include <errno.h>
+#include <locale.h>
+#include <stdlib.h>
+#include <string.h>
+#include <glib/gi18n.h>
+
+#include <gio/gio.h>
+
+#include "config.h"
+#include "plugin.h"
+
+#define ICON_BUTTON_TRIM 4
+
+//#define DEBUG_ON
+#ifdef DEBUG_ON
+#define DEBUG(fmt,args...) printf(fmt,##args)
+#else
+#define DEBUG
+#endif
+
+/* Plug-in global data */
+
+typedef struct {
+
+    GtkWidget *plugin;              /* Back pointer to the widget */
+    LXPanel *panel;                 /* Back pointer to panel */
+    GtkWidget *tray_icon;           /* Displayed image */
+    config_setting_t *settings;     /* Plugin settings */
+    GtkWidget *menu;                /* Popup menu */
+	GtkListStore *pair_list;
+	GtkListStore *unpair_list;
+	GDBusObjectManager *objmanager;
+	GDBusProxy *agentmanager;
+	GDBusProxy *adapter;
+	GDBusConnection *gbc;
+	//gboolean searching;
+	//gboolean discoverable;
+	const gchar *paired_object;
+	const gchar *cancel_object;
+	GtkWidget *dialog;
+	GtkWidget *list;
+} BluetoothPlugin;
+
+typedef enum {
+    DIALOG_PAIR,
+    DIALOG_REMOVE
+} DIALOG_TYPE;
+
+/* Agent data */
+
+static void handle_method_call (GDBusConnection *connection, const gchar *sender, const gchar *object_path,
+    const gchar *interface_name, const gchar *method_name, GVariant *parameters, GDBusMethodInvocation *invocation,
+    gpointer user_data);
+
+static const GDBusInterfaceVTable interface_vtable =
+{
+  handle_method_call,
+  NULL,
+  NULL
+};
+
+static const gchar introspection_xml[] =
+"<!DOCTYPE node PUBLIC \"-//freedesktop//DTD D-BUS Object Introspection 1.0//EN\"\n"
+"\"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd\";>\n"
+"<node>\n"
+"   <interface name=\"org.bluez.Agent1\">\n"
+"       <signal name=\"pinRequested\">\n"
+"           <arg name=\"arg_0\" type=\"s\"/>\n"
+"       </signal>\n"
+"       <signal name=\"agentReleased\">\n"
+"       </signal>\n"
+"       <method name=\"Release\">\n"
+"       </method>\n"
+"       <method name=\"AuthorizeService\">\n"
+"           <arg name=\"device\" type=\"o\" direction=\"in\"/>\n"
+"           <arg name=\"uuid\" type=\"s\" direction=\"in\"/>\n"
+"       </method>\n"
+"       <method name=\"RequestPinCode\">\n"
+"           <arg name=\"device\" type=\"o\" direction=\"in\"/>\n"
+"           <arg type=\"s\" direction=\"out\"/>\n"
+"       </method>\n"
+"       <method name=\"RequestPasskey\">\n"
+"           <arg name=\"device\" type=\"o\" direction=\"in\"/>\n"
+"           <arg type=\"u\" direction=\"out\"/>\n"
+"       </method>\n"
+"       <method name=\"DisplayPinCode\">\n"
+"           <arg name=\"device\" type=\"o\" direction=\"in\"/>\n"
+"           <arg name=\"pincode\" type=\"s\" direction=\"in\"/>\n"
+"       </method>\n"
+"       <method name=\"DisplayPasskey\">\n"
+"           <arg name=\"device\" type=\"o\" direction=\"in\"/>\n"
+"           <arg name=\"passkey\" type=\"u\" direction=\"in\"/>\n"
+"           <arg name=\"entered\" type=\"q\" direction=\"in\"/>\n"
+"       </method>\n"
+"       <method name=\"RequestConfirmation\">\n"
+"           <arg name=\"device\" type=\"o\" direction=\"in\"/>\n"
+"           <arg name=\"passkey\" type=\"u\" direction=\"in\"/>\n"
+"       </method>\n"
+"       <method name=\"Cancel\">\n"
+"       </method>\n"
+"   </interface>\n"
+"   <interface name=\"org.freedesktop.DBus.Introspectable\">\n"
+"       <method name=\"Introspect\">\n"
+"           <arg name=\"data\" direction=\"out\" type=\"s\"/>\n"
+"       </method>\n"
+"   </interface>\n"
+"</node>\n";
+
+/*---------------------------------------------------------------------------*/
+/* Prototypes */
+/*---------------------------------------------------------------------------*/
+
+static void find_hardware (BluetoothPlugin *bt);
+static void cb_name_owned (GDBusConnection *connection, const gchar *name, const gchar *owner, gpointer user_data);
+static void cb_name_unowned (GDBusConnection *connection, const gchar *name, gpointer user_data);
+static void cb_interface_added (GDBusObjectManager *manager, GDBusObject *object, GDBusInterface *interface, gpointer user_data);
+static void cb_interface_removed (GDBusObjectManager *manager, GDBusObject *object, GDBusInterface *interface, gpointer user_data);
+static void cb_object_added (GDBusObjectManager *manager, GDBusObject *object, gpointer user_data);
+static void cb_object_removed (GDBusObjectManager *manager, GDBusObject *object, gpointer user_data);
+static void cb_interface_signal (GDBusObjectManagerClient *manager, GDBusObjectProxy *object_proxy, GDBusProxy *proxy, gchar *sender, gchar *signal, GVariant *parameters, gpointer user_data);
+static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObjectProxy *object_proxy, GDBusProxy *proxy, GVariant *parameters, GStrv inval, gpointer user_data);
+static void set_search (BluetoothPlugin *bt, gboolean state);
+static void cb_search_start (GObject *source, GAsyncResult *res, gpointer user_data);
+static void cb_search_end (GObject *source, GAsyncResult *res, gpointer user_data);
+static gboolean is_discoverable (BluetoothPlugin *bt);
+static void set_discoverable (BluetoothPlugin *bt, gboolean state);
+static void cb_discover_start (GObject *source, GAsyncResult *res, gpointer user_data);
+static void cb_discover_end (GObject *source, GAsyncResult *res, gpointer user_data);
+static gboolean is_paired (BluetoothPlugin *bt, const gchar *path);
+static void pair_device (BluetoothPlugin *bt, const gchar *path, gboolean state);
+static void cb_paired (GObject *source, GAsyncResult *res, gpointer user_data);
+static void cb_cancelled (GObject *source, GAsyncResult *res, gpointer user_data);
+static gboolean is_trusted (BluetoothPlugin *bt, const gchar *path);
+static void trust_device (BluetoothPlugin *bt, const gchar *path, gboolean state);
+static void cb_trusted (GObject *source, GAsyncResult *res, gpointer user_data);
+static gboolean is_connected (BluetoothPlugin *bt, const gchar *path);
+static void connect_device (BluetoothPlugin *bt, const gchar *path, gboolean state);
+static void cb_connected (GObject *source, GAsyncResult *res, gpointer user_data);
+static void cb_disconnected (GObject *source, GAsyncResult *res, gpointer user_data);
+static void remove_device (BluetoothPlugin *bt, const gchar *path);
+static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data);
+
+
+static void update_device_list (BluetoothPlugin *bt);
+static guint request_confirmation (BluetoothPlugin *bt, const gchar *device, guint32 code);
+static void display_pin_code (BluetoothPlugin *bt, const gchar *device, const gchar *pin);
+static void handle_cancel_pair (GtkButton *button, gpointer user_data);
+static guint request_pin_code (BluetoothPlugin *bt, const gchar *device, GtkEntryBuffer *pinbuf);
+static guint request_authorization (BluetoothPlugin *bt, const gchar *device);
+
+
+/*---------------------------------------------------------------------------*/
+/* Function Definitions */
+/*---------------------------------------------------------------------------*/
+
+/* Perform the initial scan of the BlueZ objects on DBus, identifying the agent manager
+   (of which there should be only one per BlueZ instance) and an adapter (the object 
+   which corresponds to the Bluetooth hardware on the host computer). */ 
+
+static void find_hardware (BluetoothPlugin *bt)
+{
+    GDBusInterface *interface;
+    GDBusObject *object;
+    GList *objects, *interfaces;
+    
+    bt->agentmanager = NULL;
+    bt->adapter = NULL;
+
+    objects = g_dbus_object_manager_get_objects (bt->objmanager);
+
+    while (objects != NULL)
+    {
+        object = (GDBusObject*) objects->data;
+
+        interfaces = g_dbus_object_get_interfaces (object);
+        while (interfaces != NULL)
+        {
+            interface = G_DBUS_INTERFACE (interfaces->data);
+            if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.Adapter1") == 0)
+            {
+                if (bt->adapter == NULL) bt->adapter = G_DBUS_PROXY (interface);
+                else printf ("Multiple adapters found\n");
+            }
+            else if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.AgentManager1") == 0)
+            {
+                if (bt->agentmanager == NULL) bt->agentmanager = G_DBUS_PROXY (interface);
+                else printf ("Multiple agent managers found\n");
+            }
+            interfaces = interfaces->next;
+        }
+        objects = objects->next;
+    }
+    if (bt->agentmanager == NULL) printf ("No agent manager found\n");
+    if (bt->adapter == NULL) printf ("No adapter found\n");
+}
+
+/* Handler for method calls on the agent */
+
+static void handle_method_call (GDBusConnection *connection, const gchar *sender, const gchar *object_path,
+    const gchar *interface_name, const gchar *method_name, GVariant *parameters, GDBusMethodInvocation *invocation,
+    gpointer user_data)
+{
+	BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
+    GDBusInterface *interface;
+    GVariant *var, *retvar;
+    GtkEntryBuffer *pinbuf;
+    gchar buffer[16];
+    guint32 passkey;
+
+    printf ("Agent method %s called\n", method_name);
+    if (parameters) printf ("with parameters %s\n", g_variant_print (parameters, TRUE));   
+
+    interface = g_dbus_object_manager_get_interface (bt->objmanager, g_variant_get_string (g_variant_get_child_value (parameters, 0), NULL), "org.bluez.Device1");
+    var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Alias");
+
+    if (g_strcmp0 (method_name, "RequestConfirmation") == 0)
+    {
+        if (request_confirmation (bt, g_variant_get_string (var, NULL), g_variant_get_uint32 (g_variant_get_child_value (parameters, 1))))
+            g_dbus_method_invocation_return_value (invocation, NULL);
+        else
+            g_dbus_method_invocation_return_dbus_error (invocation, "org.bluez.Error.Rejected", "Confirmation rejected by user");
+    }
+    else if (g_strcmp0 (method_name, "DisplayPinCode") == 0)
+    {
+        bt->cancel_object = g_variant_get_string (g_variant_get_child_value (parameters, 0), NULL);
+        display_pin_code (bt, g_variant_get_string (var, NULL), g_variant_get_string (g_variant_get_child_value (parameters, 1), NULL));
+        g_dbus_method_invocation_return_value (invocation, NULL);
+    }
+    else if (g_strcmp0 (method_name, "DisplayPasskey") == 0)   // !!!! do we need to do something with "entered" parameter here?
+    {
+        bt->cancel_object = g_variant_get_string (g_variant_get_child_value (parameters, 0), NULL);
+        sprintf (buffer, "%lu", g_variant_get_uint32 (g_variant_get_child_value (parameters, 1)));
+        display_pin_code (bt, g_variant_get_string (var, NULL), buffer);
+        g_dbus_method_invocation_return_value (invocation, NULL);
+    }
+    else if (g_strcmp0 (method_name, "RequestPinCode") == 0)
+    {
+        pinbuf = gtk_entry_buffer_new (NULL, -1);
+        if (request_pin_code (bt, g_variant_get_string (var, NULL), pinbuf))
+        {
+            retvar = g_variant_new ("(s)", gtk_entry_buffer_get_text (pinbuf));
+            g_dbus_method_invocation_return_value (invocation, retvar);
+        }
+        else pair_device (bt, object_path, FALSE);
+    }
+    else if (g_strcmp0 (method_name, "RequestPasskey") == 0)
+    {
+        pinbuf = gtk_entry_buffer_new (NULL, -1);
+        if (request_pin_code (bt, g_variant_get_string (var, NULL), pinbuf))
+        {
+            sscanf (gtk_entry_buffer_get_text (pinbuf), "%lu", &passkey);
+            retvar = g_variant_new ("(u)", passkey);
+            g_dbus_method_invocation_return_value (invocation, retvar);
+        }
+        else pair_device (bt, object_path, FALSE);
+    }
+    else if (g_strcmp0 (method_name, "RequestAuthorization") == 0)
+    {
+        if (request_authorization (bt, g_variant_get_string (var, NULL)))
+            g_dbus_method_invocation_return_value (invocation, NULL);
+        else
+            g_dbus_method_invocation_return_dbus_error (invocation, "org.bluez.Error.Rejected", "Pairing rejected by user");
+    }
+}
+
+/* Object manager callbacks - we only really care about objects added, removed or with changed properties */
+
+static void cb_interface_added (GDBusObjectManager *manager, GDBusObject *object, GDBusInterface *interface, gpointer user_data)
+{
+    printf ("Object manager - interface added\n");
+}
+
+static void cb_interface_removed (GDBusObjectManager *manager, GDBusObject *object, GDBusInterface *interface, gpointer user_data)
+{
+    printf ("Object manager - interface removed\n");
+}
+
+static void cb_object_added (GDBusObjectManager *manager, GDBusObject *object, gpointer user_data)
+{
+ 	BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
+    printf ("Object manager - object added at path %s\n", g_dbus_object_get_object_path (object));
+    update_device_list (bt);
+}
+
+static void cb_object_removed (GDBusObjectManager *manager, GDBusObject *object, gpointer user_data)
+{
+	BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
+    printf ("Object manager - object removed at path %s\n", g_dbus_object_get_object_path (object));
+    update_device_list (bt);
+}
+
+static void cb_interface_signal (GDBusObjectManagerClient *manager, GDBusObjectProxy *object_proxy, GDBusProxy *proxy, gchar *sender, gchar *signal, GVariant *parameters, gpointer user_data)
+{
+    printf ("Object manager - object at %s interface signal %s %s %s\n", g_dbus_proxy_get_object_path (proxy), sender, signal, g_variant_print (parameters, TRUE));
+}
+
+static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObjectProxy *object_proxy, GDBusProxy *proxy, GVariant *parameters, GStrv inval, gpointer user_data)
+{
+	BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
+    GVariant *var;
+	
+    printf ("Object manager - object at %s property changed - %s %s\n",  g_dbus_proxy_get_object_path (proxy), g_dbus_proxy_get_interface_name (proxy), g_variant_print (parameters, TRUE));
+    update_device_list (bt);
+
+    // hack to reconnect after successful pairing
+    var = g_variant_lookup_value (parameters, "Connected", NULL);
+    if (var && g_variant_get_boolean (var) == FALSE)
+    {
+        if (g_strcmp0 (g_dbus_proxy_get_object_path (proxy), bt->paired_object) == 0)
+        {
+            printf ("Paired object disconnected - reconnecting\n");
+            connect_device (bt, bt->paired_object, TRUE);
+            bt->paired_object = NULL;
+        }
+    }
+
+    // check for changes in adapter status
+    if (g_strcmp0 (g_dbus_proxy_get_object_path (proxy), g_dbus_proxy_get_object_path (bt->adapter)) == 0)
+    {
+        if (var = g_variant_lookup_value (parameters, "Discoverable", NULL))
+        {
+            //bt->discoverable = g_variant_get_boolean (var);
+            //if (discoverable) gtk_button_set_label (GTK_BUTTON (btn_disc), "Stop Discoverable");
+            //else  gtk_button_set_label (GTK_BUTTON (btn_disc), "Make Discoverable");
+        }
+        if (var = g_variant_lookup_value (parameters, "Discovering", NULL))
+        {
+            //bt->searching = g_variant_get_boolean (var);
+            //if (searching) gtk_button_set_label (GTK_BUTTON (btn_srch), "Stop Search");
+            //else  gtk_button_set_label (GTK_BUTTON (btn_srch), "Start Search");
+        }
+	}
+}
+
+/* Searching */
+
+static void set_search (BluetoothPlugin *bt, gboolean state)
+{
+    if (state)
+    {
+        printf ("Starting search\n");
+        g_dbus_proxy_call (bt->adapter, "StartDiscovery", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_search_start, NULL);
+    }
+    else
+    {
+        printf ("Ending search\n");
+        g_dbus_proxy_call (bt->adapter, "StopDiscovery", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_search_end, NULL);
+    }
+}
+
+static void cb_search_start (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+    GError *error = NULL;
+    GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+
+    if (error) printf ("Search start - error %s\n", error->message);
+    else printf ("Search start - result %s\n", g_variant_print (var, TRUE));
+}
+
+static void cb_search_end (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+    GError *error = NULL;
+    GVariant *var= g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+
+    if (error) printf ("Search end - error %s\n", error->message);
+    else printf ("Search end - result %s\n", g_variant_print (var, TRUE));
+}
+
+/* Discoverable */
+
+static gboolean is_discoverable (BluetoothPlugin *bt)
+{
+    GVariant *var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (bt->adapter), "Discoverable");
+    return g_variant_get_boolean (var);
+}
+
+static void set_discoverable (BluetoothPlugin *bt, gboolean state)
+{
+    GVariant *var = g_variant_new ("(ssv)", g_dbus_proxy_get_interface_name (G_DBUS_PROXY (bt->adapter)), "Discoverable", g_variant_new_boolean (state));
+
+    if (state)
+    {
+        printf ("Making discoverable\n");
+        g_dbus_proxy_call (bt->adapter, "org.freedesktop.DBus.Properties.Set", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_discover_start, NULL);
+    }
+    else
+    {
+        printf ("Stopping discoverable\n");
+        g_dbus_proxy_call (bt->adapter, "org.freedesktop.DBus.Properties.Set", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_discover_end, NULL);
+    }
+}
+
+static void cb_discover_start (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+    GError *error = NULL;
+    GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+    
+    if (error) printf ("Discoverable start - error %s\n", error->message);
+    else printf ("Discoverable start - result %s\n", g_variant_print (var, TRUE));
+}
+
+static void cb_discover_end (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+    GError *error = NULL;
+    GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+    
+    if (error) printf ("Discoverable end - error %s\n", error->message);
+    else printf ("Discoverable end - result %s\n", g_variant_print (var, TRUE));
+}
+
+/* Pair device / cancel pairing */
+
+static gboolean is_paired (BluetoothPlugin *bt, const gchar *path)
+{
+    GDBusInterface *interface = g_dbus_object_manager_get_interface (bt->objmanager, path, "org.bluez.Device1");
+    GVariant *var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Paired");
+    return g_variant_get_boolean (var);
+}
+
+static void pair_device (BluetoothPlugin *bt, const gchar *path, gboolean state)
+{
+    GDBusInterface *interface = g_dbus_object_manager_get_interface (bt->objmanager, path, "org.bluez.Device1");
+
+    if (state)
+    {
+        printf ("Pairing with %s\n", path);
+        g_dbus_proxy_call (G_DBUS_PROXY (interface), "Pair", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_paired, bt);
+    }
+    else
+    {
+        printf ("CancelPairing with %s\n", path);
+        g_dbus_proxy_call (G_DBUS_PROXY (interface), "CancelPairing", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_cancelled, NULL);
+    }
+}
+
+static void cb_paired (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+	BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
+    GError *error = NULL;
+    GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+
+    if (error) printf ("Pairing error %s\n", error->message);
+    else 
+    {
+        printf ("Pairing result %s\n", g_variant_print (var, TRUE));
+
+        // for some bizarre reason, BlueZ will disconnect after a pairing - need to kludge a reconnect
+        GDBusInterface *interface = G_DBUS_INTERFACE (source);
+        bt->paired_object = g_dbus_proxy_get_object_path (G_DBUS_PROXY (interface));
+    }
+    if (bt->dialog)
+    {
+        gtk_widget_destroy (bt->dialog);
+        bt->dialog = NULL;
+    }
+}
+
+static void cb_cancelled (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+    GError *error = NULL;
+    GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+
+    if (error) printf ("Cancelling error %s\n", error->message);
+    else printf ("Cancelling result %s\n", g_variant_print (var, TRUE));
+ }
+
+/* Trust / distrust device */
+
+static gboolean is_trusted (BluetoothPlugin *bt, const gchar *path)
+{
+    GDBusInterface *interface = g_dbus_object_manager_get_interface (bt->objmanager, path, "org.bluez.Device1");
+    GVariant *var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Trusted");
+    return g_variant_get_boolean (var);
+}
+
+static void trust_device (BluetoothPlugin *bt, const gchar *path, gboolean state)
+{
+    GDBusInterface *interface = g_dbus_object_manager_get_interface (bt->objmanager, path, "org.bluez.Device1");
+    GVariant *var = g_variant_new ("(ssv)", g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "Trusted", g_variant_new_boolean (state));
+
+    if (state) printf ("Trusting\n");
+    else printf ("Distrusting\n");
+    g_dbus_proxy_call (G_DBUS_PROXY (interface), "org.freedesktop.DBus.Properties.Set", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_trusted, NULL);
+}
+
+static void cb_trusted (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+    GError *error = NULL;
+    GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+
+    if (error) printf ("Trusting error %s\n", error->message);
+    else printf ("Trusting result %s\n", g_variant_print (var, TRUE));
+}
+
+/* Connect / disconnect device */
+
+static gboolean is_connected (BluetoothPlugin *bt, const gchar *path)
+{
+    GDBusInterface *interface = g_dbus_object_manager_get_interface (bt->objmanager, path, "org.bluez.Device1");
+    GVariant *var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Connected");
+    return g_variant_get_boolean (var);
+}
+
+static void connect_device (BluetoothPlugin *bt, const gchar *path, gboolean state)
+{
+    GDBusInterface *interface = g_dbus_object_manager_get_interface (bt->objmanager, path, "org.bluez.Device1");
+
+    if (state)
+    {
+        // if trying to connect, make sure device is trusted first
+        if (!is_trusted (bt, path)) trust_device (bt, path, TRUE);
+
+        printf ("Connecting\n");
+        g_dbus_proxy_call (G_DBUS_PROXY (interface), "Connect", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_connected, NULL);
+    }
+    else
+    {
+        printf ("Disconnecting\n"); 
+        g_dbus_proxy_call (G_DBUS_PROXY (interface), "Disconnect", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_disconnected, NULL);
+    }
+}
+
+static void cb_connected (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+    GError *error = NULL;
+    GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+
+    if (error) printf ("Connect error %s\n", error->message);
+    else printf ("Connect result %s\n", g_variant_print (var, TRUE));
+}
+
+static void cb_disconnected (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+    GError *error = NULL;
+    GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+
+    if (error) printf ("Disconnect error %s\n", error->message);
+    else printf ("Disconnect result %s\n", g_variant_print (var, TRUE));
+}
+
+/* Remove device */
+
+static void remove_device (BluetoothPlugin *bt, const gchar *path)
+{
+    printf ("Removing\n");
+    g_dbus_proxy_call (bt->adapter, "RemoveDevice", g_variant_new ("(o)", path), G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_removed, NULL);
+}
+
+static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+    GError *error = NULL;
+    GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+
+    if (error) printf ("Remove error %s\n", error->message);
+    else printf ("Remove result %s\n", g_variant_print (var, TRUE));
+}
+
+
+/* GUI... */
+
+static gboolean selected_path (BluetoothPlugin *bt, char **path)
+{
+    GtkTreeSelection *sel; 
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+
+    sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (bt->list));
+    if (!gtk_tree_selection_get_selected (sel, &model, &iter))
+    {
+        *path = 0;
+        return FALSE;
+    }    
+    gtk_tree_model_get (model, &iter, 0, path, -1);
+    return TRUE;
+}
+
+void handle_pair (GtkButton *button, gpointer user_data)
+{
+	BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+    gchar *path;
+
+    if (selected_path (bt, &path))
+    {
+		gtk_widget_destroy (bt->dialog);
+		bt->dialog = NULL;
+		set_search (bt, FALSE);
+        if (!is_paired (bt, path)) pair_device (bt, path, TRUE);
+        g_free (path);
+    }
+}
+
+static void handle_remove (GtkButton *button, gpointer user_data)
+{
+	BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
+    gchar *path;
+
+    if (selected_path (bt, &path))
+    {
+		gtk_widget_destroy (bt->dialog);
+		bt->dialog = NULL;
+        remove_device (bt, path);
+        g_free (path);
+    }
+}
+
+
+void handle_cancel_dialog (GtkButton *button, gpointer user_data)
+{
+	BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
+	if (bt->dialog)
+	{
+		gtk_widget_destroy (bt->dialog);
+		bt->dialog = NULL;
+		set_search (bt, FALSE);
+	}
+}
+
+static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
+{
+    GtkWidget *vbox, *hbox, *btn_cancel, *btn_act;
+    GtkCellRenderer *rend;
+
+    // create the window
+    bt->dialog = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title (GTK_WINDOW (bt->dialog), type == DIALOG_PAIR ? "Searching for Bluetooth devices" : "Paired Bluetooth devices");
+    gtk_signal_connect (GTK_OBJECT (bt->dialog), "delete_event", G_CALLBACK (handle_cancel_dialog), bt);
+
+    // add a vbox
+    vbox = gtk_vbox_new (FALSE, 5);
+    gtk_container_add (GTK_CONTAINER (bt->dialog), vbox);
+
+    // create the list view and add to vbox
+    bt->list = gtk_tree_view_new ();
+    gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (bt->list), FALSE);
+    rend = gtk_cell_renderer_pixbuf_new ();
+    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Icon", rend, "pixbuf", 5, NULL);
+    rend = gtk_cell_renderer_text_new ();
+    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Name", rend, "text", 1, NULL);
+    //rend = gtk_cell_renderer_text_new ();
+    //gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Paired", rend, "text", 2, NULL);
+    //rend = gtk_cell_renderer_text_new ();
+    //gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Connected", rend, "text", 3, NULL);
+    //rend = gtk_cell_renderer_text_new ();
+    //gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Trusted", rend, "text", 4, NULL);
+    gtk_tree_view_set_model (GTK_TREE_VIEW (bt->list), type == DIALOG_PAIR ? GTK_TREE_MODEL (bt->unpair_list) : GTK_TREE_MODEL (bt->pair_list));
+    //g_signal_connect (list, "cursor-changed", G_CALLBACK (handle_selected), NULL);
+    gtk_box_pack_start (GTK_BOX (vbox), bt->list, TRUE, TRUE, 5);
+
+    // create the buttons in an hbox and add to vbox
+    hbox = gtk_hbox_new (TRUE, 5);
+    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 5);
+    
+    btn_act = gtk_button_new_with_label (type == DIALOG_PAIR ? "Pair" : "Remove");
+    g_signal_connect (btn_act, "clicked", type == DIALOG_PAIR ? G_CALLBACK (handle_pair) : G_CALLBACK (handle_remove), bt);
+    gtk_box_pack_end (GTK_BOX (hbox), btn_act, TRUE, TRUE, 5);
+    btn_cancel = gtk_button_new_with_label ("Cancel");
+    g_signal_connect (btn_cancel, "clicked", G_CALLBACK (handle_cancel_dialog), bt);
+    gtk_box_pack_end (GTK_BOX (hbox), btn_cancel, TRUE, TRUE, 5);
+
+    // window ready
+    gtk_widget_show_all (bt->dialog);
+}
+
+static void handle_menu_add (GtkWidget *widget, gpointer user_data)
+{
+ 	BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+ 	set_search (bt, TRUE);
+	show_list_dialog (bt, DIALOG_PAIR);
+}
+
+static void handle_menu_remove (GtkWidget *widget, gpointer user_data)
+{
+ 	BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+	show_list_dialog (bt, DIALOG_REMOVE);
+}
+
+/* UI helper functions to respond to method calls on the agent */
+
+static guint request_confirmation (BluetoothPlugin *bt, const gchar *device, guint32 code)
+{
+    char buffer[256];
+    guint res;
+    GtkWidget *lbl;
+
+    // create the dialog, asking user to confirm the displayed PIN
+    sprintf (buffer, "Please confirm that device %s is showing the code %d to connect", device, code);
+    bt->dialog = gtk_dialog_new_with_buttons ("Confirm Pairing", NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_CANCEL, 0, GTK_STOCK_OK, 1, NULL);
+    lbl = gtk_label_new (buffer);
+    gtk_label_set_line_wrap (GTK_LABEL (lbl), TRUE);
+    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->dialog))), lbl, TRUE, TRUE, 0);
+    gtk_widget_show_all (bt->dialog);
+
+    // block while waiting for user response
+    res = gtk_dialog_run (GTK_DIALOG (bt->dialog));
+    gtk_widget_destroy (bt->dialog);
+    bt->dialog = NULL;
+    return res;
+}
+
+static void handle_cancel_pair (GtkButton *button, gpointer user_data)
+{
+ 	BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+    pair_device (bt, bt->cancel_object, FALSE);
+    gtk_widget_destroy (bt->dialog);
+    bt->dialog = NULL;
+}
+
+static void display_pin_code (BluetoothPlugin *bt, const gchar *device, const gchar *pin)
+{
+    char buffer[256];
+    GtkWidget *lbl;
+
+    // create the dialog, showing the pin to enter on the remote device
+    sprintf (buffer, "Please enter code %s on device %s", pin, device);
+    bt->dialog = gtk_dialog_new_with_buttons ("Enter Pin Code", NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_CANCEL, 0, NULL);
+    lbl = gtk_label_new (buffer);
+    gtk_label_set_line_wrap (GTK_LABEL (lbl), TRUE);
+    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->dialog))), lbl, TRUE, TRUE, 0);
+    g_signal_connect (gtk_dialog_get_widget_for_response (GTK_DIALOG (bt->dialog), 0), "clicked", G_CALLBACK (handle_cancel_pair), bt);
+    gtk_widget_show_all (bt->dialog);
+}
+
+static guint request_pin_code (BluetoothPlugin *bt, const gchar *device, GtkEntryBuffer *pinbuf)
+{
+    char buffer[256];
+    guint res;
+    GtkWidget *lbl, *ent;
+
+    // create the dialog, prompting for a pin to be entered
+    sprintf (buffer, "Please enter code for device %s", device);
+    bt->dialog = gtk_dialog_new_with_buttons ("Requesting Pin Code", NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_CANCEL, 0, GTK_STOCK_OK, 1, NULL);
+    lbl = gtk_label_new (buffer);
+    gtk_label_set_line_wrap (GTK_LABEL (lbl), TRUE);
+    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->dialog))), lbl, TRUE, TRUE, 0);
+    ent = gtk_entry_new_with_buffer (pinbuf);
+    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->dialog))), ent, TRUE, TRUE, 0);  
+    gtk_widget_show_all (bt->dialog);
+
+    // block while waiting for user response
+    res = gtk_dialog_run (GTK_DIALOG (bt->dialog));
+    gtk_widget_destroy (bt->dialog);
+    bt->dialog = NULL;
+    return res;
+}
+
+static guint request_authorization (BluetoothPlugin *bt, const gchar *device)
+{
+    char buffer[256];
+    guint res;
+    GtkWidget *lbl;
+
+    // create the dialog, asking user to confirm the displayed PIN
+    sprintf (buffer, "Do you accept pairing from device %s?", device);
+    bt->dialog = gtk_dialog_new_with_buttons ("Pairing Request", NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_CANCEL, 0, GTK_STOCK_OK, 1, NULL);
+    lbl = gtk_label_new (buffer);
+    gtk_label_set_line_wrap (GTK_LABEL (lbl), TRUE);
+    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->dialog))), lbl, TRUE, TRUE, 0);
+    gtk_widget_show_all (bt->dialog);
+
+    // block while waiting for user response
+    res = gtk_dialog_run (GTK_DIALOG (bt->dialog));
+    gtk_widget_destroy (bt->dialog);
+    bt->dialog = NULL;
+    return res;
+}
+
+
+
+
+
+
+static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *lst)
+{
+    GVariant *var1, *var2, *var3, *var4, *var5;
+    GtkTreeIter iter;
+    GDBusInterface *interface;
+    GdkPixbuf *icon;
+
+    // add a new structure to the list store...
+    gtk_list_store_append (lst, &iter);
+
+    // ... and fill it with data about the object
+    interface = g_dbus_object_get_interface (object, "org.bluez.Device1");
+    var1 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Alias");
+    var2 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Paired");
+    var3 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Connected");
+    var4 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Trusted");
+    var5 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Icon");
+    GError *error = NULL;
+    icon = NULL;
+    if (var5)
+    {
+        if (gtk_icon_theme_has_icon (panel_get_icon_theme (bt->panel), g_variant_get_string (var5, NULL)))
+        {
+            icon = gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), g_variant_get_string (var5, NULL), 32, 0, &error);
+            if (error) printf ("Icon error %s\n", error->message);
+        }
+    }
+ 
+    gtk_list_store_set (lst, &iter, 0, g_dbus_object_get_object_path (object),
+        1, var1 ? g_variant_get_string (var1, NULL) : "Unnamed device", 2, g_variant_get_boolean (var2),
+        3, g_variant_get_boolean (var3), 4, g_variant_get_boolean (var4), 
+        5, icon, -1);
+        //5, var5 ? g_variant_get_string (var5, NULL) : "No icon", -1);
+}
+
+static void update_device_list (BluetoothPlugin *bt)
+{
+    GDBusInterface *interface;
+    GDBusObject *object;
+    GList *objects, *interfaces;
+    GVariant *var;
+    
+    // clear out the list store
+	gtk_list_store_clear (bt->pair_list);
+    gtk_list_store_clear (bt->unpair_list);
+
+    // iterate all the objects the manager knows about
+    objects = g_dbus_object_manager_get_objects (bt->objmanager);
+    while (objects != NULL)
+    {
+        object = (GDBusObject *) objects->data;
+        interfaces = g_dbus_object_get_interfaces (object);
+        while (interfaces != NULL)
+        {
+            // if an object has a Device1 interface, it is a Bluetooth device - add it to the list
+            interface = G_DBUS_INTERFACE (interfaces->data);
+            if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.Device1") == 0)
+            {
+				var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Paired");
+				if (g_variant_get_boolean (var)) add_device (bt, object, bt->pair_list);					
+				else add_device (bt, object, bt->unpair_list);
+                break;
+            }
+            interfaces = interfaces->next;
+        }
+        objects = objects->next;
+    }
+}
+
+
+void initialise (BluetoothPlugin *bt)
+{
+	GError *error;
+	GDBusNodeInfo *introspection_data;
+	
+	//bt->searching = FALSE;
+	//bt->discoverable = FALSE;
+	
+    // get an object manager for BlueZ
+    error = NULL;
+    bt->objmanager = g_dbus_object_manager_client_new_for_bus_sync (G_BUS_TYPE_SYSTEM, 0, "org.bluez", "/", NULL, NULL, NULL, NULL, &error);
+    if (error) printf ("Error getting object manager - %s\n", error->message);
+
+    // get a connection to the system DBus
+    error = NULL;
+    bt->gbc = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, &error);
+    if (error) printf ("Error getting system bus - %s\n", error->message);
+
+    // create the agent from XML spec
+    error = NULL;
+    introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, &error);
+    if (error) printf ("Error creating agent node - %s\n", error->message);
+
+    // register the agent on the system bus
+    error = NULL;
+    g_dbus_connection_register_object (bt->gbc, "/btagent", introspection_data->interfaces[0], &interface_vtable, bt, NULL, &error);
+    if (error) printf ("Error registering agent on bus - %s\n", error->message);
+
+    // register callbacks on object manager
+    g_signal_connect (bt->objmanager, "interface-added", G_CALLBACK (cb_interface_added), bt);
+    g_signal_connect (bt->objmanager, "interface-removed", G_CALLBACK (cb_interface_removed), bt);
+    g_signal_connect (bt->objmanager, "object-added", G_CALLBACK (cb_object_added), bt);
+    g_signal_connect (bt->objmanager, "object-removed", G_CALLBACK (cb_object_removed), bt);
+    g_signal_connect (bt->objmanager, "interface-proxy-signal", G_CALLBACK (cb_interface_signal), bt);
+    g_signal_connect (bt->objmanager, "interface-proxy-properties-changed", G_CALLBACK (cb_interface_properties), bt);
+
+    // query the DBus for Bluetooth devices
+    find_hardware (bt);
+
+    // register the agent with the agent manager found above
+    error = NULL;
+    g_dbus_proxy_call_sync (bt->agentmanager, "RegisterAgent", g_variant_new ("(os)", "/btagent", "DisplayYesNo"), G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+    if (error) printf ("Error registering agent with manager - %s\n", error->message);
+}
+
+
+static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size)
+{
+    GdkPixbuf *pixbuf;
+    if (size == 0) size = panel_get_icon_size (p) - ICON_BUTTON_TRIM;
+    if (gtk_icon_theme_has_icon (panel_get_icon_theme (p), icon))
+    {
+        pixbuf = gtk_icon_theme_load_icon (panel_get_icon_theme (p), icon, size, 0, NULL);
+        if (pixbuf != NULL)
+        {
+            gtk_image_set_from_pixbuf (GTK_IMAGE (image), pixbuf);
+            g_object_unref (pixbuf);
+            return;
+        }
+    }
+    else
+    {
+        char path[256];
+        sprintf (path, "%s/images/%s.png", PACKAGE_DATA_DIR, icon);
+        pixbuf = gdk_pixbuf_new_from_file_at_scale (path, size, size, TRUE, NULL);
+        if (pixbuf != NULL)
+        {
+            gtk_image_set_from_pixbuf (GTK_IMAGE (image), pixbuf);
+            g_object_unref (pixbuf);
+        }
+    }
+}
+
+static void bt_popup_set_position(GtkMenu *menu, gint *px, gint *py, gboolean *push_in, gpointer data)
+{
+    BluetoothPlugin *bt = (BluetoothPlugin *) data;
+
+    /* Determine the coordinates. */
+    lxpanel_plugin_popup_set_position_helper(bt->panel, bt->plugin, GTK_WIDGET(menu), px, py);
+    *push_in = TRUE;
+}
+
+static void handle_menu_connect (GtkWidget *widget, gpointer user_data)
+{
+ 	BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+    gchar *name, *path;
+    gboolean valid;
+    
+    // assume all paired devices have unique names - otherwise life becomes rather tricky...
+    GtkTreeIter iter;
+    valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (bt->pair_list), &iter);
+    while (valid)
+    {
+        gtk_tree_model_get (GTK_TREE_MODEL (bt->pair_list), &iter, 0, &path, 1, &name, -1);
+        if (!g_strcmp0 (gtk_menu_item_get_label (GTK_MENU_ITEM (widget)), name)) break; 
+        g_free (name);
+        g_free (path);
+        valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (bt->pair_list), &iter);    
+    }
+
+    if (!is_connected (bt, path))
+        connect_device (bt, path, TRUE);
+    else
+        connect_device (bt, path, FALSE);
+        
+    g_free (name);
+    g_free (path);
+}
+
+static void handle_menu_discover (GtkWidget *widget, gpointer user_data)
+{
+ 	BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+
+    if (!is_discoverable (bt)) set_discoverable (bt, TRUE);
+    else set_discoverable (bt, FALSE);
+}
+
+
+static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIter *iter, gpointer user_data)
+{
+    BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+    gchar *name, *path;
+    GtkWidget *item, *sel = gtk_image_new ();
+    
+    gtk_tree_model_get (model, iter, 0, &path, 1, &name, -1);
+    item = gtk_image_menu_item_new_with_label (name);
+    g_signal_connect (item, "activate", G_CALLBACK (handle_menu_connect), bt);
+    if (is_connected (bt, path))
+    {
+        set_icon (bt->panel, sel, "dialog-ok-apply", 16);
+        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), sel);
+    }
+    gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+
+    return FALSE;
+}
+
+void show_menu (BluetoothPlugin *bt)
+{
+	GtkWidget *item, *sel = gtk_image_new ();
+	
+	// discoverable toggle
+	bt->menu = gtk_menu_new ();
+    item = gtk_image_menu_item_new_with_label (_("Discoverable"));    
+    if (is_discoverable (bt)) 
+    {
+        set_icon (bt->panel, sel, "dialog-ok-apply", 16);
+        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(item), sel);
+    }    
+	g_signal_connect (item, "activate", G_CALLBACK (handle_menu_discover), bt);
+    gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+    item = gtk_separator_menu_item_new();
+    gtk_menu_shell_append(GTK_MENU_SHELL(bt->menu), item);
+
+    // add and remove dialogs
+	item = gtk_image_menu_item_new_with_label (_("Add Device..."));
+	g_signal_connect (item, "activate", G_CALLBACK (handle_menu_add), bt);
+    gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+    item = gtk_image_menu_item_new_with_label (_("Remove Device..."));
+	g_signal_connect (item, "activate", G_CALLBACK (handle_menu_remove), bt);
+    gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+    item = gtk_separator_menu_item_new();
+    gtk_menu_shell_append(GTK_MENU_SHELL (bt->menu), item);
+
+    // paired devices
+    gtk_tree_model_foreach (GTK_TREE_MODEL (bt->pair_list), add_to_menu, bt);
+
+    if (bt->menu) 
+    {
+        gtk_widget_show_all (GTK_WIDGET (bt->menu));
+        gtk_menu_popup (GTK_MENU (bt->menu), NULL, NULL, bt_popup_set_position, bt, 1, gtk_get_current_event_time ());
+    }
+}
+
+/* Handler for menu button click */
+static gboolean bluetooth_button_press_event (GtkWidget *widget, GdkEventButton *event, LXPanel *panel)
+{
+    BluetoothPlugin *bt = lxpanel_plugin_get_data (widget);
+
+    /* Show or hide the popup menu on left-click */
+    if (event->button == 1)
+    {
+        show_menu (bt);
+        return TRUE;
+    }
+    else return FALSE;
+}
+
+/* Handler for system config changed message from panel */
+static void bluetooth_configuration_changed (LXPanel *panel, GtkWidget *widget)
+{
+    BluetoothPlugin *bt = lxpanel_plugin_get_data (widget);
+
+    set_icon (panel, bt->tray_icon, "preferences-system-bluetooth", 0);
+}
+
+/* Plugin destructor. */
+static void bluetooth_destructor (gpointer user_data)
+{
+    BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
+
+    /* Deallocate memory */
+    g_free (bt);
+}
+
+/* Plugin constructor. */
+static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *settings)
+{
+    /* Allocate and initialize plugin context */
+    BluetoothPlugin *bt = g_new0 (BluetoothPlugin, 1);
+    GtkWidget *p;
+    
+    setlocale (LC_ALL, "");
+    bindtextdomain (PACKAGE, NULL);
+    bind_textdomain_codeset (PACKAGE, "UTF-8");
+    textdomain (PACKAGE);
+
+    bt->tray_icon = gtk_image_new ();
+    //set_icon (panel, bt->tray_icon, "preferences-desktop-accessibility", 0);
+    set_icon (panel, bt->tray_icon, "preferences-system-bluetooth", 0);
+    //gtk_widget_set_tooltip_text (bt->tray_icon, _("Select a drive in menu to eject safely"));
+    gtk_widget_set_visible (bt->tray_icon, TRUE);
+
+    /* Allocate top level widget and set into Plugin widget pointer. */
+    bt->panel = panel;
+    bt->plugin = p = gtk_button_new ();
+    gtk_button_set_relief (GTK_BUTTON (bt->plugin), GTK_RELIEF_NONE);
+    g_signal_connect (bt->plugin, "button-press-event", G_CALLBACK(bluetooth_button_press_event), NULL);
+    bt->settings = settings;
+    lxpanel_plugin_set_data (p, bt, bluetooth_destructor);
+    gtk_widget_add_events (p, GDK_BUTTON_PRESS_MASK);
+
+    /* Allocate icon as a child of top level */
+    gtk_container_add (GTK_CONTAINER (p), bt->tray_icon);
+    
+    /* Show the widget, and return. */
+    gtk_widget_show_all (p);
+    
+    bt->pair_list = gtk_list_store_new (6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF);
+    bt->unpair_list = gtk_list_store_new (6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF);   
+    
+    initialise (bt);
+    
+    update_device_list (bt);
+    
+    return p;
+}
+
+FM_DEFINE_MODULE(lxpanel_gtk, bluetooth)
+
+/* Plugin descriptor. */
+LXPanelPluginInit fm_module_init_lxpanel_gtk = {
+    .name = N_("Bluetooth"),
+    .description = N_("Manages Bluetooth devices"),
+    .new_instance = bluetooth_constructor,
+    .reconfigure = bluetooth_configuration_changed,
+    .button_press_event = bluetooth_button_press_event
+};
