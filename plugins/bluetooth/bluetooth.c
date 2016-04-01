@@ -772,7 +772,7 @@ static gboolean selected_path (BluetoothPlugin *bt, char **path, char **name)
     sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (bt->list));
     if (!gtk_tree_selection_get_selected (sel, &model, &iter))
     {
-        *path = 0;
+        *path = NULL;
         return FALSE;
     }    
     gtk_tree_model_get (model, &iter, 0, path, 1, name, -1);
@@ -818,6 +818,8 @@ static void handle_close_list_dialog (GtkButton *button, gpointer user_data)
     BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
     if (bt->list_dialog)
     {
+        gtk_widget_destroy (bt->list);
+        bt->list = NULL;
         gtk_widget_destroy (bt->list_dialog);
         bt->list_dialog = NULL;
         if (is_searching (bt)) set_search (bt, FALSE);
@@ -961,16 +963,15 @@ static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *
     var3 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Connected");
     var4 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Trusted");
     var5 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Icon");
-    GError *error = NULL;
     icon = NULL;
     if (var5)
     {
         if (gtk_icon_theme_has_icon (panel_get_icon_theme (bt->panel), g_variant_get_string (var5, NULL)))
         {
-            icon = gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), g_variant_get_string (var5, NULL), 32, 0, &error);
-            if (error) printf ("Icon error %s\n", error->message);
+            icon = gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), g_variant_get_string (var5, NULL), 32, 0, NULL);
         }
     }
+    if (!icon) icon = gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), "dialog-question", 32, 0, NULL);
  
     gtk_list_store_set (lst, &iter, 0, g_dbus_object_get_object_path (object),
         1, var1 ? g_variant_get_string (var1, NULL) : "Unnamed device", 2, g_variant_get_boolean (var2),
@@ -984,6 +985,11 @@ static void update_device_list (BluetoothPlugin *bt)
     GDBusObject *object;
     GList *objects, *interfaces;
     GVariant *var;
+    gchar *path = NULL, *name;
+    int item = 0, sel_item = -1;
+
+    // save the current highlight if there is one
+    if (bt->list) selected_path (bt, &path, &name);
 
     // clear out the list store
     gtk_list_store_clear (bt->pair_list);
@@ -1003,12 +1009,28 @@ static void update_device_list (BluetoothPlugin *bt)
             {
                 var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Paired");
                 if (g_variant_get_boolean (var)) add_device (bt, object, bt->pair_list);
-                else add_device (bt, object, bt->unpair_list);
+                else
+                {
+                    add_device (bt, object, bt->unpair_list);
+
+                    // find the new location of the selected item
+                    if (path && !g_strcmp0 (g_dbus_object_get_object_path (object), path)) sel_item = item;
+                    item++;
+                }
                 break;
             }
             interfaces = interfaces->next;
         }
         objects = objects->next;
+    }
+
+    // replace the selection
+    if (bt->list && sel_item != -1)
+    {
+        GtkTreePath *selpath = gtk_tree_path_new_from_indices (sel_item, -1);
+        GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (bt->list));
+        gtk_tree_selection_select_path (sel, selpath);
+        gtk_tree_path_free (selpath);
     }
 }
 
