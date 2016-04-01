@@ -133,6 +133,7 @@ static void cb_object_added (GDBusObjectManager *manager, GDBusObject *object, g
 static void cb_object_removed (GDBusObjectManager *manager, GDBusObject *object, gpointer user_data);
 static void cb_interface_signal (GDBusObjectManagerClient *manager, GDBusObjectProxy *object_proxy, GDBusProxy *proxy, gchar *sender, gchar *signal, GVariant *parameters, gpointer user_data);
 static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObjectProxy *object_proxy, GDBusProxy *proxy, GVariant *parameters, GStrv inval, gpointer user_data);
+static gboolean is_searching (BluetoothPlugin *bt);
 static void set_search (BluetoothPlugin *bt, gboolean state);
 static void cb_search_start (GObject *source, GAsyncResult *res, gpointer user_data);
 static void cb_search_end (GObject *source, GAsyncResult *res, gpointer user_data);
@@ -331,6 +332,12 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
 }
 
 /* Searching */
+
+static gboolean is_searching (BluetoothPlugin *bt)
+{
+    GVariant *var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (bt->adapter), "Discovering");
+    return g_variant_get_boolean (var);
+}
 
 static void set_search (BluetoothPlugin *bt, gboolean state)
 {
@@ -674,6 +681,8 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             bt->pinbuf = gtk_entry_buffer_new (NULL, -1);
             bt->pair_dialog = gtk_dialog_new_with_buttons (buffer, NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL);
 	        gtk_window_set_icon (GTK_WINDOW (bt->pair_dialog), gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), "preferences-system-bluetooth", 24, 0, NULL));
+            gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER_ALWAYS);
+            gtk_container_set_border_width (GTK_CONTAINER (bt->pair_dialog), 10);
             bt->pair_label = gtk_label_new ("Pairing request sent to device - waiting for response....");
             gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label, TRUE, TRUE, 0);
@@ -811,51 +820,54 @@ static void handle_close_list_dialog (GtkButton *button, gpointer user_data)
     {
         gtk_widget_destroy (bt->list_dialog);
         bt->list_dialog = NULL;
-        set_search (bt, FALSE);
+        if (is_searching (bt)) set_search (bt, FALSE);
     }
 }
 
 static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 {
-    GtkWidget *vbox, *hbox, *btn_cancel, *btn_act;
+    GtkWidget *btn_cancel, *btn_act, *frm, *lbl, *scrl, *align;
     GtkCellRenderer *rend;
 
     // create the window
-    bt->list_dialog = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title (GTK_WINDOW (bt->list_dialog), type == DIALOG_PAIR ? "Searching for Bluetooth devices" : "Paired Bluetooth devices");
-    //gtk_signal_connect (GTK_OBJECT (bt->list_dialog), "delete_event", G_CALLBACK (handle_cancel_dialog), bt);
+    bt->list_dialog = gtk_dialog_new_with_buttons (type == DIALOG_PAIR ? "Add New Device" : "Remove Device", NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL);
+    gtk_window_set_position (GTK_WINDOW (bt->list_dialog), GTK_WIN_POS_CENTER_ALWAYS);
+	gtk_window_set_icon (GTK_WINDOW (bt->list_dialog), gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), "preferences-system-bluetooth", 24, 0, NULL));
+    gtk_container_set_border_width (GTK_CONTAINER (bt->list_dialog), 5);
+    gtk_box_set_spacing (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), 10);
 
-    // add a vbox
-    vbox = gtk_vbox_new (FALSE, 5);
-    gtk_container_add (GTK_CONTAINER (bt->list_dialog), vbox);
+    // add the buttons
+    btn_cancel = gtk_dialog_add_button (GTK_DIALOG (bt->list_dialog), "_Cancel", 0);
+    btn_act = gtk_dialog_add_button (GTK_DIALOG (bt->list_dialog), type == DIALOG_PAIR ? "_Pair" : "_Remove", 1);
+    g_signal_connect (btn_act, "clicked", type == DIALOG_PAIR ? G_CALLBACK (handle_pair) : G_CALLBACK (handle_remove), bt);
+    g_signal_connect (btn_cancel, "clicked", G_CALLBACK (handle_close_list_dialog), bt);
+    //g_signal_connect (GTK_OBJECT (bt->list_dialog), "delete_event", G_CALLBACK (handle_close_list_dialog), bt);
 
-    // create the list view and add to vbox
+    // add a label
+    lbl = gtk_label_new (type == DIALOG_PAIR ? "Searching for Bluetooth devices..." : "Paired Bluetooth devices");
+    gtk_misc_set_alignment (GTK_MISC (lbl), 0.0, 0.5);
+    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), align, TRUE, TRUE, 0);
+    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), lbl, TRUE, TRUE, 0);
+
+    // add a scrolled window
+    scrl = gtk_scrolled_window_new (NULL, NULL);
+    gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrl), GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
+    gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (scrl), GTK_SHADOW_IN);
+    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), scrl, TRUE, TRUE, 0);
+
+    // create the list view and add to scrolled window
     bt->list = gtk_tree_view_new ();
+    gtk_tree_view_set_fixed_height_mode (GTK_TREE_VIEW (bt->list), TRUE);
     gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (bt->list), FALSE);
+    gtk_widget_set_size_request (bt->list, -1, 150);
     rend = gtk_cell_renderer_pixbuf_new ();
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Icon", rend, "pixbuf", 5, NULL);
+    gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (bt->list), 0), 50);
     rend = gtk_cell_renderer_text_new ();
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Name", rend, "text", 1, NULL);
-    //rend = gtk_cell_renderer_text_new ();
-    //gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Paired", rend, "text", 2, NULL);
-    //rend = gtk_cell_renderer_text_new ();
-    //gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Connected", rend, "text", 3, NULL);
-    //rend = gtk_cell_renderer_text_new ();
-    //gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Trusted", rend, "text", 4, NULL);
+    gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (bt->list), 1), 300);
     gtk_tree_view_set_model (GTK_TREE_VIEW (bt->list), type == DIALOG_PAIR ? GTK_TREE_MODEL (bt->unpair_list) : GTK_TREE_MODEL (bt->pair_list));
-    //g_signal_connect (list, "cursor-changed", G_CALLBACK (handle_selected), NULL);
-    gtk_box_pack_start (GTK_BOX (vbox), bt->list, TRUE, TRUE, 5);
-
-    // create the buttons in an hbox and add to vbox
-    hbox = gtk_hbox_new (TRUE, 5);
-    gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 5);
-    
-    btn_act = gtk_button_new_with_label (type == DIALOG_PAIR ? "Pair" : "Remove");
-    g_signal_connect (btn_act, "clicked", type == DIALOG_PAIR ? G_CALLBACK (handle_pair) : G_CALLBACK (handle_remove), bt);
-    gtk_box_pack_end (GTK_BOX (hbox), btn_act, TRUE, TRUE, 5);
-    btn_cancel = gtk_button_new_with_label ("Cancel");
-    g_signal_connect (btn_cancel, "clicked", G_CALLBACK (handle_close_list_dialog), bt);
-    gtk_box_pack_end (GTK_BOX (hbox), btn_cancel, TRUE, TRUE, 5);
+    gtk_container_add (GTK_CONTAINER (scrl), bt->list);
 
     // window ready
     gtk_widget_show_all (bt->list_dialog);
