@@ -486,8 +486,8 @@ static void trust_device (BluetoothPlugin *bt, const gchar *path, gboolean state
     GDBusInterface *interface = g_dbus_object_manager_get_interface (bt->objmanager, path, "org.bluez.Device1");
     GVariant *var = g_variant_new ("(ssv)", g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "Trusted", g_variant_new_boolean (state));
 
-    if (state) printf ("Trusting\n");
-    else printf ("Distrusting\n");
+    if (state) printf ("Trusting %s\n", path);
+    else printf ("Distrusting %s\n", path);
     g_dbus_proxy_call (G_DBUS_PROXY (interface), "org.freedesktop.DBus.Properties.Set", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_trusted, NULL);
 }
 
@@ -518,12 +518,12 @@ static void connect_device (BluetoothPlugin *bt, const gchar *path, gboolean sta
         // if trying to connect, make sure device is trusted first
         if (!is_trusted (bt, path)) trust_device (bt, path, TRUE);
 
-        printf ("Connecting\n");
+        printf ("Connecting to %s\n", path);
         g_dbus_proxy_call (G_DBUS_PROXY (interface), "Connect", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_connected, bt);
     }
     else
     {
-        printf ("Disconnecting\n"); 
+        printf ("Disconnecting from %s\n", path); 
         g_dbus_proxy_call (G_DBUS_PROXY (interface), "Disconnect", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_disconnected, NULL);
     }
 }
@@ -682,15 +682,16 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             sprintf (buffer, "Pairing with %s", device);
             bt->pinbuf = gtk_entry_buffer_new (NULL, -1);
             bt->pair_dialog = gtk_dialog_new_with_buttons (buffer, NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL);
-	        gtk_window_set_icon (GTK_WINDOW (bt->pair_dialog), gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), "preferences-system-bluetooth", 24, 0, NULL));
+            gtk_window_set_icon (GTK_WINDOW (bt->pair_dialog), gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), "preferences-system-bluetooth", 24, 0, NULL));
             gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER_ALWAYS);
             gtk_container_set_border_width (GTK_CONTAINER (bt->pair_dialog), 10);
             bt->pair_label = gtk_label_new ("Pairing request sent to device - waiting for response....");
             gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
-			gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
-			gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
+            gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
+            gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label, TRUE, TRUE, 0);
             bt->pair_entry = gtk_entry_new_with_buffer (bt->pinbuf);
+            gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_entry, TRUE, TRUE, 0);
             bt->pair_cancel = gtk_dialog_add_button (GTK_DIALOG (bt->pair_dialog), "Cancel", 0);
             bt->pair_ok = gtk_dialog_add_button (GTK_DIALOG (bt->pair_dialog), "OK", 1);
             connect_cancel (bt, G_CALLBACK (handle_cancel_pair));
@@ -773,8 +774,8 @@ static gboolean selected_path (BluetoothPlugin *bt, char **path, char **name)
     GtkTreeModel *model;
     GtkTreeIter iter;
 
-	if (!bt->list)
-	{
+    if (!bt->list)
+    {
         *path = NULL;
         return FALSE;
     }
@@ -847,7 +848,7 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
     // create the window
     bt->list_dialog = gtk_dialog_new_with_buttons (type == DIALOG_PAIR ? "Add New Device" : "Remove Device", NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL);
     gtk_window_set_position (GTK_WINDOW (bt->list_dialog), GTK_WIN_POS_CENTER_ALWAYS);
-	gtk_window_set_icon (GTK_WINDOW (bt->list_dialog), gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), "preferences-system-bluetooth", 24, 0, NULL));
+    gtk_window_set_icon (GTK_WINDOW (bt->list_dialog), gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), "preferences-system-bluetooth", 24, 0, NULL));
     gtk_container_set_border_width (GTK_CONTAINER (bt->list_dialog), 5);
     gtk_box_set_spacing (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), 10);
 
@@ -1158,7 +1159,8 @@ static void initialise (BluetoothPlugin *bt)
 
     // register the agent with the agent manager found above
     error = NULL;
-    g_dbus_proxy_call_sync (bt->agentmanager, "RegisterAgent", g_variant_new ("(os)", "/btagent", "DisplayYesNo"), G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+    //g_dbus_proxy_call_sync (bt->agentmanager, "RegisterAgent", g_variant_new ("(os)", "/btagent", "DisplayYesNo"), G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+    g_dbus_proxy_call_sync (bt->agentmanager, "RegisterAgent", g_variant_new ("(os)", "/btagent", "KeyboardDisplay"), G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
     if (error) printf ("Error registering agent with manager - %s\n", error->message);
 }
 
