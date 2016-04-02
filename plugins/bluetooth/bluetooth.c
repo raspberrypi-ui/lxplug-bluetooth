@@ -241,6 +241,8 @@ static void handle_method_call (GDBusConnection *connection, const gchar *sender
     printf ("Agent method %s called\n", method_name);
     if (parameters) printf ("with parameters %s\n", g_variant_print (parameters, TRUE));
 
+    if (g_strcmp0 (method_name, "Cancel") == 0) return;
+
     bt->invocation = invocation;
     interface = g_dbus_object_manager_get_interface (bt->objmanager, g_variant_get_string (g_variant_get_child_value (parameters, 0), NULL), "org.bluez.Device1");
     var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Alias");
@@ -661,13 +663,13 @@ static void handle_close_pair_dialog (GtkButton *button, gpointer user_data)
 static void connect_ok (BluetoothPlugin *bt, void (*cb) (void))
 {
     if (bt->ok_instance) g_signal_handler_disconnect (bt->pair_ok, bt->ok_instance);
-    g_signal_connect (bt->pair_ok, "clicked", cb, bt);
+    bt->ok_instance = g_signal_connect (bt->pair_ok, "clicked", cb, bt);
 }
 
 static void connect_cancel (BluetoothPlugin *bt, void (*cb) (void))
 {
     if (bt->cancel_instance) g_signal_handler_disconnect (bt->pair_cancel, bt->cancel_instance);
-    g_signal_connect (bt->pair_cancel, "clicked", cb, bt);
+    bt->cancel_instance = g_signal_connect (bt->pair_cancel, "clicked", cb, bt);
 }
 
 static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gchar *device, const gchar *param)
@@ -685,6 +687,8 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             gtk_container_set_border_width (GTK_CONTAINER (bt->pair_dialog), 10);
             bt->pair_label = gtk_label_new ("Pairing request sent to device - waiting for response....");
             gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
+			gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
+			gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label, TRUE, TRUE, 0);
             bt->pair_entry = gtk_entry_new_with_buffer (bt->pinbuf);
             bt->pair_cancel = gtk_dialog_add_button (GTK_DIALOG (bt->pair_dialog), "Cancel", 0);
@@ -698,7 +702,7 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
 
         case STATE_PAIR_ERROR:
             if (!bt->pair_dialog) return;
-            sprintf (buffer, "Pairing failed - error %s", param);
+            sprintf (buffer, "Pairing failed - %s", param);
             gtk_label_set_text (GTK_LABEL (bt->pair_label), buffer);
             gtk_widget_hide (bt->pair_entry);
             connect_ok (bt, G_CALLBACK (handle_close_pair_dialog));
@@ -721,7 +725,7 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             break;
 
         case STATE_CONNECT_FAIL:
-            sprintf (buffer, "Connection failed - error %s. Try to connect manually.", param);
+            sprintf (buffer, "Connection failed - %s. Try to connect manually.", param);
             gtk_label_set_text (GTK_LABEL (bt->pair_label), buffer);
             connect_ok (bt, G_CALLBACK (handle_close_pair_dialog));
             gtk_widget_show (bt->pair_ok);
@@ -769,6 +773,11 @@ static gboolean selected_path (BluetoothPlugin *bt, char **path, char **name)
     GtkTreeModel *model;
     GtkTreeIter iter;
 
+	if (!bt->list)
+	{
+        *path = NULL;
+        return FALSE;
+    }
     sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (bt->list));
     if (!gtk_tree_selection_get_selected (sel, &model, &iter))
     {
@@ -786,6 +795,8 @@ static void handle_pair (GtkButton *button, gpointer user_data)
 
     if (selected_path (bt, &path, &name))
     {
+        gtk_widget_destroy (bt->list);
+        bt->list = NULL;
         gtk_widget_destroy (bt->list_dialog);
         bt->list_dialog = NULL;
         set_search (bt, FALSE);
@@ -806,6 +817,8 @@ static void handle_remove (GtkButton *button, gpointer user_data)
 
     if (selected_path (bt, &path, &name))
     {
+        gtk_widget_destroy (bt->list);
+        bt->list = NULL;
         gtk_widget_destroy (bt->list_dialog);
         bt->list_dialog = NULL;
         remove_device (bt, path);
