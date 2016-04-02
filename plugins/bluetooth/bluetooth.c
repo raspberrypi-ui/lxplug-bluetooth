@@ -34,9 +34,8 @@ typedef struct {
     GDBusProxy *adapter;
     GDBusConnection *gbc;
     gchar *pairing_object;
-    GtkWidget *list_dialog;
-    GtkWidget *list;
-    GtkWidget *pair_dialog, *pair_label, *pair_ok, *pair_cancel, *pair_entry;
+    GtkWidget *list_dialog, *list;
+    GtkWidget *pair_dialog, *pair_label, *pair_entry, *pair_ok, *pair_cancel;
     GtkEntryBuffer *pinbuf;
     GDBusMethodInvocation *invocation;
     gulong ok_instance;
@@ -842,7 +841,7 @@ static void handle_close_list_dialog (GtkButton *button, gpointer user_data)
 
 static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 {
-    GtkWidget *btn_cancel, *btn_act, *frm, *lbl, *scrl, *align;
+    GtkWidget *btn_cancel, *btn_act, *frm, *lbl, *scrl;
     GtkCellRenderer *rend;
 
     // create the window
@@ -862,7 +861,6 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
     // add a label
     lbl = gtk_label_new (type == DIALOG_PAIR ? "Searching for Bluetooth devices..." : "Paired Bluetooth devices");
     gtk_misc_set_alignment (GTK_MISC (lbl), 0.0, 0.5);
-    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), align, TRUE, TRUE, 0);
     gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), lbl, TRUE, TRUE, 0);
 
     // add a scrolled window
