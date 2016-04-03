@@ -908,25 +908,23 @@ static void handle_menu_connect (GtkWidget *widget, gpointer user_data)
     gchar *name, *path;
     gboolean valid;
 
-    // assume all paired devices have unique names for now - otherwise life becomes rather tricky...
     GtkTreeIter iter;
     valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (bt->pair_list), &iter);
     while (valid)
     {
         gtk_tree_model_get (GTK_TREE_MODEL (bt->pair_list), &iter, 0, &path, 1, &name, -1);
-        if (!g_strcmp0 (gtk_menu_item_get_label (GTK_MENU_ITEM (widget)), name)) break;
+        if (!g_strcmp0 (gtk_widget_get_name (widget), path))
+        {
+			if (!is_connected (bt, path))
+				connect_device (bt, path, TRUE);
+			else
+				connect_device (bt, path, FALSE);
+			break;
+		}
         g_free (name);
         g_free (path);
         valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (bt->pair_list), &iter);    
     }
-
-    if (!is_connected (bt, path))
-        connect_device (bt, path, TRUE);
-    else
-        connect_device (bt, path, FALSE);
-
-    g_free (name);
-    g_free (path);
 }
 
 static void handle_menu_discover (GtkWidget *widget, gpointer user_data)
@@ -941,17 +939,34 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     gchar *name, *path;
-    GtkWidget *item, *sel = gtk_image_new ();
+    GtkWidget *item, *submenu, *smi;
 
     gtk_tree_model_get (model, iter, 0, &path, 1, &name, -1);
     item = gtk_image_menu_item_new_with_label (name);
-    g_signal_connect (item, "activate", G_CALLBACK (handle_menu_connect), bt);
+
+    // create a submenu for each paired device
+	submenu = gtk_menu_new ();
+	gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
+
+	// create a single item for the submenu
     if (is_connected (bt, path))
     {
+		GtkWidget *sel = gtk_image_new ();
         set_icon (bt->panel, sel, "dialog-ok-apply", 16);
         gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), sel);
+        smi = gtk_menu_item_new_with_label (_("Disconnect..."));
     }
-    gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+    else smi = gtk_menu_item_new_with_label (_("Connect..."));
+
+    // use the widget name of the menu item to store the unique path of the paired device
+    gtk_widget_set_name (smi, path);
+
+    // connect the connect toggle function and add the submenu item to the submenu
+    g_signal_connect (smi, "activate", G_CALLBACK (handle_menu_connect), bt);
+	gtk_menu_shell_append (GTK_MENU_SHELL (submenu), smi);
+
+	// append the new item with submenu to the main menu
+	gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
 
     return FALSE;
 }
@@ -1130,7 +1145,7 @@ static void show_menu (BluetoothPlugin *bt)
         }
 	}
 
-    gtk_widget_show_all (GTK_WIDGET (bt->menu));
+    gtk_widget_show_all (bt->menu);
     gtk_menu_popup (GTK_MENU (bt->menu), NULL, NULL, menu_popup_set_position, bt, 1, gtk_get_current_event_time ());
 }
 
