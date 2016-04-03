@@ -1019,6 +1019,8 @@ static void update_device_list (BluetoothPlugin *bt)
             interface = G_DBUS_INTERFACE (interfaces->data);
             if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.Device1") == 0)
             {
+                // ignore any devices which have no class
+                if (!g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Class")) break;
                 var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Paired");
                 if (g_variant_get_boolean (var)) add_device (bt, object, bt->pair_list);
                 else
@@ -1085,6 +1087,7 @@ static void menu_popup_set_position (GtkMenu *menu, gint *px, gint *py, gboolean
 static void show_menu (BluetoothPlugin *bt)
 {
     GtkWidget *item, *sel = gtk_image_new ();
+    GtkTreeIter iter;
     
     // discoverable toggle
     bt->menu = gtk_menu_new ();
@@ -1096,8 +1099,8 @@ static void show_menu (BluetoothPlugin *bt)
     }    
     g_signal_connect (item, "activate", G_CALLBACK (handle_menu_discover), bt);
     gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
-    item = gtk_separator_menu_item_new();
-    gtk_menu_shell_append(GTK_MENU_SHELL(bt->menu), item);
+    item = gtk_separator_menu_item_new ();
+    gtk_menu_shell_append (GTK_MENU_SHELL(bt->menu), item);
 
     // add and remove dialogs
     item = gtk_image_menu_item_new_with_label (_("Add Device..."));
@@ -1106,11 +1109,15 @@ static void show_menu (BluetoothPlugin *bt)
     item = gtk_image_menu_item_new_with_label (_("Remove Device..."));
     g_signal_connect (item, "activate", G_CALLBACK (handle_menu_remove), bt);
     gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
-    item = gtk_separator_menu_item_new();
-    gtk_menu_shell_append(GTK_MENU_SHELL (bt->menu), item);
 
     // paired devices
-    gtk_tree_model_foreach (GTK_TREE_MODEL (bt->pair_list), add_to_menu, bt);
+    if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (bt->pair_list), &iter))
+    {
+        item = gtk_separator_menu_item_new ();
+        gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+
+        gtk_tree_model_foreach (GTK_TREE_MODEL (bt->pair_list), add_to_menu, bt);
+    }
 
     if (bt->menu) 
     {
