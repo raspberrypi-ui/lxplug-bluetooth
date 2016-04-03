@@ -123,6 +123,8 @@ static const gchar introspection_xml[] =
 /* Prototypes */
 /*---------------------------------------------------------------------------*/
 
+static void initialise (BluetoothPlugin *bt);
+static void clear (BluetoothPlugin *bt);
 static void find_hardware (BluetoothPlugin *bt);
 static void cb_name_owned (GDBusConnection *connection, const gchar *name, const gchar *owner, gpointer user_data);
 static void cb_name_unowned (GDBusConnection *connection, const gchar *name, gpointer user_data);
@@ -179,13 +181,65 @@ static void update_device_list (BluetoothPlugin *bt);
 static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size);
 static void menu_popup_set_position (GtkMenu *menu, gint *px, gint *py, gboolean *push_in, gpointer data);
 static void show_menu (BluetoothPlugin *bt);
-static void initialise (BluetoothPlugin *bt);
 
 /*---------------------------------------------------------------------------*/
 /* Function Definitions */
 /*---------------------------------------------------------------------------*/
 
-/* Perform the initial scan of the BlueZ objects on DBus, identifying the agent manager
+/* Find an object manager and set up the callbacks to monitor the DBus for BlueZ objects.
+   Also create the DBus agent which handles pairing for use later. */
+
+static void initialise (BluetoothPlugin *bt)
+{
+    GError *error;
+    GDBusNodeInfo *introspection_data;
+
+    // make sure everything is reset - should be unnecessary...
+    clear (bt);
+
+    // get an object manager for BlueZ
+    error = NULL;
+    bt->objmanager = g_dbus_object_manager_client_new_for_bus_sync (G_BUS_TYPE_SYSTEM, 0, "org.bluez", "/", NULL, NULL, NULL, NULL, &error);
+    if (error) DEBUG ("Error getting object manager - %s\n", error->message);
+
+    // register callbacks on object manager
+    g_signal_connect (bt->objmanager, "interface-added", G_CALLBACK (cb_interface_added), bt);
+    g_signal_connect (bt->objmanager, "interface-removed", G_CALLBACK (cb_interface_removed), bt);
+    g_signal_connect (bt->objmanager, "object-added", G_CALLBACK (cb_object_added), bt);
+    g_signal_connect (bt->objmanager, "object-removed", G_CALLBACK (cb_object_removed), bt);
+    g_signal_connect (bt->objmanager, "interface-proxy-signal", G_CALLBACK (cb_interface_signal), bt);
+    g_signal_connect (bt->objmanager, "interface-proxy-properties-changed", G_CALLBACK (cb_interface_properties), bt);
+
+    // get a connection to the system DBus
+    error = NULL;
+    bt->gbc = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, &error);
+    if (error) DEBUG ("Error getting system bus - %s\n", error->message);
+
+    // create the agent from XML spec
+    error = NULL;
+    introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, &error);
+    if (error) DEBUG ("Error creating agent node - %s\n", error->message);
+
+    // register the agent on the system bus
+    error = NULL;
+    g_dbus_connection_register_object (bt->gbc, "/btagent", introspection_data->interfaces[0], &interface_vtable, bt, NULL, &error);
+    if (error) DEBUG ("Error registering agent on bus - %s\n", error->message);
+
+    // query the DBus for an agent manager and a Bluetooth adapter
+    find_hardware (bt);
+}
+
+/* Clear all the BlueZ data if the DBus connection is lost */
+
+static void clear (BluetoothPlugin *bt)
+{
+    bt->objmanager = NULL;
+    bt->gbc = NULL;
+    bt->agentmanager = NULL;
+    bt->adapter = NULL;
+}
+
+/* Scan for BlueZ objects on DBus, identifying the agent manager
    (of which there should be only one per BlueZ instance) and an adapter (the object 
    which corresponds to the Bluetooth hardware on the host computer). */ 
 
@@ -194,9 +248,8 @@ static void find_hardware (BluetoothPlugin *bt)
     GDBusInterface *interface;
     GDBusObject *object;
     GList *objects, *interfaces;
-    
-    bt->agentmanager = NULL;
-    bt->adapter = NULL;
+    GDBusProxy *newagentmanager = NULL, *newadapter = NULL;
+    GError *error;
 
     objects = g_dbus_object_manager_get_objects (bt->objmanager);
 
@@ -210,20 +263,60 @@ static void find_hardware (BluetoothPlugin *bt)
             interface = G_DBUS_INTERFACE (interfaces->data);
             if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.Adapter1") == 0)
             {
-                if (bt->adapter == NULL) bt->adapter = G_DBUS_PROXY (interface);
+                if (newadapter == NULL) newadapter = G_DBUS_PROXY (interface);
                 else DEBUG ("Multiple adapters found\n");
             }
             else if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.AgentManager1") == 0)
             {
-                if (bt->agentmanager == NULL) bt->agentmanager = G_DBUS_PROXY (interface);
+                if (newagentmanager == NULL) newagentmanager = G_DBUS_PROXY (interface);
                 else DEBUG ("Multiple agent managers found\n");
             }
             interfaces = interfaces->next;
         }
         objects = objects->next;
     }
-    if (bt->agentmanager == NULL) DEBUG ("No agent manager found\n");
-    if (bt->adapter == NULL) DEBUG ("No adapter found\n");
+
+    if (!newagentmanager)
+    {
+        DEBUG ("No agent manager found\n");
+        bt->agentmanager = NULL;
+    }
+    else if (newagentmanager != bt->agentmanager)
+    {
+        DEBUG ("New agent manager found\n");
+        // if there is already an agent manager, unregister the agent from it
+        if (bt->agentmanager)
+        {
+            error = NULL;
+            g_dbus_proxy_call_sync (bt->agentmanager, "UnregisterAgent", g_variant_new ("(o)", "/btagent"), G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+            if (error) DEBUG ("Error unregistering agent with manager - %s\n", error->message);
+        }
+
+        bt->agentmanager = newagentmanager;
+
+        // register the agent with the new agent manager
+        if (bt->agentmanager)
+        {
+            error = NULL;
+            //g_dbus_proxy_call_sync (bt->agentmanager, "RegisterAgent", g_variant_new ("(os)", "/btagent", "DisplayYesNo"), G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+            g_dbus_proxy_call_sync (bt->agentmanager, "RegisterAgent", g_variant_new ("(os)", "/btagent", "KeyboardDisplay"), G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
+            if (error) DEBUG ("Error registering agent with manager - %s\n", error->message);
+        }
+    }
+
+    if (!newadapter)
+    {
+        DEBUG ("No adapter found\n");
+        bt->adapter = NULL;
+    }
+    else if (newadapter != bt->adapter)
+    {
+        DEBUG ("New adapter found\n");
+        bt->adapter = newadapter;
+    }
+
+   // initialise lists with current state of object proxy
+   update_device_list (bt);
 }
 
 /* Handler for method calls on the agent */
@@ -279,6 +372,22 @@ static void handle_method_call (GDBusConnection *connection, const gchar *sender
     }
 }
 
+/* Bus watcher callbacks - information only at present; may want to link the general initialisation to these */
+
+static void cb_name_owned (GDBusConnection *connection, const gchar *name, const gchar *owner, gpointer user_data)
+{
+    BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
+    printf ("Name %s owned on DBus\n", name);
+    initialise (bt);
+}
+
+static void cb_name_unowned (GDBusConnection *connection, const gchar *name, gpointer user_data)
+{
+    BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
+    printf ("Name %s unowned on DBus\n", name);
+    clear (bt);
+}
+
 /* Object manager callbacks - we only really care about objects added, removed or with changed properties */
 
 static void cb_interface_added (GDBusObjectManager *manager, GDBusObject *object, GDBusInterface *interface, gpointer user_data)
@@ -295,14 +404,14 @@ static void cb_object_added (GDBusObjectManager *manager, GDBusObject *object, g
 {
     BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
     DEBUG ("Object manager - object added at path %s\n", g_dbus_object_get_object_path (object));
-    update_device_list (bt);
+    find_hardware (bt);
 }
 
 static void cb_object_removed (GDBusObjectManager *manager, GDBusObject *object, gpointer user_data)
 {
     BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
     DEBUG ("Object manager - object removed at path %s\n", g_dbus_object_get_object_path (object));
-    update_device_list (bt);
+    find_hardware (bt);
 }
 
 static void cb_interface_signal (GDBusObjectManagerClient *manager, GDBusObjectProxy *object_proxy, GDBusProxy *proxy, gchar *sender, gchar *signal, GVariant *parameters, gpointer user_data)
@@ -915,12 +1024,12 @@ static void handle_menu_connect (GtkWidget *widget, gpointer user_data)
         gtk_tree_model_get (GTK_TREE_MODEL (bt->pair_list), &iter, 0, &path, 1, &name, -1);
         if (!g_strcmp0 (gtk_widget_get_name (widget), path))
         {
-			if (!is_connected (bt, path))
-				connect_device (bt, path, TRUE);
-			else
-				connect_device (bt, path, FALSE);
-			break;
-		}
+            if (!is_connected (bt, path))
+                connect_device (bt, path, TRUE);
+            else
+                connect_device (bt, path, FALSE);
+            break;
+        }
         g_free (name);
         g_free (path);
         valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (bt->pair_list), &iter);    
@@ -945,13 +1054,13 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     item = gtk_image_menu_item_new_with_label (name);
 
     // create a submenu for each paired device
-	submenu = gtk_menu_new ();
-	gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
+    submenu = gtk_menu_new ();
+    gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
-	// create a single item for the submenu
+    // create a single item for the submenu
     if (is_connected (bt, path))
     {
-		GtkWidget *sel = gtk_image_new ();
+        GtkWidget *sel = gtk_image_new ();
         set_icon (bt->panel, sel, "dialog-ok-apply", 16);
         gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), sel);
         smi = gtk_menu_item_new_with_label (_("Disconnect..."));
@@ -963,10 +1072,10 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
 
     // connect the connect toggle function and add the submenu item to the submenu
     g_signal_connect (smi, "activate", G_CALLBACK (handle_menu_connect), bt);
-	gtk_menu_shell_append (GTK_MENU_SHELL (submenu), smi);
+    gtk_menu_shell_append (GTK_MENU_SHELL (submenu), smi);
 
-	// append the new item with submenu to the main menu
-	gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+    // append the new item with submenu to the main menu
+    gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
 
     return FALSE;
 }
@@ -1112,7 +1221,7 @@ static void show_menu (BluetoothPlugin *bt)
         item = gtk_image_menu_item_new_with_label (_("No Bluetooth adapter found"));
         gtk_widget_set_sensitive (item, FALSE);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
-	}
+    }
     else
     {
         // discoverable toggle
@@ -1143,53 +1252,10 @@ static void show_menu (BluetoothPlugin *bt)
 
             gtk_tree_model_foreach (GTK_TREE_MODEL (bt->pair_list), add_to_menu, bt);
         }
-	}
+    }
 
     gtk_widget_show_all (bt->menu);
     gtk_menu_popup (GTK_MENU (bt->menu), NULL, NULL, menu_popup_set_position, bt, 1, gtk_get_current_event_time ());
-}
-
-static void initialise (BluetoothPlugin *bt)
-{
-    GError *error;
-    GDBusNodeInfo *introspection_data;
-
-    // get an object manager for BlueZ
-    error = NULL;
-    bt->objmanager = g_dbus_object_manager_client_new_for_bus_sync (G_BUS_TYPE_SYSTEM, 0, "org.bluez", "/", NULL, NULL, NULL, NULL, &error);
-    if (error) DEBUG ("Error getting object manager - %s\n", error->message);
-
-    // get a connection to the system DBus
-    error = NULL;
-    bt->gbc = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, &error);
-    if (error) DEBUG ("Error getting system bus - %s\n", error->message);
-
-    // create the agent from XML spec
-    error = NULL;
-    introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, &error);
-    if (error) DEBUG ("Error creating agent node - %s\n", error->message);
-
-    // register the agent on the system bus
-    error = NULL;
-    g_dbus_connection_register_object (bt->gbc, "/btagent", introspection_data->interfaces[0], &interface_vtable, bt, NULL, &error);
-    if (error) DEBUG ("Error registering agent on bus - %s\n", error->message);
-
-    // register callbacks on object manager
-    g_signal_connect (bt->objmanager, "interface-added", G_CALLBACK (cb_interface_added), bt);
-    g_signal_connect (bt->objmanager, "interface-removed", G_CALLBACK (cb_interface_removed), bt);
-    g_signal_connect (bt->objmanager, "object-added", G_CALLBACK (cb_object_added), bt);
-    g_signal_connect (bt->objmanager, "object-removed", G_CALLBACK (cb_object_removed), bt);
-    g_signal_connect (bt->objmanager, "interface-proxy-signal", G_CALLBACK (cb_interface_signal), bt);
-    g_signal_connect (bt->objmanager, "interface-proxy-properties-changed", G_CALLBACK (cb_interface_properties), bt);
-
-    // query the DBus for Bluetooth devices
-    find_hardware (bt);
-
-    // register the agent with the agent manager found above
-    error = NULL;
-    //g_dbus_proxy_call_sync (bt->agentmanager, "RegisterAgent", g_variant_new ("(os)", "/btagent", "DisplayYesNo"), G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
-    g_dbus_proxy_call_sync (bt->agentmanager, "RegisterAgent", g_variant_new ("(os)", "/btagent", "KeyboardDisplay"), G_DBUS_CALL_FLAGS_NONE, -1, NULL, &error);
-    if (error) DEBUG ("Error registering agent with manager - %s\n", error->message);
 }
 
 /* Handler for menu button click */
@@ -1228,8 +1294,7 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
 {
     /* Allocate and initialize plugin context */
     BluetoothPlugin *bt = g_new0 (BluetoothPlugin, 1);
-    GtkWidget *p;
-    
+
     setlocale (LC_ALL, "");
     bindtextdomain (PACKAGE, NULL);
     bind_textdomain_codeset (PACKAGE, "UTF-8");
@@ -1238,32 +1303,35 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
     bt->tray_icon = gtk_image_new ();
     //set_icon (panel, bt->tray_icon, "preferences-desktop-accessibility", 0);
     set_icon (panel, bt->tray_icon, "preferences-system-bluetooth", 0);
-    //gtk_widget_set_tooltip_text (bt->tray_icon, _("Select a drive in menu to eject safely"));
+    gtk_widget_set_tooltip_text (bt->tray_icon, _("Manage Bluetooth devices"));
     gtk_widget_set_visible (bt->tray_icon, TRUE);
 
     /* Allocate top level widget and set into Plugin widget pointer. */
     bt->panel = panel;
-    bt->plugin = p = gtk_button_new ();
+    bt->plugin = gtk_button_new ();
     gtk_button_set_relief (GTK_BUTTON (bt->plugin), GTK_RELIEF_NONE);
     g_signal_connect (bt->plugin, "button-press-event", G_CALLBACK(bluetooth_button_press_event), NULL);
     bt->settings = settings;
-    lxpanel_plugin_set_data (p, bt, bluetooth_destructor);
-    gtk_widget_add_events (p, GDK_BUTTON_PRESS_MASK);
+    lxpanel_plugin_set_data (bt->plugin, bt, bluetooth_destructor);
+    gtk_widget_add_events (bt->plugin, GDK_BUTTON_PRESS_MASK);
 
     /* Allocate icon as a child of top level */
-    gtk_container_add (GTK_CONTAINER (p), bt->tray_icon);
+    gtk_container_add (GTK_CONTAINER (bt->plugin), bt->tray_icon);
     
-    /* Show the widget, and return. */
-    gtk_widget_show_all (p);
+    /* Show the widget */
+    gtk_widget_show_all (bt->plugin);
     
+    /* Initialise plugin data */
     bt->pair_list = gtk_list_store_new (6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF);
-    bt->unpair_list = gtk_list_store_new (6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF);   
+    bt->unpair_list = gtk_list_store_new (6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF);
+    bt->ok_instance = 0;
+    bt->cancel_instance = 0;
+    clear (bt);
     
-    initialise (bt);
-    
-    update_device_list (bt);
-    
-    return p;
+    // set up callbacks to see if BlueZ is on DBus
+    g_bus_watch_name (G_BUS_TYPE_SYSTEM, "org.bluez", 0, cb_name_owned, cb_name_unowned, bt, NULL);
+
+    return bt->plugin;
 }
 
 FM_DEFINE_MODULE(lxpanel_gtk, bluetooth)
