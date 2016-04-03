@@ -1089,41 +1089,49 @@ static void show_menu (BluetoothPlugin *bt)
     GtkWidget *item, *sel = gtk_image_new ();
     GtkTreeIter iter;
     
-    // discoverable toggle
     bt->menu = gtk_menu_new ();
-    item = gtk_image_menu_item_new_with_label (_("Discoverable"));    
-    if (is_discoverable (bt)) 
-    {
-        set_icon (bt->panel, sel, "dialog-ok-apply", 16);
-        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(item), sel);
-    }    
-    g_signal_connect (item, "activate", G_CALLBACK (handle_menu_discover), bt);
-    gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
-    item = gtk_separator_menu_item_new ();
-    gtk_menu_shell_append (GTK_MENU_SHELL(bt->menu), item);
 
-    // add and remove dialogs
-    item = gtk_image_menu_item_new_with_label (_("Add Device..."));
-    g_signal_connect (item, "activate", G_CALLBACK (handle_menu_add), bt);
-    gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
-    item = gtk_image_menu_item_new_with_label (_("Remove Device..."));
-    g_signal_connect (item, "activate", G_CALLBACK (handle_menu_remove), bt);
-    gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
-
-    // paired devices
-    if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (bt->pair_list), &iter))
+    if (bt->adapter == NULL)
     {
+        // warn if no BT hardware detected
+        item = gtk_image_menu_item_new_with_label (_("No Bluetooth adapter found"));
+        gtk_widget_set_sensitive (item, FALSE);
+        gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+	}
+    else
+    {
+        // discoverable toggle
+        item = gtk_image_menu_item_new_with_label (_("Discoverable"));
+        if (is_discoverable (bt))
+        {
+            set_icon (bt->panel, sel, "dialog-ok-apply", 16);
+            gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(item), sel);
+        }
+        g_signal_connect (item, "activate", G_CALLBACK (handle_menu_discover), bt);
+        gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
         item = gtk_separator_menu_item_new ();
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
 
-        gtk_tree_model_foreach (GTK_TREE_MODEL (bt->pair_list), add_to_menu, bt);
-    }
+        // add and remove dialogs
+        item = gtk_image_menu_item_new_with_label (_("Add Device..."));
+        g_signal_connect (item, "activate", G_CALLBACK (handle_menu_add), bt);
+        gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+        item = gtk_image_menu_item_new_with_label (_("Remove Device..."));
+        g_signal_connect (item, "activate", G_CALLBACK (handle_menu_remove), bt);
+        gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
 
-    if (bt->menu) 
-    {
-        gtk_widget_show_all (GTK_WIDGET (bt->menu));
-        gtk_menu_popup (GTK_MENU (bt->menu), NULL, NULL, menu_popup_set_position, bt, 1, gtk_get_current_event_time ());
-    }
+        // paired devices
+        if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (bt->pair_list), &iter))
+        {
+            item = gtk_separator_menu_item_new ();
+            gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+
+            gtk_tree_model_foreach (GTK_TREE_MODEL (bt->pair_list), add_to_menu, bt);
+        }
+	}
+
+    gtk_widget_show_all (GTK_WIDGET (bt->menu));
+    gtk_menu_popup (GTK_MENU (bt->menu), NULL, NULL, menu_popup_set_position, bt, 1, gtk_get_current_event_time ());
 }
 
 static void initialise (BluetoothPlugin *bt)
