@@ -1291,6 +1291,8 @@ static void update_device_list (BluetoothPlugin *bt)
 
     if (path) g_free (path);
     if (name) g_free (name);
+
+    if (bt->menu && gtk_widget_get_visible (bt->menu)) show_menu (bt);
 }
 
 static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size)
@@ -1333,8 +1335,19 @@ static void show_menu (BluetoothPlugin *bt)
 {
     GtkWidget *item, *sel = gtk_image_new ();
     GtkTreeIter iter;
-    
-    bt->menu = gtk_menu_new ();
+    GList *items;
+
+    // if the menu is currently on screen, delete all the items and rebuild rather than creating a new one
+    if (bt->menu && gtk_widget_get_visible (bt->menu))
+    {
+        items = gtk_container_get_children (GTK_CONTAINER (bt->menu));
+        while (items)
+        {
+            gtk_widget_destroy (GTK_WIDGET (items->data));
+            items = items->next;
+        }
+    }
+    else bt->menu = gtk_menu_new ();
 
     if (bt->adapter == NULL)
     {
@@ -1372,6 +1385,17 @@ static void show_menu (BluetoothPlugin *bt)
             gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
 
             gtk_tree_model_foreach (GTK_TREE_MODEL (bt->pair_list), add_to_menu, bt);
+        }
+    }
+
+    // lock menu if a dialog is open
+    if (bt->list_dialog || bt->pair_dialog || bt->conn_dialog)
+    {
+        items = gtk_container_get_children (GTK_CONTAINER (bt->menu));
+        while (items)
+        {
+            gtk_widget_set_sensitive (GTK_WIDGET (items->data), FALSE);
+            items = items->next;
         }
     }
 
