@@ -717,20 +717,21 @@ static guint request_authorization (BluetoothPlugin *bt, const gchar *device)
 {
     char buffer[256];
     guint res;
-    GtkWidget *lbl;
 
     // create the dialog, asking user to confirm the displayed PIN
     sprintf (buffer, "Do you accept pairing from device '%s'?", device);
-    bt->list_dialog = gtk_dialog_new_with_buttons ("Pairing Request", NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_CANCEL, 0, GTK_STOCK_OK, 1, NULL);
-    lbl = gtk_label_new (buffer);
-    gtk_label_set_line_wrap (GTK_LABEL (lbl), TRUE);
-    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), lbl, TRUE, TRUE, 0);
-    gtk_widget_show_all (bt->list_dialog);
+    bt->pair_dialog = gtk_dialog_new_with_buttons ("Pairing Request", NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_CANCEL, 0, GTK_STOCK_OK, 1, NULL);
+    bt->pair_label = gtk_label_new (buffer);
+    gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
+    gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
+    gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
+    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label , TRUE, TRUE, 0);
+    gtk_widget_show_all (bt->pair_dialog);
 
     // block while waiting for user response
-    res = gtk_dialog_run (GTK_DIALOG (bt->list_dialog));
-    gtk_widget_destroy (bt->list_dialog);
-    bt->list_dialog = NULL;
+    res = gtk_dialog_run (GTK_DIALOG (bt->pair_dialog));
+    gtk_widget_destroy (bt->pair_dialog);
+    bt->pair_dialog = NULL;
     return res;
 }
 
@@ -1123,8 +1124,8 @@ static void handle_menu_connect (GtkWidget *widget, gpointer user_data)
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     gchar *name, *path;
     gboolean valid;
-
     GtkTreeIter iter;
+
     valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (bt->pair_list), &iter);
     while (valid)
     {
