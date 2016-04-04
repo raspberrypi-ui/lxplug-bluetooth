@@ -830,6 +830,8 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_entry, TRUE, TRUE, 0);
             bt->pair_cancel = gtk_dialog_add_button (GTK_DIALOG (bt->pair_dialog), "Cancel", 0);
             bt->pair_ok = gtk_dialog_add_button (GTK_DIALOG (bt->pair_dialog), "OK", 1);
+            bt->ok_instance = 0;
+            bt->cancel_instance = 0;
             connect_cancel (bt, G_CALLBACK (handle_cancel_pair));
             gtk_widget_show_all (bt->pair_dialog);
             gtk_widget_hide (bt->pair_entry);
@@ -1159,7 +1161,7 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     gchar *name, *path;
-    GtkWidget *item, *submenu, *smi;
+    GtkWidget *item, *submenu, *smi, *icon;
 
     gtk_tree_model_get (model, iter, 0, &path, 1, &name, -1);
     item = gtk_image_menu_item_new_with_label (name);
@@ -1169,14 +1171,19 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
     // create a single item for the submenu
+    icon = gtk_image_new ();
     if (is_connected (bt, path))
     {
-        GtkWidget *sel = gtk_image_new ();
-        set_icon (bt->panel, sel, "dialog-ok-apply", 16);
-        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), sel);
+        set_icon (bt->panel, icon, "bluetooth-online", 16);
+        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), icon);
         smi = gtk_menu_item_new_with_label (_("Disconnect..."));
     }
-    else smi = gtk_menu_item_new_with_label (_("Connect..."));
+    else
+    {
+        set_icon (bt->panel, icon, "bluetooth-offline", 16);
+        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), icon);
+        smi = gtk_menu_item_new_with_label (_("Connect..."));
+    }
 
     // use the widget name of the menu item to store the unique path of the paired device
     gtk_widget_set_name (smi, path);
