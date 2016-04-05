@@ -40,6 +40,8 @@ typedef struct {
     GDBusMethodInvocation *invocation;
     gulong ok_instance;
     gulong cancel_instance;
+    guint flash_timer;
+    guint flash_state;
 } BluetoothPlugin;
 
 typedef enum {
@@ -179,6 +181,7 @@ static void handle_close_connect_dialog (GtkButton *button, gpointer user_data);
 static void handle_menu_add (GtkWidget *widget, gpointer user_data);
 static void handle_menu_remove (GtkWidget *widget, gpointer user_data);
 static void handle_menu_connect (GtkWidget *widget, gpointer user_data);
+static gboolean flash_icon (gpointer user_data);
 static void handle_menu_discover (GtkWidget *widget, gpointer user_data);
 static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIter *iter, gpointer user_data);
 static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *lst);
@@ -1150,12 +1153,35 @@ static void handle_menu_connect (GtkWidget *widget, gpointer user_data)
     }
 }
 
+static gboolean flash_icon (gpointer user_data)
+{
+    BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+    const char *icon;
+
+    if (bt->flash_timer == 0) return FALSE;
+    if (bt->flash_state == 0) icon = "preferences-system-bluetooth";
+    else icon = "preferences-system-bluetooth-active";
+    set_icon (bt->panel, bt->tray_icon, icon, 0);
+    bt->flash_state ^= 1;
+    return TRUE;
+}
+
 static void handle_menu_discover (GtkWidget *widget, gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
 
-    if (!is_discoverable (bt)) set_discoverable (bt, TRUE);
-    else set_discoverable (bt, FALSE);
+    if (!is_discoverable (bt))
+    {
+        set_discoverable (bt, TRUE);
+        bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+    }
+    else
+    {
+        set_discoverable (bt, FALSE);
+        g_source_remove (bt->flash_timer);
+        bt->flash_timer = 0;
+        set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
+    }
 }
 
 static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIter *iter, gpointer user_data)
@@ -1360,12 +1386,8 @@ static void show_menu (BluetoothPlugin *bt)
     else
     {
         // discoverable toggle
-        item = gtk_image_menu_item_new_with_label (_("Discoverable"));
-        if (is_discoverable (bt))
-        {
-            set_icon (bt->panel, sel, "dialog-ok-apply", 16);
-            gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM(item), sel);
-        }
+        if (is_discoverable (bt)) item = gtk_image_menu_item_new_with_label (_("Stop Discoverable"));
+        else item = gtk_image_menu_item_new_with_label (_("Make Discoverable"));
         g_signal_connect (item, "activate", G_CALLBACK (handle_menu_discover), bt);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
         item = gtk_separator_menu_item_new ();
