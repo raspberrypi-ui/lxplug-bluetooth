@@ -843,16 +843,8 @@ static void handle_close_pair_dialog (GtkButton *button, gpointer user_data)
 static gint delete_pair (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
-    if (bt->pair_dialog)
-    {
-        gtk_widget_destroy (bt->pair_dialog);
-        bt->pair_dialog = NULL;
-    }
-    if (bt->pairing_object)
-    {
-        g_free (bt->pairing_object);
-        bt->pairing_object = NULL;
-    }
+    if (bt->pairing_object) pair_device (bt, bt->pairing_object, FALSE);
+    handle_close_pair_dialog (NULL, bt);
     return TRUE;
 }
 
