@@ -65,7 +65,8 @@ typedef enum {
     STATE_CONNECTED,
     STATE_CONNECT_FAIL,
     STATE_REMOVING,
-    STATE_REMOVE_FAIL
+    STATE_REMOVE_FAIL,
+    STATE_PAIRED_AUDIO
 } PAIR_STATE;
 
 /* Agent data */
@@ -458,7 +459,11 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
         if (g_strcmp0 (g_dbus_proxy_get_object_path (proxy), bt->pairing_object) == 0)
         {
             DEBUG ("Paired object disconnected - reconnecting\n");
-            connect_device (bt, bt->pairing_object, TRUE);
+
+            // if this is not an audio device, connect to it
+            GVariant *icon = g_dbus_proxy_get_cached_property (proxy, "Icon");
+            if (g_strcmp0 (g_variant_get_string (icon, NULL), "audio-card"))
+                connect_device (bt, bt->pairing_object, TRUE);
             g_free (bt->pairing_object);
             bt->pairing_object = NULL;
         }
@@ -617,7 +622,19 @@ static void cb_paired (GObject *source, GAsyncResult *res, gpointer user_data)
     else
     {
         DEBUG ("Pairing result %s\n", g_variant_print (var, TRUE));
-        show_pairing_dialog (bt, STATE_PAIRED, NULL, NULL);
+
+        GVariant *icon = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (source), "Icon");
+        if (g_strcmp0 (g_variant_get_string (icon, NULL), "audio-card"))
+        {
+            show_pairing_dialog (bt, STATE_PAIRED, NULL, NULL);
+        }
+        else
+        {
+            show_pairing_dialog (bt, STATE_PAIRED_AUDIO, NULL, NULL);
+            trust_device (bt, bt->pairing_object, TRUE);
+            g_free (bt->pairing_object);
+            bt->pairing_object = NULL;
+        }
     }
 }
 
@@ -1011,6 +1028,13 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             gtk_widget_show (bt->pair_ok);
             gtk_widget_hide (bt->pair_cancel);
             break;
+
+        case STATE_PAIRED_AUDIO:
+            gtk_label_set_text (GTK_LABEL (bt->pair_label), "Paired successfully. Use the audio menu to select as output device.");
+            connect_ok (bt, G_CALLBACK (handle_close_pair_dialog));
+            gtk_widget_show (bt->pair_ok);
+            gtk_widget_hide (bt->pair_cancel);
+            break;
     }
 }
 
@@ -1123,6 +1147,7 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
     gtk_window_set_icon (GTK_WINDOW (bt->list_dialog), gdk_pixbuf_new_from_file ("/usr/share/lxpanel/images/preferences-system-bluetooth.png", NULL));
     gtk_container_set_border_width (GTK_CONTAINER (bt->list_dialog), 5);
     gtk_box_set_spacing (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), 10);
+    gtk_box_set_homogeneous (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), FALSE);
 
     // add the buttons
     btn_cancel = gtk_dialog_add_button (GTK_DIALOG (bt->list_dialog), "_Cancel", 0);
@@ -1134,7 +1159,7 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
     // add a label
     lbl = gtk_label_new (type == DIALOG_PAIR ? "Searching for Bluetooth devices..." : "Paired Bluetooth devices");
     gtk_misc_set_alignment (GTK_MISC (lbl), 0.0, 0.5);
-    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), lbl, TRUE, TRUE, 0);
+    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), lbl, FALSE, FALSE, 0);
 
     // add a scrolled window
     scrl = gtk_scrolled_window_new (NULL, NULL);
@@ -1413,7 +1438,7 @@ static void update_device_list (BluetoothPlugin *bt)
             if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.Device1") == 0)
             {
                 // ignore any devices which have no class
-                if (!g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Class")) break;
+                //if (!g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Class")) break;
                 var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Paired");
                 if (g_variant_get_boolean (var)) add_device (bt, object, bt->pair_list);
                 else
