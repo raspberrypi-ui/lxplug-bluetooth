@@ -1013,7 +1013,7 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             gtk_window_set_icon (GTK_WINDOW (bt->pair_dialog), gdk_pixbuf_new_from_file ("/usr/share/lxpanel/images/preferences-system-bluetooth.png", NULL));
             gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER);
             gtk_container_set_border_width (GTK_CONTAINER (bt->pair_dialog), 10);
-            bt->pair_label = gtk_label_new (_("Pairing request sent to device - waiting for response...."));
+            bt->pair_label = gtk_label_new (_("Pairing request sent to device - waiting for response..."));
             gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
             gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
             gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
