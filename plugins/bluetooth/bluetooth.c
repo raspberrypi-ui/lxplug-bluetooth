@@ -1011,7 +1011,7 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             bt->pinbuf = gtk_entry_buffer_new (NULL, -1);
             bt->pair_dialog = gtk_dialog_new_with_buttons (buffer, NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL);
             gtk_window_set_icon (GTK_WINDOW (bt->pair_dialog), gdk_pixbuf_new_from_file ("/usr/share/lxpanel/images/preferences-system-bluetooth.png", NULL));
-            gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER_ALWAYS);
+            gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER);
             gtk_container_set_border_width (GTK_CONTAINER (bt->pair_dialog), 10);
             bt->pair_label = gtk_label_new (_("Pairing request sent to device - waiting for response...."));
             gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
@@ -1106,7 +1106,7 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
         case STATE_PAIR_REQUEST:
             bt->pair_dialog = gtk_dialog_new_with_buttons (_("Pairing Requested"), NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL);
             gtk_window_set_icon (GTK_WINDOW (bt->pair_dialog), gdk_pixbuf_new_from_file ("/usr/share/lxpanel/images/preferences-system-bluetooth.png", NULL));
-            gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER_ALWAYS);
+            gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER);
             gtk_container_set_border_width (GTK_CONTAINER (bt->pair_dialog), 10);
             sprintf (buffer, _("Device '%s' has requested a pairing. Do you accept the request?"), device);
             bt->pair_label = gtk_label_new (buffer);
@@ -1252,7 +1252,7 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 
     // create the window
     bt->list_dialog = gtk_dialog_new_with_buttons (type == DIALOG_PAIR ? _("Add New Device") : _("Remove Device"), NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL);
-    gtk_window_set_position (GTK_WINDOW (bt->list_dialog), GTK_WIN_POS_CENTER_ALWAYS);
+    gtk_window_set_position (GTK_WINDOW (bt->list_dialog), GTK_WIN_POS_CENTER);
     gtk_window_set_icon (GTK_WINDOW (bt->list_dialog), gdk_pixbuf_new_from_file ("/usr/share/lxpanel/images/preferences-system-bluetooth.png", NULL));
     gtk_container_set_border_width (GTK_CONTAINER (bt->list_dialog), 5);
     gtk_box_set_spacing (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), 10);
@@ -1323,7 +1323,7 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STA
         case STATE_PAIR_INIT:
             bt->conn_dialog = gtk_dialog_new_with_buttons (buffer1, NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, NULL);
             gtk_window_set_icon (GTK_WINDOW (bt->conn_dialog), gdk_pixbuf_new_from_file ("/usr/share/lxpanel/images/preferences-system-bluetooth.png", NULL));
-            gtk_window_set_position (GTK_WINDOW (bt->conn_dialog), GTK_WIN_POS_CENTER_ALWAYS);
+            gtk_window_set_position (GTK_WINDOW (bt->conn_dialog), GTK_WIN_POS_CENTER);
             gtk_container_set_border_width (GTK_CONTAINER (bt->conn_dialog), 10);
             bt->conn_label = gtk_label_new (buffer2);
             gtk_label_set_line_wrap (GTK_LABEL (bt->conn_label), TRUE);
