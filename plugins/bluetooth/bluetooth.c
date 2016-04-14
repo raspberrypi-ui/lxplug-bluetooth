@@ -1540,10 +1540,15 @@ static void update_device_list (BluetoothPlugin *bt)
     GList *objects, *interfaces;
     GVariant *var;
     gchar *path = NULL, *name = NULL;
-    int item = 0, sel_item = -1;
+    int item = 0, sel_item = -1, type = DIALOG_CONNECT;
 
     // save the current highlight if there is one
-    if (bt->list) selected_path (bt, &path, &name);
+    if (bt->list)
+    {
+        selected_path (bt, &path, &name);
+        if (gtk_tree_view_get_model (GTK_TREE_VIEW (bt->list)) == GTK_TREE_MODEL (bt->pair_list)) type = DIALOG_REMOVE;
+        else type = DIALOG_PAIR;
+    }
 
     // clear out the list store
     gtk_list_store_clear (bt->pair_list);
@@ -1564,12 +1569,17 @@ static void update_device_list (BluetoothPlugin *bt)
                 // ignore any devices which have no class
                 //if (!g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Class")) break;
                 var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Paired");
-                if (g_variant_get_boolean (var)) add_device (bt, object, bt->pair_list);
-                else add_device (bt, object, bt->unpair_list);
-
-                // find the new location of the selected item
                 if (path && !g_strcmp0 (g_dbus_object_get_object_path (object), path)) sel_item = item;
-                item++;
+                if (g_variant_get_boolean (var))
+                {
+                    add_device (bt, object, bt->pair_list);
+                    if (type == DIALOG_REMOVE) item++;
+                }
+                else
+                {
+                    add_device (bt, object, bt->unpair_list);
+                    if (type == DIALOG_PAIR) item++;
+                }
 
                 g_variant_unref (var);
                 break;
