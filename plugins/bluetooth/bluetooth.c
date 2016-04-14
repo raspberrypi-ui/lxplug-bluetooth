@@ -411,14 +411,14 @@ static void handle_method_call (GDBusConnection *connection, const gchar *sender
     }
     else if (g_strcmp0 (method_name, "DisplayPinCode") == 0)
     {
-        g_dbus_method_invocation_return_value (invocation, NULL);
         show_pairing_dialog (bt, STATE_DISPLAY_PIN, g_variant_get_string (var, NULL), g_variant_get_string (g_variant_get_child_value (parameters, 1), NULL));
+        g_dbus_method_invocation_return_value (invocation, NULL);
     }
     else if (g_strcmp0 (method_name, "DisplayPasskey") == 0)   // !!!! do we need to do something with "entered" parameter here?
     {
-        g_dbus_method_invocation_return_value (invocation, NULL);
         sprintf (buffer, "%lu", g_variant_get_uint32 (g_variant_get_child_value (parameters, 1)));
         show_pairing_dialog (bt, STATE_DISPLAY_PIN, g_variant_get_string (var, NULL), buffer);
+        g_dbus_method_invocation_return_value (invocation, NULL);
     }
     else if (g_strcmp0 (method_name, "RequestPinCode") == 0)
     {
@@ -861,15 +861,15 @@ static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data)
     if (error)
     {
         DEBUG ("Remove error %s\n", error->message);
-        if (bt->conn_dialog) show_connect_dialog (bt, DIALOG_REMOVE, STATE_PAIR_FAIL, error->message);
         if (bt->pair_dialog) show_pairing_dialog (bt, STATE_REMOVE_FAIL, NULL, error->message);
+        if (bt->conn_dialog) show_connect_dialog (bt, DIALOG_REMOVE, STATE_PAIR_FAIL, error->message);
         g_error_free (error);
     }
     else
     {
         DEBUG ("Remove result %s\n", g_variant_print (var, TRUE));
-        if (bt->conn_dialog) handle_close_connect_dialog (NULL, bt);
         if (bt->pair_dialog) handle_close_pair_dialog (NULL, bt);
+        if (bt->conn_dialog) handle_close_connect_dialog (NULL, bt);
     }
     if (var) g_variant_unref (var);
 }
@@ -904,10 +904,10 @@ static void handle_pin_entered (GtkButton *button, gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     DEBUG ("PIN entered by user\n");
+    show_pairing_dialog (bt, STATE_WAITING, NULL, NULL);
     GVariant *retvar = g_variant_new ("(s)", gtk_entry_buffer_get_text (bt->pinbuf));
     g_variant_ref_sink (retvar);
     g_dbus_method_invocation_return_value (bt->invocation, retvar);
-    show_pairing_dialog (bt, STATE_WAITING, NULL, NULL);
     g_variant_unref (retvar);
  }
 
@@ -916,11 +916,11 @@ static void handle_pass_entered (GtkButton *button, gpointer user_data)
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     guint32 passkey;
     DEBUG ("Passkey entered by user\n");
+    show_pairing_dialog (bt, STATE_WAITING, NULL, NULL);
     sscanf (gtk_entry_buffer_get_text (bt->pinbuf), "%lu", &passkey);
     GVariant *retvar = g_variant_new ("(u)", passkey);
     g_variant_ref_sink (retvar);
     g_dbus_method_invocation_return_value (bt->invocation, retvar);
-    show_pairing_dialog (bt, STATE_WAITING, NULL, NULL);
     g_variant_unref (retvar);
 }
 
@@ -928,8 +928,8 @@ static void handle_pin_confirmed (GtkButton *button, gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     DEBUG ("PIN confirmed by user\n");
-    g_dbus_method_invocation_return_value (bt->invocation, NULL);
     show_pairing_dialog (bt, STATE_WAITING, NULL, NULL);
+    g_dbus_method_invocation_return_value (bt->invocation, NULL);
 }
 
 static void handle_pin_rejected (GtkButton *button, gpointer user_data)
@@ -977,15 +977,15 @@ static gint delete_pair (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 static void handle_reject_pair (GtkButton *button, gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
-    remove_device (bt, bt->incoming_object);
     show_pairing_dialog (bt, STATE_REMOVING, NULL, NULL);
+    remove_device (bt, bt->incoming_object);
 }
 
 static void handle_accept_pair (GtkButton *button, gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
-    connect_device (bt, bt->incoming_object, TRUE);
     show_pairing_dialog (bt, STATE_PAIRED, NULL, NULL);
+    connect_device (bt, bt->incoming_object, TRUE);
 }
 
 static void connect_ok (BluetoothPlugin *bt, void (*cb) (void))
@@ -1145,6 +1145,8 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             gtk_widget_hide (bt->pair_cancel);
             break;
     }
+
+    gtk_widget_queue_draw (bt->pair_dialog);
 }
 
 /* Functions to manage pair and remove dialogs */
@@ -1188,8 +1190,8 @@ static void handle_pair (GtkButton *button, gpointer user_data)
 
         if (!is_paired (bt, path))
         {
-            bt->pairing_object = path;
             show_pairing_dialog (bt, STATE_PAIR_INIT, name, NULL);
+            bt->pairing_object = path;
             pair_device (bt, path, TRUE);
         }
         // path is freed as bt->pairing_object later...
@@ -1211,8 +1213,8 @@ static void handle_remove (GtkButton *button, gpointer user_data)
             gtk_widget_destroy (bt->list_dialog);
             bt->list_dialog = NULL;
         }
-        remove_device (bt, path);
         show_connect_dialog (bt, DIALOG_REMOVE, STATE_PAIR_INIT, name);
+        remove_device (bt, path);
         g_free (path);
         g_free (name);
     }
@@ -1341,6 +1343,8 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STA
             gtk_widget_show (bt->conn_ok);
             break;
     }
+
+    gtk_widget_queue_draw (bt->conn_dialog);
 }
 
 static void handle_close_connect_dialog (GtkButton *button, gpointer user_data)
@@ -1394,13 +1398,13 @@ static void handle_menu_connect (GtkWidget *widget, gpointer user_data)
         {
             if (!is_connected (bt, path))
             {
-                connect_device (bt, path, TRUE);
                 show_connect_dialog (bt, DIALOG_CONNECT, STATE_PAIR_INIT, name);
+                connect_device (bt, path, TRUE);
             }
             else
             {
-                connect_device (bt, path, FALSE);
                 show_connect_dialog (bt, DIALOG_DISCONNECT, STATE_PAIR_INIT, name);
+                connect_device (bt, path, FALSE);
             }
             break;
         }
