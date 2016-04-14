@@ -1290,6 +1290,7 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Name", rend, "text", 1, NULL);
     gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (bt->list), 1), 300);
     gtk_tree_view_set_model (GTK_TREE_VIEW (bt->list), type == DIALOG_PAIR ? GTK_TREE_MODEL (bt->unpair_list) : GTK_TREE_MODEL (bt->pair_list));
+    gtk_tree_view_set_tooltip_column (GTK_TREE_VIEW (bt->list), 0);
     gtk_container_add (GTK_CONTAINER (scrl), bt->list);
 
     // window ready
