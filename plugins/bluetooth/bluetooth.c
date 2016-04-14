@@ -564,7 +564,7 @@ static void cb_search_start (GObject *source, GAsyncResult *res, gpointer user_d
         g_error_free (error);
     }
     else DEBUG ("Search start - result %s\n", g_variant_print (var, TRUE));
-    g_variant_unref (var);
+    if (var) g_variant_unref (var);
 }
 
 static void cb_search_end (GObject *source, GAsyncResult *res, gpointer user_data)
@@ -578,7 +578,7 @@ static void cb_search_end (GObject *source, GAsyncResult *res, gpointer user_dat
         g_error_free (error);
     }
     else DEBUG ("Search end - result %s\n", g_variant_print (var, TRUE));
-    g_variant_unref (var);
+    if (var) g_variant_unref (var);
 }
 
 /* Discoverable */
@@ -626,7 +626,7 @@ static void cb_discover_start (GObject *source, GAsyncResult *res, gpointer user
         if (bt->flash_timer) g_source_remove (bt->flash_timer);
         bt->flash_timer = g_timeout_add (500, flash_icon, bt);
     }
-    g_variant_unref (var);
+    if (var) g_variant_unref (var);
 }
 
 static void cb_discover_end (GObject *source, GAsyncResult *res, gpointer user_data)
@@ -647,7 +647,7 @@ static void cb_discover_end (GObject *source, GAsyncResult *res, gpointer user_d
         bt->flash_timer = 0;
         set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
     }
-    g_variant_unref (var);
+    if (var) g_variant_unref (var);
 }
 
 /* Pair device / cancel pairing */
@@ -714,7 +714,7 @@ static void cb_paired (GObject *source, GAsyncResult *res, gpointer user_data)
         }
         if (icon) g_variant_unref (icon);
     }
-    g_variant_unref (var);
+    if (var) g_variant_unref (var);
 }
 
 static void cb_cancelled (GObject *source, GAsyncResult *res, gpointer user_data)
@@ -728,7 +728,7 @@ static void cb_cancelled (GObject *source, GAsyncResult *res, gpointer user_data
         g_error_free (error);
     }
     else DEBUG ("Cancelling result %s\n", g_variant_print (var, TRUE));
-    g_variant_unref (var);
+    if (var) g_variant_unref (var);
 }
 
 /* Trust / distrust device */
@@ -767,7 +767,7 @@ static void cb_trusted (GObject *source, GAsyncResult *res, gpointer user_data)
         g_error_free (error);
     }
     else DEBUG ("Trusting result %s\n", g_variant_print (var, TRUE));
-    g_variant_unref (var);
+    if (var) g_variant_unref (var);
 }
 
 /* Connect / disconnect device */
@@ -821,7 +821,7 @@ static void cb_connected (GObject *source, GAsyncResult *res, gpointer user_data
         if (bt->pair_dialog) show_pairing_dialog (bt, STATE_CONNECTED, NULL, NULL);
         if (bt->conn_dialog) handle_close_connect_dialog (NULL, bt);
     }
-    g_variant_unref (var);
+    if (var) g_variant_unref (var);
 }
 
 static void cb_disconnected (GObject *source, GAsyncResult *res, gpointer user_data)
@@ -841,7 +841,7 @@ static void cb_disconnected (GObject *source, GAsyncResult *res, gpointer user_d
         DEBUG ("Disconnect result %s\n", g_variant_print (var, TRUE));
         if (bt->conn_dialog) handle_close_connect_dialog (NULL, bt);
     }
-    g_variant_unref (var);
+    if (var) g_variant_unref (var);
 }
 
 /* Remove device */
@@ -871,7 +871,7 @@ static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data)
         if (bt->conn_dialog) handle_close_connect_dialog (NULL, bt);
         if (bt->pair_dialog) handle_close_pair_dialog (NULL, bt);
     }
-    g_variant_unref (var);
+    if (var) g_variant_unref (var);
 }
 
 /* GUI... */
