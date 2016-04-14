@@ -1561,14 +1561,12 @@ static void update_device_list (BluetoothPlugin *bt)
                 //if (!g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Class")) break;
                 var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Paired");
                 if (g_variant_get_boolean (var)) add_device (bt, object, bt->pair_list);
-                else
-                {
-                    add_device (bt, object, bt->unpair_list);
+                else add_device (bt, object, bt->unpair_list);
 
-                    // find the new location of the selected item
-                    if (path && !g_strcmp0 (g_dbus_object_get_object_path (object), path)) sel_item = item;
-                    item++;
-                }
+                // find the new location of the selected item
+                if (path && !g_strcmp0 (g_dbus_object_get_object_path (object), path)) sel_item = item;
+                item++;
+
                 g_variant_unref (var);
                 break;
             }
