@@ -6,8 +6,10 @@
 *.lo
 .dirstamp
 .DS_Store
+Makefile
 lxpanel
 lxpanelctl
+config.status
 config.log
 .deps/
 .libs/
