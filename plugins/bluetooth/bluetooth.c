@@ -67,8 +67,15 @@ typedef enum {
     STATE_CONNECT_FAIL,
     STATE_REMOVING,
     STATE_REMOVE_FAIL,
-    STATE_PAIRED_AUDIO
+    STATE_PAIRED_AUDIO,
+    STATE_PAIRED_UNUSABLE
 } PAIR_STATE;
+
+typedef enum {
+    DEV_HID,
+    DEV_AUDIO_SINK,
+    DEV_OTHER
+} DEVICE_TYPE;
 
 /* Agent data */
 
@@ -166,6 +173,7 @@ static void cb_connected (GObject *source, GAsyncResult *res, gpointer user_data
 static void cb_disconnected (GObject *source, GAsyncResult *res, gpointer user_data);
 static void remove_device (BluetoothPlugin *bt, const gchar *path);
 static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data);
+static DEVICE_TYPE check_uuids (BluetoothPlugin *bt, const gchar *path);
 
 static guint request_authorization (BluetoothPlugin *bt, const gchar *device);
 static void handle_pin_entered (GtkButton *button, gpointer user_data);
@@ -503,12 +511,10 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
             DEBUG ("Paired object disconnected - reconnecting\n");
 
             // if this is not an audio device, connect to it
-            icon = g_dbus_proxy_get_cached_property (proxy, "Icon");
-            if (g_strcmp0 (g_variant_get_string (icon, NULL), "audio-card"))
+            if (check_uuids (bt, bt->pairing_object) == DEV_HID)
                 connect_device (bt, bt->pairing_object, TRUE);
             g_free (bt->pairing_object);
             bt->pairing_object = NULL;
-            if (icon) g_variant_unref (icon);
         }
     }
     if (var) g_variant_unref (var);
@@ -684,6 +690,7 @@ static void cb_paired (GObject *source, GAsyncResult *res, gpointer user_data)
     BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
     GError *error = NULL;
     GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+    DEVICE_TYPE dev;
 
     if (error)
     {
@@ -700,19 +707,26 @@ static void cb_paired (GObject *source, GAsyncResult *res, gpointer user_data)
     {
         DEBUG ("Pairing result %s\n", g_variant_print (var, TRUE));
 
-        GVariant *icon = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (source), "Icon");
-        if (g_strcmp0 (g_variant_get_string (icon, NULL), "audio-card"))
+        // check services available
+        dev = check_uuids (bt, bt->pairing_object);
+        if (dev == DEV_HID)
         {
             show_pairing_dialog (bt, STATE_PAIRED, NULL, NULL);
         }
-        else
+        else if (dev == DEV_AUDIO_SINK)
         {
             show_pairing_dialog (bt, STATE_PAIRED_AUDIO, NULL, NULL);
             trust_device (bt, bt->pairing_object, TRUE);
             g_free (bt->pairing_object);
             bt->pairing_object = NULL;
         }
-        if (icon) g_variant_unref (icon);
+        else
+        {
+            show_pairing_dialog (bt, STATE_PAIRED_UNUSABLE, NULL, NULL);
+            trust_device (bt, bt->pairing_object, TRUE);
+            g_free (bt->pairing_object);
+            bt->pairing_object = NULL;
+        }
     }
     if (var) g_variant_unref (var);
 }
@@ -793,6 +807,7 @@ static void connect_device (BluetoothPlugin *bt, const gchar *path, gboolean sta
 
         DEBUG ("Connecting to %s\n", path);
         g_dbus_proxy_call (G_DBUS_PROXY (interface), "Connect", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_connected, bt);
+        //g_dbus_proxy_call (G_DBUS_PROXY (interface), "ConnectProfile", g_variant_new ("(s)", "00001116-0000-1000-8000-00805f9b34fb"), G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_connected, bt);
     }
     else
     {
@@ -872,6 +887,24 @@ static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data)
         if (bt->conn_dialog) handle_close_connect_dialog (NULL, bt);
     }
     if (var) g_variant_unref (var);
+}
+
+static DEVICE_TYPE check_uuids (BluetoothPlugin *bt, const gchar *path)
+{
+    GDBusInterface *interface = g_dbus_object_manager_get_interface (bt->objmanager, path, "org.bluez.Device1");
+    GVariant *elem, *var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "UUIDs");
+    GVariantIter iter;
+    g_variant_iter_init (&iter, var);
+    while (elem = g_variant_iter_next_value (&iter))
+    {
+        const char *uuid = g_variant_get_string (elem, NULL);
+        if (!strncasecmp (uuid, "00001124", 8)) return DEV_HID;
+        if (!strncasecmp (uuid, "0000110B", 8)) return DEV_AUDIO_SINK;
+        g_variant_unref (elem);
+    }
+    g_variant_unref (var);
+    g_object_unref (interface);
+    return DEV_OTHER;
 }
 
 /* GUI... */
@@ -1144,9 +1177,14 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             gtk_widget_show (bt->pair_ok);
             gtk_widget_hide (bt->pair_cancel);
             break;
-    }
 
-    gtk_widget_queue_draw (bt->pair_dialog);
+        case STATE_PAIRED_UNUSABLE:
+            gtk_label_set_text (GTK_LABEL (bt->pair_label), _("Paired successfully, but this device has no services which can be used with Raspberry Pi."));
+            connect_ok (bt, G_CALLBACK (handle_close_pair_dialog));
+            gtk_widget_show (bt->pair_ok);
+            gtk_widget_hide (bt->pair_cancel);
+            break;
+    }
 }
 
 /* Functions to manage pair and remove dialogs */
@@ -1344,8 +1382,6 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STA
             gtk_widget_show (bt->conn_ok);
             break;
     }
-
-    gtk_widget_queue_draw (bt->conn_dialog);
 }
 
 static void handle_close_connect_dialog (GtkButton *button, gpointer user_data)
@@ -1400,7 +1436,11 @@ static void handle_menu_connect (GtkWidget *widget, gpointer user_data)
             if (!is_connected (bt, path))
             {
                 show_connect_dialog (bt, DIALOG_CONNECT, STATE_PAIR_INIT, name);
-                connect_device (bt, path, TRUE);
+                if (check_uuids (bt, path) == DEV_AUDIO_SINK)
+                    show_connect_dialog (bt, DIALOG_CONNECT, STATE_PAIR_FAIL, _("Use the audio menu to connect to this device"));
+                else if (check_uuids (bt, path) == DEV_OTHER)
+                    show_connect_dialog (bt, DIALOG_CONNECT, STATE_PAIR_FAIL, _("No usable services on this device"));
+                else connect_device (bt, path, TRUE);
             }
             else
             {
