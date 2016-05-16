@@ -229,19 +229,19 @@ static void initialise (BluetoothPlugin *bt)
     bt->objmanager = g_dbus_object_manager_client_new_for_bus_sync (G_BUS_TYPE_SYSTEM, 0, "org.bluez", "/", NULL, NULL, NULL, NULL, &error);
     if (error)
     {
-		DEBUG ("Error getting object manager - %s\n", error->message);
-		g_error_free (error);
-	}
-	else
-	{
-		// register callbacks on object manager
-		g_signal_connect (bt->objmanager, "interface-added", G_CALLBACK (cb_interface_added), bt);
-		g_signal_connect (bt->objmanager, "interface-removed", G_CALLBACK (cb_interface_removed), bt);
-		g_signal_connect (bt->objmanager, "object-added", G_CALLBACK (cb_object_added), bt);
-		g_signal_connect (bt->objmanager, "object-removed", G_CALLBACK (cb_object_removed), bt);
-		g_signal_connect (bt->objmanager, "interface-proxy-signal", G_CALLBACK (cb_interface_signal), bt);
-		g_signal_connect (bt->objmanager, "interface-proxy-properties-changed", G_CALLBACK (cb_interface_properties), bt);
-	}
+        DEBUG ("Error getting object manager - %s\n", error->message);
+        g_error_free (error);
+    }
+    else
+    {
+        // register callbacks on object manager
+        g_signal_connect (bt->objmanager, "interface-added", G_CALLBACK (cb_interface_added), bt);
+        g_signal_connect (bt->objmanager, "interface-removed", G_CALLBACK (cb_interface_removed), bt);
+        g_signal_connect (bt->objmanager, "object-added", G_CALLBACK (cb_object_added), bt);
+        g_signal_connect (bt->objmanager, "object-removed", G_CALLBACK (cb_object_removed), bt);
+        g_signal_connect (bt->objmanager, "interface-proxy-signal", G_CALLBACK (cb_interface_signal), bt);
+        g_signal_connect (bt->objmanager, "interface-proxy-properties-changed", G_CALLBACK (cb_interface_properties), bt);
+    }
 
     // get a connection to the system DBus
     error = NULL;
