@@ -1667,7 +1667,9 @@ static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size)
     if (size == 0) size = panel_get_icon_size (p) - ICON_BUTTON_TRIM;
     if (gtk_icon_theme_has_icon (panel_get_icon_theme (p), icon))
     {
-        pixbuf = gtk_icon_theme_load_icon (panel_get_icon_theme (p), icon, size, 0, NULL);
+        GtkIconInfo *info = gtk_icon_theme_lookup_icon (panel_get_icon_theme (p), icon, size, GTK_ICON_LOOKUP_FORCE_SIZE);
+        pixbuf = gtk_icon_info_load_icon (info, NULL);
+        gtk_icon_info_free (info);
         if (pixbuf != NULL)
         {
             gtk_image_set_from_pixbuf (GTK_IMAGE (image), pixbuf);
