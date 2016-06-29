@@ -213,6 +213,42 @@ static void show_menu (BluetoothPlugin *bt);
 /* Function Definitions */
 /*---------------------------------------------------------------------------*/
 
+static int bt_enabled (void)
+{
+    FILE *fp;
+
+    // is rfkill installed?
+    fp = popen ("test -e /usr/sbin/rfkill", "r");
+    if (pclose (fp)) return -2;
+
+    // is there BT hardware that rfkill can see?
+    fp = popen ("rfkill list bluetooth | grep -q blocked", "r");
+    if (pclose (fp)) return -1;
+
+    // is rfkill blocking BT?
+    fp = popen ("rfkill list bluetooth | grep -q 'Soft blocked: no'", "r");
+    if (!pclose (fp)) return 1;
+    return 0;
+}
+
+static void toggle_bt (GtkWidget *widget, gpointer user_data)
+{
+    BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+
+    if (bt_enabled ())
+    {
+        system ("sudo rfkill block bluetooth");
+        if (bt->flash_timer) g_source_remove (bt->flash_timer);
+        bt->flash_timer = 0;
+        set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
+    }
+    else
+    {
+        system ("sudo rfkill unblock bluetooth");
+        set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
+    }
+}
+
 /* Find an object manager and set up the callbacks to monitor the DBus for BlueZ objects.
    Also create the DBus agent which handles pairing for use later. */
 
@@ -390,7 +426,7 @@ static void find_hardware (BluetoothPlugin *bt)
     }
 
     // update the tray icon
-    if (bt->adapter)
+    if (bt->adapter && (bt_enabled () == 1 || bt_enabled () == -2))
     {
         set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
         if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
@@ -1704,6 +1740,7 @@ static void show_menu (BluetoothPlugin *bt)
     GtkWidget *item, *sel = gtk_image_new ();
     GtkTreeIter iter;
     GList *items;
+    int bt_state;
 
     // if the menu is currently on screen, delete all the items and rebuild rather than creating a new one
     if (bt->menu && gtk_widget_get_visible (bt->menu))
@@ -1718,15 +1755,33 @@ static void show_menu (BluetoothPlugin *bt)
     }
     else bt->menu = gtk_menu_new ();
 
-    if (bt->adapter == NULL)
+    bt_state = bt_enabled ();
+    if (bt->adapter == NULL || bt_state == -1)
     {
         // warn if no BT hardware detected
         item = gtk_image_menu_item_new_with_label (_("No Bluetooth adapter found"));
         gtk_widget_set_sensitive (item, FALSE);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
     }
+    else if (bt_state == 0)
+    {
+        // add enable bt option
+        item = gtk_menu_item_new_with_label (_("Turn On Bluetooth"));
+        g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (toggle_bt), bt);
+        gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+    }
     else
     {
+        if (bt_state == 1)
+        {
+            // add disable bt option
+            item = gtk_menu_item_new_with_label (_("Turn Off Bluetooth"));
+            g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (toggle_bt), bt);
+            gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+            item = gtk_separator_menu_item_new ();
+            gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+        }
+
         // discoverable toggle
         if (is_discoverable (bt)) item = gtk_image_menu_item_new_with_label (_("Stop Discoverable"));
         else item = gtk_image_menu_item_new_with_label (_("Make Discoverable"));
@@ -1788,7 +1843,7 @@ static void bluetooth_configuration_changed (LXPanel *panel, GtkWidget *widget)
 {
     BluetoothPlugin *bt = lxpanel_plugin_get_data (widget);
 
-    if (bt->adapter)
+    if (bt->adapter && (bt_enabled () == 1 || bt_enabled () == -2))
     {
         set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
         if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
