@@ -342,6 +342,7 @@ static void find_hardware (BluetoothPlugin *bt)
     GDBusProxy *newagentmanager = NULL, *newadapter = NULL;
     GError *error;
     GVariant *res;
+    int bt_state;
 
 	// if there's no object manager, you won't find anything, and it'll crash...
 	if (!bt->objmanager) return;
@@ -426,7 +427,10 @@ static void find_hardware (BluetoothPlugin *bt)
     }
 
     // update the tray icon
-    if (bt->adapter && (bt_enabled () == 1 || bt_enabled () == -2))
+    bt_state = bt_enabled ();
+    bt_state = bt_enabled ();   // not a bug - poll a few times to allow to settle...
+    bt_state = bt_enabled ();
+    if (bt->adapter && (bt_state == 1 || bt_state == -2))
     {
         set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
         if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
@@ -1843,7 +1847,8 @@ static void bluetooth_configuration_changed (LXPanel *panel, GtkWidget *widget)
 {
     BluetoothPlugin *bt = lxpanel_plugin_get_data (widget);
 
-    if (bt->adapter && (bt_enabled () == 1 || bt_enabled () == -2))
+    int bt_state = bt_enabled ();
+    if (bt->adapter && (bt_state == 1 || bt_state == -2))
     {
         set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
         if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
