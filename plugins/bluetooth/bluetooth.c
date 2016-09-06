@@ -1552,6 +1552,7 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
 
     gtk_tree_model_get (model, iter, 0, &path, 1, &name, -1);
     item = gtk_image_menu_item_new_with_label (name);
+    gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (item), TRUE);
 
     // create a submenu for each paired device
     submenu = gtk_menu_new ();
@@ -1766,7 +1767,7 @@ static void show_menu (BluetoothPlugin *bt)
     if (bt->adapter == NULL || bt_state == -1)
     {
         // warn if no BT hardware detected
-        item = gtk_image_menu_item_new_with_label (_("No Bluetooth adapter found"));
+        item = gtk_menu_item_new_with_label (_("No Bluetooth adapter found"));
         gtk_widget_set_sensitive (item, FALSE);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
     }
@@ -1790,18 +1791,18 @@ static void show_menu (BluetoothPlugin *bt)
         }
 
         // discoverable toggle
-        if (is_discoverable (bt)) item = gtk_image_menu_item_new_with_label (_("Stop Discoverable"));
-        else item = gtk_image_menu_item_new_with_label (_("Make Discoverable"));
+        if (is_discoverable (bt)) item = gtk_menu_item_new_with_label (_("Stop Discoverable"));
+        else item = gtk_menu_item_new_with_label (_("Make Discoverable"));
         g_signal_connect (item, "activate", G_CALLBACK (handle_menu_discover), bt);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
         item = gtk_separator_menu_item_new ();
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
 
         // add and remove dialogs
-        item = gtk_image_menu_item_new_with_label (_("Add Device..."));
+        item = gtk_menu_item_new_with_label (_("Add Device..."));
         g_signal_connect (item, "activate", G_CALLBACK (handle_menu_add), bt);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
-        item = gtk_image_menu_item_new_with_label (_("Remove Device..."));
+        item = gtk_menu_item_new_with_label (_("Remove Device..."));
         g_signal_connect (item, "activate", G_CALLBACK (handle_menu_remove), bt);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
 
