@@ -222,11 +222,11 @@ static int bt_enabled (void)
     if (pclose (fp)) return -2;
 
     // is there BT hardware that rfkill can see?
-    fp = popen ("rfkill list bluetooth | grep -q blocked", "r");
+    fp = popen ("/usr/sbin/rfkill list bluetooth | grep -q blocked", "r");
     if (pclose (fp)) return -1;
 
     // is rfkill blocking BT?
-    fp = popen ("rfkill list bluetooth | grep -q 'Soft blocked: no'", "r");
+    fp = popen ("/usr/sbin/rfkill list bluetooth | grep -q 'Soft blocked: no'", "r");
     if (!pclose (fp)) return 1;
     return 0;
 }
@@ -237,14 +237,14 @@ static void toggle_bt (GtkWidget *widget, gpointer user_data)
 
     if (bt_enabled ())
     {
-        system ("sudo rfkill block bluetooth");
+        system ("sudo /usr/sbin/rfkill block bluetooth");
         if (bt->flash_timer) g_source_remove (bt->flash_timer);
         bt->flash_timer = 0;
         set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
     }
     else
     {
-        system ("sudo rfkill unblock bluetooth");
+        system ("sudo /usr/sbin/rfkill unblock bluetooth");
         set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
     }
 }
