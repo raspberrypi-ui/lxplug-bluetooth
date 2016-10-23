@@ -1764,7 +1764,7 @@ static void show_menu (BluetoothPlugin *bt)
     else bt->menu = gtk_menu_new ();
 
     bt_state = bt_enabled ();
-    if (bt->adapter == NULL || bt_state == -1)
+    if ((bt_state == -2 && bt->adapter == NULL) || bt_state == -1)
     {
         // warn if no BT hardware detected
         item = gtk_menu_item_new_with_label (_("No Bluetooth adapter found"));
