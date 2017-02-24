@@ -553,21 +553,34 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
 
     // hack to reconnect after successful pairing
     var = g_variant_lookup_value (parameters, "Connected", NULL);
-    if (var && g_variant_get_boolean (var) == FALSE)
+    if (var)
     {
-        if (g_strcmp0 (g_dbus_proxy_get_object_path (proxy), bt->pairing_object) == 0)
+        if (g_variant_get_boolean (var) == FALSE)
         {
-            DEBUG ("Paired object disconnected - reconnecting");
+            if (g_strcmp0 (g_dbus_proxy_get_object_path (proxy), bt->pairing_object) == 0)
+            {
+                DEBUG ("Paired object disconnected - reconnecting");
 
-            // if this is not an audio device, connect to it
-            if (check_uuids (bt, bt->pairing_object) == DEV_HID)
-                connect_device (bt, bt->pairing_object, TRUE);
-            g_free (bt->pairing_object);
-            bt->pairing_object = NULL;
+                // if this is not an audio device, connect to it
+                if (check_uuids (bt, bt->pairing_object) == DEV_HID)
+                    connect_device (bt, bt->pairing_object, TRUE);
+                g_free (bt->pairing_object);
+                bt->pairing_object = NULL;
+            }
         }
+        else
+        {
+            // need to reload lxkeymap settings if a keyboard connects
+            GDBusInterface *interface = g_dbus_object_manager_get_interface (bt->objmanager, g_dbus_proxy_get_object_path (proxy), "org.bluez.Device1");
+            GVariant *icon = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Icon");
+            if (!strcmp (g_variant_get_string (icon, NULL), "input-keyboard"))
+            {
+                DEBUG ("Reloading keymap");
+                system ("lxkeymap -a");
+            }
+        }
+        g_variant_unref (var);
     }
-    if (var) g_variant_unref (var);
-
     // hack to accept incoming pairing
     var = g_variant_lookup_value (parameters, "Paired", NULL);
     if (var && g_variant_get_boolean (var) == TRUE)
