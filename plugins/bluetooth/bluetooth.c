@@ -571,12 +571,11 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
         else
         {
             // need to reload lxkeymap settings if a keyboard connects
-            GDBusInterface *interface = g_dbus_object_manager_get_interface (bt->objmanager, g_dbus_proxy_get_object_path (proxy), "org.bluez.Device1");
-            GVariant *icon = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Icon");
+            icon = g_dbus_proxy_get_cached_property (proxy, "Icon");
             if (!strcmp (g_variant_get_string (icon, NULL), "input-keyboard"))
             {
                 DEBUG ("Reloading keymap");
-                system ("lxkeymap -a");
+                system ("lxkeymap --autostart");
             }
         }
         g_variant_unref (var);
