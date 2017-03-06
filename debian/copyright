@@ -1,9 +1,4 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: LXPanel
-Upstream-Contact: lxde-list@lists.sourceforge.net
-                  simon@raspberrypi.org
-Source: http://sourceforge.net/projects/lxde/files/
-        http://github.com/raspberrypi-ui/lxplug_bluetooth
 
 Files: *
 Copyright: Hong Jen Yee (PCMan)  <pcman.tw@gmail.com>
