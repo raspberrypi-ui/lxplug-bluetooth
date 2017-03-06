@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+
+DEB_HOST_ARCH_OS ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh ${@} --parallel --with autoreconf
+
+override_dh_autoreconf:
+	dh_autoreconf ./autogen.sh -- 
+
+override_dh_auto_configure:
+	dh_auto_configure -- --with-plugins=all --disable-silent-rules
+
+override_dh_makeshlibs:
+	# plugins are not shared libs so disable processing for them
+	dh_makeshlibs -X/plugins/

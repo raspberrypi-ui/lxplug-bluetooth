@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <errno.h>
 #include <locale.h>
 #include <stdlib.h>
@@ -6,7 +9,6 @@
 
 #include <gio/gio.h>
 
-#include "config.h"
 #include "plugin.h"
 
 #define ICON_BUTTON_TRIM 4
@@ -1891,10 +1893,12 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
     /* Allocate and initialize plugin context */
     BluetoothPlugin *bt = g_new0 (BluetoothPlugin, 1);
 
+#ifdef ENABLE_NLS
     setlocale (LC_ALL, "");
-    bindtextdomain (PACKAGE, NULL);
-    bind_textdomain_codeset (PACKAGE, "UTF-8");
-    textdomain (PACKAGE);
+    bindtextdomain ( GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR );
+    bind_textdomain_codeset ( GETTEXT_PACKAGE, "UTF-8" );
+    textdomain ( GETTEXT_PACKAGE );
+#endif
 
     bt->tray_icon = gtk_image_new ();
     set_icon (panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);

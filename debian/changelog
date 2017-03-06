@@ -1,0 +1,5 @@
+lxplug-bluetooth (0.1) jessie; urgency=medium
+
+  * Initial release.
+
+ -- Simon Long <simon@raspberrypi.org>  Mon, 06 Mar 2017 14:20:54 +0000
