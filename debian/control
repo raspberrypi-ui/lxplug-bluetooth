@@ -8,7 +8,7 @@ Build-Depends:
  libwnck-dev, libfm-gtk-dev (>= 1.2.0) 
 Homepage: http://raspberrypi.org/
 
-Package: lxplug-volume
+Package: lxplug-bluetooth
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, lxmenu-data,
  lxpanel, lxpanel-data, libfm-modules

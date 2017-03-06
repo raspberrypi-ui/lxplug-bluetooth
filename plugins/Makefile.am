@@ -27,7 +27,7 @@ bluetooth_la_CFLAGS = \
 
 bluetooth_la_LDFLAGS = \
 	$(PACKAGE_LIBS) \
-	-module @LXPANEL_MODULE@ \
+	-module @LXPANEL_MODULE@
 
 install-exec-hook:
 	rm -f $(DESTDIR)$(libdir)/lxpanel/plugins/*.la

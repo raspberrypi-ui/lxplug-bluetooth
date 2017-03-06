@@ -81,10 +81,10 @@ subdir = plugins
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/intltool.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -120,19 +120,17 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(pkglibdir)"
 LTLIBRARIES = $(pkglib_LTLIBRARIES)
-volumealsabt_la_LIBADD =
+bluetooth_la_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_volumealsabt_la_OBJECTS =  \
-	volumealsabt/volumealsabt_la-volumealsabt.lo
-volumealsabt_la_OBJECTS = $(am_volumealsabt_la_OBJECTS)
+am_bluetooth_la_OBJECTS = bluetooth/bluetooth_la-bluetooth.lo
+bluetooth_la_OBJECTS = $(am_bluetooth_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-volumealsabt_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
-	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
-	$(volumealsabt_la_CFLAGS) $(CFLAGS) $(volumealsabt_la_LDFLAGS) \
-	$(LDFLAGS) -o $@
+bluetooth_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(bluetooth_la_CFLAGS) \
+	$(CFLAGS) $(bluetooth_la_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -167,8 +165,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(volumealsabt_la_SOURCES)
-DIST_SOURCES = $(volumealsabt_la_SOURCES)
+SOURCES = $(bluetooth_la_SOURCES)
+DIST_SOURCES = $(bluetooth_la_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -361,30 +359,24 @@ top_srcdir = @top_srcdir@
 
 pkglib_LTLIBRARIES = $(DYNAMIC_PLUGINS)
 EXTRA_LTLIBRARIES = \
-	volumealsabt.la
+	bluetooth.la
 
 
-# volumealsabt
-volumealsabt_la_SOURCES = \
-	volumealsabt/volumealsabt.c
+# bluetooth
+bluetooth_la_SOURCES = \
+	bluetooth/bluetooth.c
 
-volumealsabt_la_CFLAGS = \
+bluetooth_la_CFLAGS = \
 	-I$(top_srcdir) \
 	-DPACKAGE_DATA_DIR=\""$(datadir)/lxpanel"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(prefix)/$(DATADIRNAME)/locale"\" \
 	-I/usr/include/lxpanel \
-	-I/usr/include/gstreamer-0.10 \
-	-I/usr/include/libxml2 \
 	$(PACKAGE_CFLAGS) \
 	$(G_CAST_CHECKS)
 
-volumealsabt_la_LDFLAGS = \
+bluetooth_la_LDFLAGS = \
 	$(PACKAGE_LIBS) \
-	-module @LXPANEL_MODULE@ \
-	-lasound \
-	-lgstreamer-0.10 \
-	-lxml2 \
-	-lgstaudio-0.10
+	-module @LXPANEL_MODULE@
 
 @BUILD_PLUGIN_LOADER_TRUE@DYNAMIC_PLUGINS_INSTALLED = $(DYNAMIC_PLUGINS:.la=.so)
 all: all-am
@@ -456,28 +448,27 @@ clean-pkglibLTLIBRARIES:
 	  echo rm -f $${locs}; \
 	  rm -f $${locs}; \
 	}
-volumealsabt/$(am__dirstamp):
-	@$(MKDIR_P) volumealsabt
-	@: > volumealsabt/$(am__dirstamp)
-volumealsabt/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) volumealsabt/$(DEPDIR)
-	@: > volumealsabt/$(DEPDIR)/$(am__dirstamp)
-volumealsabt/volumealsabt_la-volumealsabt.lo:  \
-	volumealsabt/$(am__dirstamp) \
-	volumealsabt/$(DEPDIR)/$(am__dirstamp)
+bluetooth/$(am__dirstamp):
+	@$(MKDIR_P) bluetooth
+	@: > bluetooth/$(am__dirstamp)
+bluetooth/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) bluetooth/$(DEPDIR)
+	@: > bluetooth/$(DEPDIR)/$(am__dirstamp)
+bluetooth/bluetooth_la-bluetooth.lo: bluetooth/$(am__dirstamp) \
+	bluetooth/$(DEPDIR)/$(am__dirstamp)
 
-volumealsabt.la: $(volumealsabt_la_OBJECTS) $(volumealsabt_la_DEPENDENCIES) $(EXTRA_volumealsabt_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(volumealsabt_la_LINK)  $(volumealsabt_la_OBJECTS) $(volumealsabt_la_LIBADD) $(LIBS)
+bluetooth.la: $(bluetooth_la_OBJECTS) $(bluetooth_la_DEPENDENCIES) $(EXTRA_bluetooth_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(bluetooth_la_LINK)  $(bluetooth_la_OBJECTS) $(bluetooth_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
-	-rm -f volumealsabt/*.$(OBJEXT)
-	-rm -f volumealsabt/*.lo
+	-rm -f bluetooth/*.$(OBJEXT)
+	-rm -f bluetooth/*.lo
 
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@volumealsabt/$(DEPDIR)/volumealsabt_la-volumealsabt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@bluetooth/$(DEPDIR)/bluetooth_la-bluetooth.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -503,19 +494,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
 
-volumealsabt/volumealsabt_la-volumealsabt.lo: volumealsabt/volumealsabt.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(volumealsabt_la_CFLAGS) $(CFLAGS) -MT volumealsabt/volumealsabt_la-volumealsabt.lo -MD -MP -MF volumealsabt/$(DEPDIR)/volumealsabt_la-volumealsabt.Tpo -c -o volumealsabt/volumealsabt_la-volumealsabt.lo `test -f 'volumealsabt/volumealsabt.c' || echo '$(srcdir)/'`volumealsabt/volumealsabt.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) volumealsabt/$(DEPDIR)/volumealsabt_la-volumealsabt.Tpo volumealsabt/$(DEPDIR)/volumealsabt_la-volumealsabt.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='volumealsabt/volumealsabt.c' object='volumealsabt/volumealsabt_la-volumealsabt.lo' libtool=yes @AMDEPBACKSLASH@
+bluetooth/bluetooth_la-bluetooth.lo: bluetooth/bluetooth.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(bluetooth_la_CFLAGS) $(CFLAGS) -MT bluetooth/bluetooth_la-bluetooth.lo -MD -MP -MF bluetooth/$(DEPDIR)/bluetooth_la-bluetooth.Tpo -c -o bluetooth/bluetooth_la-bluetooth.lo `test -f 'bluetooth/bluetooth.c' || echo '$(srcdir)/'`bluetooth/bluetooth.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) bluetooth/$(DEPDIR)/bluetooth_la-bluetooth.Tpo bluetooth/$(DEPDIR)/bluetooth_la-bluetooth.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='bluetooth/bluetooth.c' object='bluetooth/bluetooth_la-bluetooth.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(volumealsabt_la_CFLAGS) $(CFLAGS) -c -o volumealsabt/volumealsabt_la-volumealsabt.lo `test -f 'volumealsabt/volumealsabt.c' || echo '$(srcdir)/'`volumealsabt/volumealsabt.c
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(bluetooth_la_CFLAGS) $(CFLAGS) -c -o bluetooth/bluetooth_la-bluetooth.lo `test -f 'bluetooth/bluetooth.c' || echo '$(srcdir)/'`bluetooth/bluetooth.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-	-rm -rf volumealsabt/.libs volumealsabt/_libs
+	-rm -rf bluetooth/.libs bluetooth/_libs
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -632,8 +623,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f volumealsabt/$(DEPDIR)/$(am__dirstamp)
-	-rm -f volumealsabt/$(am__dirstamp)
+	-rm -f bluetooth/$(DEPDIR)/$(am__dirstamp)
+	-rm -f bluetooth/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -645,7 +636,7 @@ clean-am: clean-generic clean-libtool clean-pkglibLTLIBRARIES \
 	mostlyclean-am
 
 distclean: distclean-am
-	-rm -rf volumealsabt/$(DEPDIR)
+	-rm -rf bluetooth/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -692,7 +683,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-	-rm -rf volumealsabt/$(DEPDIR)
+	-rm -rf bluetooth/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
