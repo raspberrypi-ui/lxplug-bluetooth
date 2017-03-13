@@ -582,6 +582,7 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
 					DEBUG ("Reloading keymap");
 					system ("lxkeymap --autostart");
 				}
+				g_variant_unref (icon);
 			}
         }
         g_variant_unref (var);
