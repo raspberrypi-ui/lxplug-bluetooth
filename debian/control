@@ -5,7 +5,7 @@ Maintainer: Simon Long <simon@raspberrypi.org>
 Build-Depends:
  debhelper (>= 9), dh-autoreconf, intltool, libgtk2.0-dev (>= 2.18), 
  libiw-dev [linux-any], libmenu-cache-dev | libmenu-cache1-dev,
- libwnck-dev, libfm-gtk-dev (>= 1.2.0) 
+ libwnck-dev, libfm-gtk-dev (>= 1.2.0), lxpanel-dev
 Homepage: http://raspberrypi.org/
 
 Package: lxplug-bluetooth
