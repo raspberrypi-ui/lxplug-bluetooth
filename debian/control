@@ -12,6 +12,6 @@ Package: lxplug-bluetooth
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, lxmenu-data,
  lxpanel, lxpanel-data, libfm-modules
-Recommends: pulseaudio-module-bluetooth, pi-bluetooth
+Recommends: bluealsa, pi-bluetooth
 Description: Bluetooth plugin for lxpanel
  Plugin for lxpanel to control pairing and connection of Bluetooth devices.
