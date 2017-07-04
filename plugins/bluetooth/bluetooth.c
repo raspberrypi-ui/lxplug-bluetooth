@@ -239,14 +239,14 @@ static void toggle_bt (GtkWidget *widget, gpointer user_data)
 
     if (bt_enabled ())
     {
-        system ("sudo /usr/sbin/rfkill block bluetooth");
+        system ("/usr/sbin/rfkill block bluetooth");
         if (bt->flash_timer) g_source_remove (bt->flash_timer);
         bt->flash_timer = 0;
         set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
     }
     else
     {
-        system ("sudo /usr/sbin/rfkill unblock bluetooth");
+        system ("/usr/sbin/rfkill unblock bluetooth");
         set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
     }
 }

@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.3) stretch; urgency=medium
+
+  * Remove unnecessary sudo from rfkill commands
+
+ -- Simon Long <simon@raspberrypi.org>  Tue, 04 Jul 2017 10:16:08 +0100
+
 lxplug-bluetooth (0.2) stretch; urgency=medium
 
   * Add bluealsa as dependency instead of pulseaudio.
