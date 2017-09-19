@@ -1856,6 +1856,9 @@ static gboolean bluetooth_button_press_event (GtkWidget *widget, GdkEventButton 
 {
     BluetoothPlugin *bt = lxpanel_plugin_get_data (widget);
 
+#ifdef ENABLE_NLS
+    textdomain ( GETTEXT_PACKAGE );
+#endif
     /* Show or hide the popup menu on left-click */
     if (event->button == 1)
     {
@@ -1942,5 +1945,6 @@ LXPanelPluginInit fm_module_init_lxpanel_gtk = {
     .description = N_("Manages Bluetooth devices"),
     .new_instance = bluetooth_constructor,
     .reconfigure = bluetooth_configuration_changed,
-    .button_press_event = bluetooth_button_press_event
+    .button_press_event = bluetooth_button_press_event,
+    .gettext_package = GETTEXT_PACKAGE
 };

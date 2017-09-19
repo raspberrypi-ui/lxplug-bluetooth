@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.4) stretch; urgency=medium
+
+  * Fix internationalisation
+
+ -- Simon Long <simon@raspberrypi.org>  Tue, 19 Sep 2017 08:24:19 +0000
+
 lxplug-bluetooth (0.3) stretch; urgency=medium
 
   * Remove unnecessary sudo from rfkill commands
