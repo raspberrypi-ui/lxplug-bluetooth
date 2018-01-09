@@ -75,6 +75,7 @@ typedef enum {
 
 typedef enum {
     DEV_HID,
+    DEV_HID_LE,
     DEV_AUDIO_SINK,
     DEV_OTHER
 } DEVICE_TYPE;
@@ -591,7 +592,9 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
     var = g_variant_lookup_value (parameters, "Paired", NULL);
     if (var && g_variant_get_boolean (var) == TRUE)
     {
-        if (bt->pairing_object == NULL)
+        var = g_variant_lookup_value (parameters, "Modalias", NULL);
+        var1 = g_variant_lookup_value (parameters, "UUIDs", NULL);
+        if (var && var1 && bt->pairing_object == NULL)
         {
             DEBUG ("New pairing detected");
             var1 = g_dbus_proxy_get_cached_property (proxy, "Alias");
@@ -781,6 +784,10 @@ static void cb_paired (GObject *source, GAsyncResult *res, gpointer user_data)
         {
             show_pairing_dialog (bt, STATE_PAIRED, NULL, NULL);
         }
+        else if (dev == DEV_HID_LE)
+        {
+            show_pairing_dialog (bt, STATE_CONNECTED, NULL, NULL);
+        }
         else if (dev == DEV_AUDIO_SINK)
         {
             show_pairing_dialog (bt, STATE_PAIRED_AUDIO, NULL, NULL);
@@ -968,6 +975,7 @@ static DEVICE_TYPE check_uuids (BluetoothPlugin *bt, const gchar *path)
         const char *uuid = g_variant_get_string (elem, NULL);
         if (!strncasecmp (uuid, "00001124", 8)) return DEV_HID;
         if (!strncasecmp (uuid, "0000110B", 8)) return DEV_AUDIO_SINK;
+        if (!strncasecmp (uuid, "00001812", 8)) return DEV_HID_LE;
         g_variant_unref (elem);
     }
     g_variant_unref (var);
