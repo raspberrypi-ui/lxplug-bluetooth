@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.6) stretch; urgency=medium
+
+  * Resize status icon when menu is large
+
+ -- Simon Long <simon@raspberrypi.org>  Thu, 01 Mar 2018 14:59:40 +0000
+
 lxplug-bluetooth (0.5) stretch; urgency=medium
 
   * Add support for BT LE HID devices

@@ -1576,7 +1576,10 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     gchar *name, *path;
     GtkWidget *item, *submenu, *smi, *icon;
+    int msize = 16;
 
+    if (panel_get_icon_size (bt->panel) > 36) msize = 24;
+ 
     gtk_tree_model_get (model, iter, 0, &path, 1, &name, -1);
     item = gtk_image_menu_item_new_with_label (name);
     gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (item), TRUE);
@@ -1586,16 +1589,16 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
     // create a single item for the submenu
-    icon = gtk_image_new ();
+   icon = gtk_image_new ();
     if (is_connected (bt, path))
     {
-        set_icon (bt->panel, icon, "bluetooth-online", 16);
+        set_icon (bt->panel, icon, "bluetooth-online", msize);
         gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), icon);
         smi = gtk_menu_item_new_with_label (_("Disconnect..."));
     }
     else
     {
-        set_icon (bt->panel, icon, "bluetooth-offline", 16);
+        set_icon (bt->panel, icon, "bluetooth-offline", msize);
         gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), icon);
         smi = gtk_menu_item_new_with_label (_("Connect..."));
     }
