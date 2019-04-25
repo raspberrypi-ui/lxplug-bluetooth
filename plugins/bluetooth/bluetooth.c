@@ -463,7 +463,7 @@ static void find_hardware (BluetoothPlugin *bt)
     if (bt->adapter && (bt_state == 1 || bt_state == -2))
     {
         set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
-        if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+        if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (1000, flash_icon, bt);
     }
     else set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
 
@@ -728,7 +728,7 @@ static void cb_discover_start (GObject *source, GAsyncResult *res, gpointer user
     {
         DEBUG ("Discoverable start - result %s", g_variant_print (var, TRUE));
         if (bt->flash_timer) g_source_remove (bt->flash_timer);
-        bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+        bt->flash_timer = g_timeout_add (1000, flash_icon, bt);
     }
     if (var) g_variant_unref (var);
 }
@@ -1587,7 +1587,7 @@ static void handle_menu_discover (GtkWidget *widget, gpointer user_data)
     {
         set_discoverable (bt, TRUE);
         if (bt->flash_timer) g_source_remove (bt->flash_timer);
-        bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+        bt->flash_timer = g_timeout_add (1000, flash_icon, bt);
     }
     else
     {
@@ -1765,6 +1765,22 @@ static void update_device_list (BluetoothPlugin *bt)
 static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size)
 {
     GdkPixbuf *pixbuf;
+	static GdkPixbuf *pixbuf_active = NULL;
+	static GdkPixbuf *pixbuf_nomal = NULL;
+	 
+	if(!strcmp("preferences-system-bluetooth-active",icon) && pixbuf_active) //if loaded, just use it
+	{
+        gtk_image_set_from_pixbuf (GTK_IMAGE (image), pixbuf_active);
+		return;
+	}
+
+	if(!strcmp("preferences-system-bluetooth",icon) && pixbuf_nomal)
+    {
+		gtk_image_set_from_pixbuf (GTK_IMAGE (image), pixbuf_nomal);
+		return;
+	}
+	
+
     if (size == 0) size = panel_get_icon_size (p) - ICON_BUTTON_TRIM;
     if (gtk_icon_theme_has_icon (panel_get_icon_theme (p), icon))
     {
@@ -1774,7 +1790,12 @@ static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size)
         if (pixbuf != NULL)
         {
             gtk_image_set_from_pixbuf (GTK_IMAGE (image), pixbuf);
-            g_object_unref (pixbuf);
+			
+            //g_object_unref (pixbuf); //don't unref to save CPU cycles 
+			if(!strcmp("preferences-system-bluetooth-active",icon))
+				pixbuf_active = pixbuf;
+			if(!strcmp("preferences-system-bluetooth",icon))
+				pixbuf_nomal = pixbuf;
             return;
         }
     }
@@ -1786,7 +1807,13 @@ static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size)
         if (pixbuf != NULL)
         {
             gtk_image_set_from_pixbuf (GTK_IMAGE (image), pixbuf);
-            g_object_unref (pixbuf);
+			
+			if(!strcmp("preferences-system-bluetooth-active",icon))
+                pixbuf_active = pixbuf;
+        	if(!strcmp("preferences-system-bluetooth",icon))
+                pixbuf_nomal = pixbuf;
+
+            //g_object_unref (pixbuf);
         }
     }
 }
@@ -1915,7 +1942,7 @@ static void bluetooth_configuration_changed (LXPanel *panel, GtkWidget *widget)
     if (bt->adapter && (bt_state == 1 || bt_state == -2))
     {
         set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
-        if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+        if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (1000, flash_icon, bt);
     }
     else set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
 }
