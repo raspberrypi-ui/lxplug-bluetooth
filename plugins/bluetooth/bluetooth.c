@@ -1765,6 +1765,24 @@ static void update_device_list (BluetoothPlugin *bt)
 static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size)
 {
     GdkPixbuf *pixbuf;
+
+	// Do nothing if icon to set matches current icon
+    static char * icon_last_set = NULL;
+    if (icon_last_set && !strcmp(icon_last_set, icon))
+    {
+        return;
+    }
+    
+    // Free up previous memory allocation
+    if (icon_last_set)
+    {
+        free(icon_last_set);
+        icon_last_set = NULL;
+    }
+    // Save current icon name
+    icon_last_set = (char *)malloc(strlen(icon) + 1);
+    strcpy(icon_last_set, icon);
+
     if (size == 0) size = panel_get_icon_size (p) - ICON_BUTTON_TRIM;
     if (gtk_icon_theme_has_icon (panel_get_icon_theme (p), icon))
     {
