@@ -1766,7 +1766,7 @@ static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size)
 {
     GdkPixbuf *pixbuf;
 
-	// Do nothing if icon to set matches current icon
+    // Do nothing if icon to set matches current icon
     static char * icon_last_set = NULL;
     if (icon_last_set && !strcmp(icon_last_set, icon))
     {
