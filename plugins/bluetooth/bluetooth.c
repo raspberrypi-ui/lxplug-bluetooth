@@ -448,24 +448,25 @@ static void find_hardware (BluetoothPlugin *bt)
         DEBUG ("No adapter found");
         if (bt->adapter) g_object_unref (bt->adapter);
         bt->adapter = NULL;
+        set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
     }
     else if (newadapter != bt->adapter)
     {
         DEBUG ("New adapter found");
         if (bt->adapter) g_object_unref (bt->adapter);
         bt->adapter = newadapter;
-    }
 
-    // update the tray icon
-    bt_state = bt_enabled ();
-    bt_state = bt_enabled ();   // not a bug - poll a few times to allow to settle...
-    bt_state = bt_enabled ();
-    if (bt->adapter && (bt_state == 1 || bt_state == -2))
-    {
-        set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
-        if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+        // update the tray icon
+        bt_state = bt_enabled ();
+        bt_state = bt_enabled ();   // not a bug - poll a few times to allow to settle...
+        bt_state = bt_enabled ();
+        if (bt_state == 1 || bt_state == -2)
+        {
+            set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
+            if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+        }
+        else set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
     }
-    else set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
 
     // initialise lists with current state of object proxy
     update_device_list (bt);
