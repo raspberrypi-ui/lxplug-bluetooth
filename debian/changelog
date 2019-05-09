@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.7) unstable; urgency=medium
+
+  * Fix high CPU load due to unneeded icon redraws
+
+ -- Simon Long <simon@raspberrypi.org>  Thu, 09 May 2019 16:07:28 +0100
+
 lxplug-bluetooth (0.6) stretch; urgency=medium
 
   * Resize status icon when menu is large
