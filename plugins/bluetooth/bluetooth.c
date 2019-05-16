@@ -448,6 +448,11 @@ static void find_hardware (BluetoothPlugin *bt)
         DEBUG ("No adapter found");
         if (bt->adapter) g_object_unref (bt->adapter);
         bt->adapter = NULL;
+        if (bt->flash_timer)
+        {
+            g_source_remove (bt->flash_timer);
+            bt->flash_timer = 0;
+        }
         gtk_widget_hide_all (bt->plugin);
         gtk_widget_set_sensitive (bt->plugin, FALSE);
     }
