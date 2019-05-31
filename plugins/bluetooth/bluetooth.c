@@ -448,24 +448,33 @@ static void find_hardware (BluetoothPlugin *bt)
         DEBUG ("No adapter found");
         if (bt->adapter) g_object_unref (bt->adapter);
         bt->adapter = NULL;
+        if (bt->flash_timer)
+        {
+            g_source_remove (bt->flash_timer);
+            bt->flash_timer = 0;
+        }
+        gtk_widget_hide_all (bt->plugin);
+        gtk_widget_set_sensitive (bt->plugin, FALSE);
     }
     else if (newadapter != bt->adapter)
     {
         DEBUG ("New adapter found");
         if (bt->adapter) g_object_unref (bt->adapter);
         bt->adapter = newadapter;
-    }
 
-    // update the tray icon
-    bt_state = bt_enabled ();
-    bt_state = bt_enabled ();   // not a bug - poll a few times to allow to settle...
-    bt_state = bt_enabled ();
-    if (bt->adapter && (bt_state == 1 || bt_state == -2))
-    {
-        set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
-        if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+        // update the tray icon
+        bt_state = bt_enabled ();
+        bt_state = bt_enabled ();   // not a bug - poll a few times to allow to settle...
+        bt_state = bt_enabled ();
+        if (bt_state == 1 || bt_state == -2)
+        {
+            set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
+            if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+        }
+        else set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
+        gtk_widget_show_all (bt->plugin);
+        gtk_widget_set_sensitive (bt->plugin, TRUE);
     }
-    else set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
 
     // initialise lists with current state of object proxy
     update_device_list (bt);
@@ -1912,12 +1921,22 @@ static void bluetooth_configuration_changed (LXPanel *panel, GtkWidget *widget)
     BluetoothPlugin *bt = lxpanel_plugin_get_data (widget);
 
     int bt_state = bt_enabled ();
-    if (bt->adapter && (bt_state == 1 || bt_state == -2))
+    if (bt->adapter)
     {
-        set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
-        if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+        if (bt_state == 1 || bt_state == -2)
+        {
+            set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
+            if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+        }
+        else set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
+        gtk_widget_show_all (bt->plugin);
+        gtk_widget_set_sensitive (bt->plugin, TRUE);
     }
-    else set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
+    else
+    {
+        gtk_widget_hide_all (bt->plugin);
+        gtk_widget_set_sensitive (bt->plugin, FALSE);
+    }
 }
 
 /* Plugin destructor. */
@@ -1961,6 +1980,8 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
     
     /* Show the widget */
     gtk_widget_show_all (bt->plugin);
+    gtk_widget_hide_all (bt->plugin);
+    gtk_widget_set_sensitive (bt->plugin, FALSE);
     
     /* Initialise plugin data */
     bt->pair_list = gtk_list_store_new (6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF);
