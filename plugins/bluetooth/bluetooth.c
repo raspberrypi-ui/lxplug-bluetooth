@@ -279,6 +279,53 @@ static void toggle_bt (GtkWidget *widget, gpointer user_data)
     }
 }
 
+static int cache_or_load_icon(BluetoothPlugin *bt, const gchar *icon, GdkPixbuf **icon_buff_return)
+{
+	static gchar *icon_name[] = {
+		"audio-card",
+		"computer",
+		"gnome-dev-computer",
+		"gnome-fs-client",
+		"input-keyboard",
+		"input-mouse",
+		"keyboard",
+		"media-removable",
+		"mouse",
+		"phone",
+		"stock_cell-phone",
+		"system",
+		"dialog-question"
+	};
+
+	static GdkPixbuf *icon_ref[sizeof(icon_name) / sizeof(gchar *)];
+	GdkPixbuf **icon_buff = icon_ref;
+
+	if(!icon) // cache icon when initialise
+	{
+		for(gchar **icon_to_load = icon_name; icon_to_load < icon_name + sizeof(icon_name) / sizeof(gchar *); icon_to_load++)
+		{
+			icon_buff[icon_to_load - icon_name] = gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), icon_name[icon_to_load - icon_name], 32, 0, NULL);
+		}
+
+		return 0;
+	}
+	else
+	{
+		gchar **icon_name_p = icon_name;
+
+		for(gint i = 0; i < sizeof(icon_name) / sizeof(gchar *); i++, icon_name_p++)
+		{
+			if(!g_strcmp0(*icon_name_p, icon)) // find the correct icon
+			{
+				*icon_buff_return = icon_buff[i];
+				return 0;
+			}
+		}
+
+		return -1;
+	}
+}
+
 /* Find an object manager and set up the callbacks to monitor the DBus for BlueZ objects.
    Also create the DBus agent which handles pairing for use later. */
 
@@ -335,7 +382,8 @@ static void initialise (BluetoothPlugin *bt)
         DEBUG ("Error registering agent on bus - %s", error->message);
         g_error_free (error);
     }
-
+    
+    cache_or_load_icon(bt,NULL,NULL);
     // query the DBus for an agent manager and a Bluetooth adapter
     find_hardware (bt);
 
@@ -1677,19 +1725,15 @@ static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *
     icon = NULL;
     if (var5)
     {
-        if (gtk_icon_theme_has_icon (panel_get_icon_theme (bt->panel), g_variant_get_string (var5, NULL)))
-        {
-            icon = gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), g_variant_get_string (var5, NULL), 32, 0, NULL);
-        }
+        cache_or_load_icon(bt, g_variant_get_string(var5, NULL), &icon);
     }
-    if (!icon) icon = gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), "dialog-question", 32, 0, NULL);
+    if (!icon) cache_or_load_icon(bt, "dialog-question", &icon);
  
     gtk_list_store_set (lst, &iter, 0, g_dbus_object_get_object_path (object),
         1, var1 ? g_variant_get_string (var1, NULL) : "Unnamed device", 2, g_variant_get_boolean (var2),
         3, g_variant_get_boolean (var3), 4, g_variant_get_boolean (var4), 
         5, icon, -1);
 
-    g_object_unref (icon);
     if (var1) g_variant_unref (var1);
     if (var2) g_variant_unref (var2);
     if (var3) g_variant_unref (var3);
