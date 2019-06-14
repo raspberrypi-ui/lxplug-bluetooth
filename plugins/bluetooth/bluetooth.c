@@ -47,6 +47,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DEBUG
 #endif
 
+#define ICON_CACHE_SIZE 13
+
 /* Plug-in global data */
 
 typedef struct {
@@ -73,6 +75,7 @@ typedef struct {
     gulong cancel_instance;
     guint flash_timer;
     guint flash_state;
+    GdkPixbuf *icon_ref[ICON_CACHE_SIZE];
 } BluetoothPlugin;
 
 typedef enum {
@@ -236,6 +239,7 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
 static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *lst);
 static void update_device_list (BluetoothPlugin *bt);
 static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size);
+static void cache_or_load_icon (BluetoothPlugin *bt, const gchar *icon_name, GdkPixbuf **icon);
 static void menu_popup_set_position (GtkMenu *menu, gint *px, gint *py, gboolean *push_in, gpointer data);
 static void show_menu (BluetoothPlugin *bt);
 
@@ -277,53 +281,6 @@ static void toggle_bt (GtkWidget *widget, gpointer user_data)
         system ("/usr/sbin/rfkill unblock bluetooth");
         set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
     }
-}
-
-static int cache_or_load_icon(BluetoothPlugin *bt, const gchar *icon, GdkPixbuf **icon_buff_return)
-{
-	static gchar *icon_name[] = {
-		"audio-card",
-		"computer",
-		"gnome-dev-computer",
-		"gnome-fs-client",
-		"input-keyboard",
-		"input-mouse",
-		"keyboard",
-		"media-removable",
-		"mouse",
-		"phone",
-		"stock_cell-phone",
-		"system",
-		"dialog-question"
-	};
-
-	static GdkPixbuf *icon_ref[sizeof(icon_name) / sizeof(gchar *)];
-	GdkPixbuf **icon_buff = icon_ref;
-
-	if(!icon) // cache icon when initialise
-	{
-		for(gchar **icon_to_load = icon_name; icon_to_load < icon_name + sizeof(icon_name) / sizeof(gchar *); icon_to_load++)
-		{
-			icon_buff[icon_to_load - icon_name] = gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), icon_name[icon_to_load - icon_name], 32, 0, NULL);
-		}
-
-		return 0;
-	}
-	else
-	{
-		gchar **icon_name_p = icon_name;
-
-		for(gint i = 0; i < sizeof(icon_name) / sizeof(gchar *); i++, icon_name_p++)
-		{
-			if(!g_strcmp0(*icon_name_p, icon)) // find the correct icon
-			{
-				*icon_buff_return = icon_buff[i];
-				return 0;
-			}
-		}
-
-		return -1;
-	}
 }
 
 /* Find an object manager and set up the callbacks to monitor the DBus for BlueZ objects.
@@ -382,8 +339,7 @@ static void initialise (BluetoothPlugin *bt)
         DEBUG ("Error registering agent on bus - %s", error->message);
         g_error_free (error);
     }
-    
-    cache_or_load_icon(bt,NULL,NULL);
+
     // query the DBus for an agent manager and a Bluetooth adapter
     find_hardware (bt);
 
@@ -422,8 +378,8 @@ static void find_hardware (BluetoothPlugin *bt)
     GVariant *res;
     int bt_state;
 
-	// if there's no object manager, you won't find anything, and it'll crash...
-	if (!bt->objmanager) return;
+    // if there's no object manager, you won't find anything, and it'll crash...
+    if (!bt->objmanager) return;
 
     objects = g_dbus_object_manager_get_objects (bt->objmanager);
 
@@ -661,14 +617,14 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
             icon = g_dbus_proxy_get_cached_property (proxy, "Icon");
             if (icon)
             {
-				const gchar *iname = g_variant_get_string (icon, NULL);
-				if (iname && !strcmp (iname, "input-keyboard"))
-				{
-					DEBUG ("Reloading keymap");
-					system ("lxkeymap --autostart");
-				}
-				g_variant_unref (icon);
-			}
+                const gchar *iname = g_variant_get_string (icon, NULL);
+                if (iname && !strcmp (iname, "input-keyboard"))
+                {
+                    DEBUG ("Reloading keymap");
+                    system ("lxkeymap --autostart");
+                }
+                g_variant_unref (icon);
+            }
         }
         g_variant_unref (var);
     }
@@ -1673,7 +1629,7 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
     // create a single item for the submenu
-   icon = gtk_image_new ();
+    icon = gtk_image_new ();
     if (is_connected (bt, path))
     {
         set_icon (bt->panel, icon, "bluetooth-online", msize);
@@ -1722,13 +1678,9 @@ static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *
     var3 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Connected");
     var4 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Trusted");
     var5 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Icon");
-    icon = NULL;
-    if (var5)
-    {
-        cache_or_load_icon(bt, g_variant_get_string(var5, NULL), &icon);
-    }
-    if (!icon) cache_or_load_icon(bt, "dialog-question", &icon);
- 
+
+    cache_or_load_icon (bt, var5 ? g_variant_get_string (var5, NULL) : "dialog-question", &icon);
+
     gtk_list_store_set (lst, &iter, 0, g_dbus_object_get_object_path (object),
         1, var1 ? g_variant_get_string (var1, NULL) : "Unnamed device", 2, g_variant_get_boolean (var2),
         3, g_variant_get_boolean (var3), 4, g_variant_get_boolean (var4), 
@@ -1841,6 +1793,51 @@ static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size)
             gtk_image_set_from_pixbuf (GTK_IMAGE (image), pixbuf);
             g_object_unref (pixbuf);
         }
+    }
+}
+
+static void cache_or_load_icon (BluetoothPlugin *bt, const gchar *icon_name, GdkPixbuf **icon)
+{
+    static const gchar *icon_names[ICON_CACHE_SIZE] =
+    {
+        "audio-card",
+        "computer",
+        "gnome-dev-computer",
+        "gnome-fs-client",
+        "input-keyboard",
+        "input-mouse",
+        "keyboard",
+        "media-removable",
+        "mouse",
+        "phone",
+        "stock_cell-phone",
+        "system",
+        "dialog-question"
+    };
+
+    int i;
+
+    if (!icon_name)
+    {
+        // initialise cache
+        for (i = 0; i < ICON_CACHE_SIZE; i++)
+        {
+            bt->icon_ref[i] = gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), icon_names[i], 32, 0, NULL);
+        }
+    }
+    else
+    {
+        // find the matching icon
+        for (i = 0; i < ICON_CACHE_SIZE; i++)
+        {
+            if (!g_strcmp0 (icon_names[i], icon_name))
+            {
+                *icon = bt->icon_ref[i];
+                return;
+            }
+        }
+
+        *icon = bt->icon_ref[ICON_CACHE_SIZE - 1];
     }
 }
 
@@ -2021,20 +2018,23 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
 
     /* Allocate icon as a child of top level */
     gtk_container_add (GTK_CONTAINER (bt->plugin), bt->tray_icon);
-    
+
     /* Show the widget */
     gtk_widget_show_all (bt->plugin);
     gtk_widget_hide_all (bt->plugin);
     gtk_widget_set_sensitive (bt->plugin, FALSE);
-    
+
     /* Initialise plugin data */
     bt->pair_list = gtk_list_store_new (6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF);
     bt->unpair_list = gtk_list_store_new (6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF);
     bt->ok_instance = 0;
     bt->cancel_instance = 0;
     clear (bt);
-    
-    // set up callbacks to see if BlueZ is on DBus
+
+    /* Load icon cache */
+    cache_or_load_icon (bt, NULL, NULL);
+
+    /* Set up callbacks to see if BlueZ is on DBus */
     g_bus_watch_name (G_BUS_TYPE_SYSTEM, "org.bluez", 0, cb_name_owned, cb_name_unowned, bt, NULL);
 
     return bt->plugin;
