@@ -47,7 +47,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DEBUG
 #endif
 
+/* Name table for cached icons */
+
 #define ICON_CACHE_SIZE 13
+
+const gchar *icon_names[ICON_CACHE_SIZE] =
+{
+    "audio-card",
+    "computer",
+    "gnome-dev-computer",
+    "gnome-fs-client",
+    "input-keyboard",
+    "input-mouse",
+    "keyboard",
+    "media-removable",
+    "mouse",
+    "phone",
+    "stock_cell-phone",
+    "system",
+    "dialog-question"
+};
 
 /* Plug-in global data */
 
@@ -239,7 +258,8 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
 static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *lst);
 static void update_device_list (BluetoothPlugin *bt);
 static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size);
-static void cache_or_load_icon (BluetoothPlugin *bt, const gchar *icon_name, GdkPixbuf **icon);
+static void init_icon_cache (BluetoothPlugin *bt);
+static GdkPixbuf *icon_from_cache (BluetoothPlugin *bt, const gchar *icon_name);
 static void menu_popup_set_position (GtkMenu *menu, gint *px, gint *py, gboolean *push_in, gpointer data);
 static void show_menu (BluetoothPlugin *bt);
 
@@ -1679,7 +1699,7 @@ static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *
     var4 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Trusted");
     var5 = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Icon");
 
-    cache_or_load_icon (bt, var5 ? g_variant_get_string (var5, NULL) : "dialog-question", &icon);
+    icon = icon_from_cache (bt, var5 ? g_variant_get_string (var5, NULL) : "dialog-question");
 
     gtk_list_store_set (lst, &iter, 0, g_dbus_object_get_object_path (object),
         1, var1 ? g_variant_get_string (var1, NULL) : "Unnamed device", 2, g_variant_get_boolean (var2),
@@ -1796,49 +1816,26 @@ static void set_icon (LXPanel *p, GtkWidget *image, const char *icon, int size)
     }
 }
 
-static void cache_or_load_icon (BluetoothPlugin *bt, const gchar *icon_name, GdkPixbuf **icon)
+static void init_icon_cache (BluetoothPlugin *bt)
 {
-    static const gchar *icon_names[ICON_CACHE_SIZE] =
-    {
-        "audio-card",
-        "computer",
-        "gnome-dev-computer",
-        "gnome-fs-client",
-        "input-keyboard",
-        "input-mouse",
-        "keyboard",
-        "media-removable",
-        "mouse",
-        "phone",
-        "stock_cell-phone",
-        "system",
-        "dialog-question"
-    };
-
     int i;
 
-    if (!icon_name)
+    for (i = 0; i < ICON_CACHE_SIZE; i++)
     {
-        // initialise cache
-        for (i = 0; i < ICON_CACHE_SIZE; i++)
-        {
-            bt->icon_ref[i] = gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), icon_names[i], 32, 0, NULL);
-        }
+        bt->icon_ref[i] = gtk_icon_theme_load_icon (panel_get_icon_theme (bt->panel), icon_names[i], 32, 0, NULL);
     }
-    else
-    {
-        // find the matching icon
-        for (i = 0; i < ICON_CACHE_SIZE; i++)
-        {
-            if (!g_strcmp0 (icon_names[i], icon_name))
-            {
-                *icon = bt->icon_ref[i];
-                return;
-            }
-        }
+}
 
-        *icon = bt->icon_ref[ICON_CACHE_SIZE - 1];
+static GdkPixbuf *icon_from_cache (BluetoothPlugin *bt, const gchar *icon_name)
+{
+    int i;
+
+    for (i = 0; i < ICON_CACHE_SIZE; i++)
+    {
+        if (!g_strcmp0 (icon_names[i], icon_name)) return bt->icon_ref[i];
     }
+
+    return bt->icon_ref[ICON_CACHE_SIZE - 1];
 }
 
 static void menu_popup_set_position (GtkMenu *menu, gint *px, gint *py, gboolean *push_in, gpointer data)
@@ -2032,7 +2029,7 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
     clear (bt);
 
     /* Load icon cache */
-    cache_or_load_icon (bt, NULL, NULL);
+    init_icon_cache (bt);
 
     /* Set up callbacks to see if BlueZ is on DBus */
     g_bus_watch_name (G_BUS_TYPE_SYSTEM, "org.bluez", 0, cb_name_owned, cb_name_unowned, bt, NULL);
