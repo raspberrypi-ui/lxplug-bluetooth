@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.9) buster; urgency=medium
+
+  * Cache device icons to reduce gtk icon loading overhead
+
+ -- Simon Long <simon@raspberrypi.org>  Mon, 01 Jul 2019 13:57:53 +0100
+
 lxplug-bluetooth (0.8) unstable; urgency=medium
 
   * Hide Bluetooth icon if no adapter found
