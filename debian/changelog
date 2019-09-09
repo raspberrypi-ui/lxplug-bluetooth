@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.10) buster; urgency=medium
+
+  * Change logic controlling tray icon to match menu logic
+
+ -- Simon Long <simon@raspberrypi.org>  Mon, 09 Sep 2019 08:48:17 +0100
+
 lxplug-bluetooth (0.9) buster; urgency=medium
 
   * Cache device icons to reduce gtk icon loading overhead

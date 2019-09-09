@@ -262,6 +262,7 @@ static void init_icon_cache (BluetoothPlugin *bt);
 static GdkPixbuf *icon_from_cache (BluetoothPlugin *bt, const gchar *icon_name);
 static void menu_popup_set_position (GtkMenu *menu, gint *px, gint *py, gboolean *push_in, gpointer data);
 static void show_menu (BluetoothPlugin *bt);
+static void update_icon (BluetoothPlugin *bt);
 
 /*---------------------------------------------------------------------------*/
 /* Function Definitions */
@@ -472,33 +473,16 @@ static void find_hardware (BluetoothPlugin *bt)
         DEBUG ("No adapter found");
         if (bt->adapter) g_object_unref (bt->adapter);
         bt->adapter = NULL;
-        if (bt->flash_timer)
-        {
-            g_source_remove (bt->flash_timer);
-            bt->flash_timer = 0;
-        }
-        gtk_widget_hide_all (bt->plugin);
-        gtk_widget_set_sensitive (bt->plugin, FALSE);
     }
     else if (newadapter != bt->adapter)
     {
         DEBUG ("New adapter found");
         if (bt->adapter) g_object_unref (bt->adapter);
         bt->adapter = newadapter;
-
-        // update the tray icon
-        bt_state = bt_enabled ();
-        bt_state = bt_enabled ();   // not a bug - poll a few times to allow to settle...
-        bt_state = bt_enabled ();
-        if (bt_state == 1 || bt_state == -2)
-        {
-            set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
-            if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
-        }
-        else set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
-        gtk_widget_show_all (bt->plugin);
-        gtk_widget_set_sensitive (bt->plugin, TRUE);
     }
+
+    // update the plugin icon
+    update_icon (bt);
 
     // initialise lists with current state of object proxy
     update_device_list (bt);
@@ -1936,6 +1920,37 @@ static void show_menu (BluetoothPlugin *bt)
     gtk_menu_popup (GTK_MENU (bt->menu), NULL, NULL, menu_popup_set_position, bt, 1, gtk_get_current_event_time ());
 }
 
+static void update_icon (BluetoothPlugin *bt)
+{
+    int bt_state;
+
+    bt_state = bt_enabled ();
+    bt_state = bt_enabled ();   // not a bug - poll a few times to allow to settle...
+    bt_state = bt_enabled ();
+
+    if ((bt_state == -2 && bt->adapter == NULL) || bt_state == -1)
+    {
+        // no adapter found - hide the icon
+        if (bt->flash_timer)
+        {
+            g_source_remove (bt->flash_timer);
+            bt->flash_timer = 0;
+        }
+        gtk_widget_hide_all (bt->plugin);
+        gtk_widget_set_sensitive (bt->plugin, FALSE);
+        return;
+    }
+
+    if (bt_state == 0) set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
+    else
+    {
+        set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
+        if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+    }
+    gtk_widget_show_all (bt->plugin);
+    gtk_widget_set_sensitive (bt->plugin, TRUE);
+}
+
 /* Handler for menu button click */
 static gboolean bluetooth_button_press_event (GtkWidget *widget, GdkEventButton *event, LXPanel *panel)
 {
@@ -1958,23 +1973,7 @@ static void bluetooth_configuration_changed (LXPanel *panel, GtkWidget *widget)
 {
     BluetoothPlugin *bt = lxpanel_plugin_get_data (widget);
 
-    int bt_state = bt_enabled ();
-    if (bt->adapter)
-    {
-        if (bt_state == 1 || bt_state == -2)
-        {
-            set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth", 0);
-            if (is_discoverable (bt) && !bt->flash_timer) bt->flash_timer = g_timeout_add (500, flash_icon, bt);
-        }
-        else set_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth-inactive", 0);
-        gtk_widget_show_all (bt->plugin);
-        gtk_widget_set_sensitive (bt->plugin, TRUE);
-    }
-    else
-    {
-        gtk_widget_hide_all (bt->plugin);
-        gtk_widget_set_sensitive (bt->plugin, FALSE);
-    }
+    update_icon (bt);
 }
 
 /* Plugin destructor. */
