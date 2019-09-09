@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define DEBUG_ON
 #ifdef DEBUG_ON
-#define DEBUG(fmt,args...) g_message("bt: " fmt,##args)
+#define DEBUG(fmt,args...) if(getenv("DEBUG_BT"))g_message("bt: " fmt,##args)
 #else
 #define DEBUG
 #endif
