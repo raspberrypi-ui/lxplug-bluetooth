@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.11) buster; urgency=medium
+
+  * Sort menu and add/remove dialogs alphabetically
+
+ -- Simon Long <simon@raspberrypi.org>  Mon, 07 Oct 2019 13:34:08 +0100
+
 lxplug-bluetooth (0.10) buster; urgency=medium
 
   * Change logic controlling tray icon to match menu logic
