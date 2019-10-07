@@ -78,6 +78,8 @@ typedef struct {
     GtkWidget *menu;                /* Popup menu */
     GtkListStore *pair_list;
     GtkListStore *unpair_list;
+    GtkTreeModelSort *sorted_list;  /* Sorted device list used in connect dialog */
+    gchar *selection;               /* Connect dialog selected item */
     GDBusConnection *busconnection;
     GDBusObjectManager *objmanager;
     GDBusProxy *agentmanager;
@@ -1344,6 +1346,8 @@ static void handle_pair (GtkButton *button, gpointer user_data)
     {
         if (bt->list_dialog)
         {
+            g_object_unref (bt->sorted_list);
+            bt->sorted_list = NULL;
             gtk_widget_destroy (bt->list);
             bt->list = NULL;
             gtk_widget_destroy (bt->list_dialog);
@@ -1371,6 +1375,8 @@ static void handle_remove (GtkButton *button, gpointer user_data)
     {
         if (bt->list_dialog)
         {
+            g_object_unref (bt->sorted_list);
+            bt->sorted_list = NULL;
             gtk_widget_destroy (bt->list);
             bt->list = NULL;
             gtk_widget_destroy (bt->list_dialog);
@@ -1388,6 +1394,8 @@ static void handle_close_list_dialog (GtkButton *button, gpointer user_data)
     BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
     if (bt->list_dialog)
     {
+        g_object_unref (bt->sorted_list);
+        bt->sorted_list = NULL;
         gtk_widget_destroy (bt->list);
         bt->list = NULL;
         gtk_widget_destroy (bt->list_dialog);
@@ -1401,6 +1409,8 @@ static gint delete_list (GtkWidget *widget, GdkEvent *event, gpointer user_data)
     BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
     if (bt->list_dialog)
     {
+        g_object_unref (bt->sorted_list);
+        bt->sorted_list = NULL;
         gtk_widget_destroy (bt->list);
         bt->list = NULL;
         gtk_widget_destroy (bt->list_dialog);
@@ -1454,7 +1464,9 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
     rend = gtk_cell_renderer_text_new ();
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Name", rend, "text", 1, NULL);
     gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (bt->list), 1), 300);
-    gtk_tree_view_set_model (GTK_TREE_VIEW (bt->list), type == DIALOG_PAIR ? GTK_TREE_MODEL (bt->unpair_list) : GTK_TREE_MODEL (bt->pair_list));
+    bt->sorted_list = GTK_TREE_MODEL_SORT (gtk_tree_model_sort_new_with_model (type == DIALOG_PAIR ? GTK_TREE_MODEL (bt->unpair_list) : GTK_TREE_MODEL (bt->pair_list)));
+    gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (bt->sorted_list), 1, GTK_SORT_ASCENDING);
+    gtk_tree_view_set_model (GTK_TREE_VIEW (bt->list), GTK_TREE_MODEL (bt->sorted_list));
     gtk_tree_view_set_tooltip_column (GTK_TREE_VIEW (bt->list), 0);
     gtk_container_add (GTK_CONTAINER (scrl), bt->list);
 
@@ -1654,8 +1666,38 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     g_signal_connect (smi, "activate", G_CALLBACK (handle_menu_connect), bt);
     gtk_menu_shell_append (GTK_MENU_SHELL (submenu), smi);
 
-    // append the new item with submenu to the main menu
-    gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+    // count the list first - we need indices...
+    int count = 0;
+    GList *l = g_list_first (gtk_container_get_children (GTK_CONTAINER (bt->menu)));
+    while (l)
+    {
+        count++;
+        l = l->next;
+    }
+
+    // find the start point of the last section - either a separator or the beginning of the list
+    l = g_list_last (gtk_container_get_children (GTK_CONTAINER (bt->menu)));
+    while (l)
+    {
+        if (G_OBJECT_TYPE (l->data) == GTK_TYPE_SEPARATOR_MENU_ITEM) break;
+        count--;
+        l = l->prev;
+    }
+
+    // if l is NULL, init to element after start; if l is non-NULL, init to element after separator
+    if (!l) l = gtk_container_get_children (GTK_CONTAINER (bt->menu));
+    else l = l->next;
+
+    // loop forward from the first element, comparing against the new label
+    while (l)
+    {
+        if (g_strcmp0 (name, gtk_menu_item_get_label (GTK_MENU_ITEM (l->data))) < 0) break;
+        count++;
+        l = l->next;
+    }
+
+    // insert at the relevant offset
+    gtk_menu_shell_insert (GTK_MENU_SHELL (bt->menu), item, count);
 
     g_free (name);
     g_free (path);
@@ -1698,22 +1740,32 @@ static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *
     g_object_unref (interface);
 }
 
+gboolean find_path (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data)
+{
+    BluetoothPlugin *bt = (BluetoothPlugin *) data;
+
+    char *btpath;
+    gtk_tree_model_get (model, iter, 0, &btpath, -1);
+    if (!g_strcmp0 (btpath, bt->selection))
+    {
+        GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (bt->list));
+        gtk_tree_selection_select_iter (sel, iter);
+        return TRUE;
+    }
+    return FALSE;
+}
+
 static void update_device_list (BluetoothPlugin *bt)
 {
     GDBusInterface *interface;
     GDBusObject *object;
     GList *objects, *interfaces;
     GVariant *var;
-    gchar *path = NULL, *name = NULL;
-    int item = 0, sel_item = -1, type = DIALOG_CONNECT;
+    gchar *name = NULL;
 
     // save the current highlight if there is one
-    if (bt->list)
-    {
-        selected_path (bt, &path, &name);
-        if (gtk_tree_view_get_model (GTK_TREE_VIEW (bt->list)) == GTK_TREE_MODEL (bt->pair_list)) type = DIALOG_REMOVE;
-        else type = DIALOG_PAIR;
-    }
+    if (bt->list) selected_path (bt, &(bt->selection), &name);
+    else bt->selection = NULL;
 
     // clear out the list store
     gtk_list_store_clear (bt->pair_list);
@@ -1731,21 +1783,9 @@ static void update_device_list (BluetoothPlugin *bt)
             interface = G_DBUS_INTERFACE (interfaces->data);
             if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.Device1") == 0)
             {
-                // ignore any devices which have no class
-                //if (!g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Class")) break;
                 var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Paired");
-                if (path && !g_strcmp0 (g_dbus_object_get_object_path (object), path)) sel_item = item;
-                if (g_variant_get_boolean (var))
-                {
-                    add_device (bt, object, bt->pair_list);
-                    if (type == DIALOG_REMOVE) item++;
-                }
-                else
-                {
-                    add_device (bt, object, bt->unpair_list);
-                    if (type == DIALOG_PAIR) item++;
-                }
-
+                if (g_variant_get_boolean (var)) add_device (bt, object, bt->pair_list);
+                else add_device (bt, object, bt->unpair_list);
                 g_variant_unref (var);
                 break;
             }
@@ -1757,15 +1797,12 @@ static void update_device_list (BluetoothPlugin *bt)
     g_list_free_full (objects, g_object_unref);
 
     // replace the selection
-    if (bt->list && sel_item != -1)
+    if (bt->selection)
     {
-        GtkTreePath *selpath = gtk_tree_path_new_from_indices (sel_item, -1);
-        GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (bt->list));
-        gtk_tree_selection_select_path (sel, selpath);
-        gtk_tree_path_free (selpath);
+        GtkTreeModel *mod = gtk_tree_view_get_model (GTK_TREE_VIEW (bt->list));
+        if (mod) gtk_tree_model_foreach (mod, find_path, bt);
+        g_free (bt->selection);
     }
-
-    if (path) g_free (path);
     if (name) g_free (name);
 
     if (bt->menu && gtk_widget_get_visible (bt->menu)) show_menu (bt);
