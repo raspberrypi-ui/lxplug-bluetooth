@@ -617,21 +617,6 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
                 bt->pairing_object = NULL;
             }
         }
-        else
-        {
-            // need to reload lxkeymap settings if a keyboard connects
-            icon = g_dbus_proxy_get_cached_property (proxy, "Icon");
-            if (icon)
-            {
-                const gchar *iname = g_variant_get_string (icon, NULL);
-                if (iname && !strcmp (iname, "input-keyboard"))
-                {
-                    DEBUG ("Reloading keymap");
-                    system ("lxkeymap --autostart");
-                }
-                g_variant_unref (icon);
-            }
-        }
         g_variant_unref (var);
     }
     // hack to accept incoming pairing
