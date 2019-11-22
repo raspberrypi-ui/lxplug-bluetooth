@@ -1035,14 +1035,16 @@ static DEVICE_TYPE check_uuids (BluetoothPlugin *bt, const gchar *path)
 
 static guint request_authorization (BluetoothPlugin *bt, const gchar *device)
 {
-    char buffer[256], path[128];
+    char buffer[256];
     guint res;
+    GdkPixbuf *icon;
 
     // create the dialog, asking user to accept the pairing
     sprintf (buffer, _("Do you accept pairing from device '%s'?"), device);
     bt->pair_dialog = gtk_dialog_new_with_buttons (_("Pairing Request"), NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_CANCEL, 0, GTK_STOCK_OK, 1, NULL);
-    sprintf (path, "%s/images/preferences-system-bluetooth.png", PACKAGE_DATA_DIR);
-    gtk_window_set_icon (GTK_WINDOW (bt->pair_dialog), gdk_pixbuf_new_from_file (path, NULL));
+    icon = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "preferences-system-bluetooth", panel_get_icon_size (bt->panel) - ICON_BUTTON_TRIM, 0, NULL);
+    gtk_window_set_icon (GTK_WINDOW (bt->pair_dialog), icon);
+    if (icon) g_object_unref (icon);
     gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER);
     bt->pair_label = gtk_label_new (buffer);
     gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
@@ -1160,7 +1162,8 @@ static void connect_cancel (BluetoothPlugin *bt, void (*cb) (void))
 
 static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gchar *device, const gchar *param)
 {
-    char buffer[256], path[128];
+    char buffer[256];
+    GdkPixbuf *icon = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "preferences-system-bluetooth", panel_get_icon_size (bt->panel) - ICON_BUTTON_TRIM, 0, NULL);
 
     switch (state)
     {
@@ -1168,8 +1171,7 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             sprintf (buffer, _("Pairing Device '%s'"), device);
             bt->pinbuf = gtk_entry_buffer_new (NULL, -1);
             bt->pair_dialog = gtk_dialog_new_with_buttons (buffer, NULL, 0, NULL);
-            sprintf (path, "%s/images/preferences-system-bluetooth.png", PACKAGE_DATA_DIR);
-            gtk_window_set_icon (GTK_WINDOW (bt->pair_dialog), gdk_pixbuf_new_from_file (path, NULL));
+            gtk_window_set_icon (GTK_WINDOW (bt->pair_dialog), icon);
             gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER);
             gtk_container_set_border_width (GTK_CONTAINER (bt->pair_dialog), 10);
             bt->pair_label = gtk_label_new (_("Pairing request sent to device - waiting for response..."));
@@ -1264,8 +1266,7 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
 
         case STATE_PAIR_REQUEST:
             bt->pair_dialog = gtk_dialog_new_with_buttons (_("Pairing Requested"), NULL, 0, NULL);
-            sprintf (path, "%s/images/preferences-system-bluetooth.png", PACKAGE_DATA_DIR);
-            gtk_window_set_icon (GTK_WINDOW (bt->pair_dialog), gdk_pixbuf_new_from_file (path, NULL));
+            gtk_window_set_icon (GTK_WINDOW (bt->pair_dialog), icon);
             gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER);
             gtk_container_set_border_width (GTK_CONTAINER (bt->pair_dialog), 10);
             sprintf (buffer, _("Device '%s' has requested a pairing. Do you accept the request?"), device);
@@ -1312,6 +1313,8 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             gtk_widget_hide (bt->pair_cancel);
             break;
     }
+
+    if (icon) g_object_unref (icon);
 }
 
 /* Functions to manage pair and remove dialogs */
@@ -1424,12 +1427,13 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 {
     GtkWidget *btn_cancel, *btn_act, *frm, *lbl, *scrl;
     GtkCellRenderer *rend;
-    char path[128];
+    GdkPixbuf *icon;
 
     // create the window
     bt->list_dialog = gtk_dialog_new_with_buttons (type == DIALOG_PAIR ? _("Add New Device") : _("Remove Device"), NULL, 0, NULL);
-    sprintf (path, "%s/images/preferences-system-bluetooth.png", PACKAGE_DATA_DIR);
-    gtk_window_set_icon (GTK_WINDOW (bt->list_dialog), gdk_pixbuf_new_from_file (path, NULL));
+    icon = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "preferences-system-bluetooth", panel_get_icon_size (bt->panel) - ICON_BUTTON_TRIM, 0, NULL);
+    gtk_window_set_icon (GTK_WINDOW (bt->list_dialog), icon);
+    if (icon) g_object_unref (icon);
     gtk_window_set_position (GTK_WINDOW (bt->list_dialog), GTK_WIN_POS_CENTER);
     gtk_container_set_border_width (GTK_CONTAINER (bt->list_dialog), 5);
     gtk_box_set_spacing (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), 10);
@@ -1478,7 +1482,8 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 
 static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STATE state, const gchar *param)
 {
-    char buffer1[256], buffer2[256], path[128];
+    char buffer1[256], buffer2[256];
+    GdkPixbuf *icon;
 
     switch (type)
     {
@@ -1502,8 +1507,9 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STA
     {
         case STATE_PAIR_INIT:
             bt->conn_dialog = gtk_dialog_new_with_buttons (buffer1, NULL, 0, NULL);
-            sprintf (path, "%s/images/preferences-system-bluetooth.png", PACKAGE_DATA_DIR);
-            gtk_window_set_icon (GTK_WINDOW (bt->conn_dialog), gdk_pixbuf_new_from_file (path, NULL));
+            icon = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (), "preferences-system-bluetooth", panel_get_icon_size (bt->panel) - ICON_BUTTON_TRIM, 0, NULL);
+            gtk_window_set_icon (GTK_WINDOW (bt->conn_dialog), icon);
+            if (icon) g_object_unref (icon);
             gtk_window_set_position (GTK_WINDOW (bt->conn_dialog), GTK_WIN_POS_CENTER);
             gtk_container_set_border_width (GTK_CONTAINER (bt->conn_dialog), 10);
             bt->conn_label = gtk_label_new (buffer2);
