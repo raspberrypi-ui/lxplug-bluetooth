@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.13) buster; urgency=medium
+
+  * Use generic icon load code
+
+ -- Simon Long <simon@raspberrypi.com>  Thu, 16 Apr 2020 15:47:10 +0100
+
 lxplug-bluetooth (0.12) buster; urgency=medium
 
   * Fix partial locking up of panel while dialogs are open; restore correct icons to dialogs
