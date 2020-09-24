@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.15) buster; urgency=medium
+
+  * Update dependencies to allow use of Pulseaudio
+
+ -- Simon Long <simon@raspberrypi.com>  Wed, 23 Sep 2020 13:43:37 +0100
+
 lxplug-bluetooth (0.14) buster; urgency=medium
 
   * Italian translation added
