@@ -1,0 +1,246 @@
+# Norwegian Bokmål translations for lxplug-bluetooth package.
+# Copyright (C) 2017 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#  <simon@raspberrypi.org>, 2017.
+# Imre Kristoffer Eilertsen <imreeil42@gmail.com>, 2020
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: lxplug-bluetooth.po\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-03-06 14:18+0000\n"
+"PO-Revision-Date: 2020-09-29 07:00+0200\n"
+"Last-Translator: Imre Kristoffer Eilertsen <imreeil42@gmail.com>\n"
+"Language-Team: Norwegian Bokmål\n"
+"Language: nb\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 2.4.1\n"
+
+#. create the dialog, asking user to accept the pairing
+#: ../plugins/bluetooth/bluetooth.c:987
+#, c-format
+msgid "Do you accept pairing from device '%s'?"
+msgstr "Aksepterer du paringen fra '%s'-enheten?"
+
+#: ../plugins/bluetooth/bluetooth.c:988
+msgid "Pairing Request"
+msgstr "Forespørsel om paring"
+
+#: ../plugins/bluetooth/bluetooth.c:1113
+#, c-format
+msgid "Pairing Device '%s'"
+msgstr "Parer enheten '%s'"
+
+#: ../plugins/bluetooth/bluetooth.c:1120
+msgid "Pairing request sent to device - waiting for response..."
+msgstr "Forespørsel om paring ble sendt til enheten - venter på respons …"
+
+#. add the buttons
+#: ../plugins/bluetooth/bluetooth.c:1127 ../plugins/bluetooth/bluetooth.c:1222
+#: ../plugins/bluetooth/bluetooth.c:1376
+msgid "_Cancel"
+msgstr "A_vbryt"
+
+#: ../plugins/bluetooth/bluetooth.c:1128 ../plugins/bluetooth/bluetooth.c:1223
+#: ../plugins/bluetooth/bluetooth.c:1455
+msgid "_OK"
+msgstr "_OK"
+
+#: ../plugins/bluetooth/bluetooth.c:1141
+#, c-format
+msgid "Pairing failed - %s"
+msgstr "Paring mislyktes - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1150
+msgid "Pairing successful - creating connection..."
+msgstr "Paring vellykket - oppretter tilkobling …"
+
+#: ../plugins/bluetooth/bluetooth.c:1157
+msgid "Connected successfully"
+msgstr "Vellykket tilkoblet"
+
+#: ../plugins/bluetooth/bluetooth.c:1164
+#, c-format
+msgid "Connection failed - %s. Try to connect manually."
+msgstr "Tilkobling mislyktes - %s. Prøv å koble til manuelt."
+
+#: ../plugins/bluetooth/bluetooth.c:1172
+#, c-format
+msgid "Please enter code '%s' on device '%s'"
+msgstr "Vennligst skriv inn koden '%s' på '%s'-enheten"
+
+#: ../plugins/bluetooth/bluetooth.c:1180
+#, c-format
+msgid "Please confirm that device '%s' is showing the code '%s' to connect"
+msgstr "Vennligst bekreft at '%s'-enheten viser koden '%s' for å koble til"
+
+#: ../plugins/bluetooth/bluetooth.c:1190
+#, c-format
+msgid "Please enter PIN code for device '%s'"
+msgstr "Vennligst skriv inn PIN-koden til enheten '%s'"
+
+#: ../plugins/bluetooth/bluetooth.c:1203
+msgid "Waiting for response from device..."
+msgstr "Venter på respons fra enheten …"
+
+#: ../plugins/bluetooth/bluetooth.c:1211
+msgid "Pairing Requested"
+msgstr "Paring forespurt"
+
+#: ../plugins/bluetooth/bluetooth.c:1216
+#, c-format
+msgid "Device '%s' has requested a pairing. Do you accept the request?"
+msgstr "'%s'-enheten har bedt om en paring. Godtar du forespørselen?"
+
+#: ../plugins/bluetooth/bluetooth.c:1232
+#, c-format
+msgid "Rejecting pairing..."
+msgstr "Avviser paring …"
+
+#: ../plugins/bluetooth/bluetooth.c:1239
+#, c-format
+msgid "Removal of pairing failed - %s. Remove the device manually."
+msgstr "Fjerning av paring mislyktes - %s. Fjern enheten manuelt."
+
+#: ../plugins/bluetooth/bluetooth.c:1247
+msgid "Paired successfully. Use the audio menu to select as output device."
+msgstr "Vellykket paret. Bruk lydmenyen for å velge den som en utdataenhet."
+
+#: ../plugins/bluetooth/bluetooth.c:1254
+msgid ""
+"Paired successfully, but this device has no services which can be used with "
+"Raspberry Pi."
+msgstr ""
+"Vellykket paret, men denne enheten har ikke noen tjenester som kan brukes "
+"med Raspberry Pi."
+
+#. create the window
+#: ../plugins/bluetooth/bluetooth.c:1367
+msgid "Add New Device"
+msgstr "Legg til ny enhet"
+
+#: ../plugins/bluetooth/bluetooth.c:1367 ../plugins/bluetooth/bluetooth.c:1421
+#, c-format
+msgid "Remove Device"
+msgstr "Fjern enhet"
+
+#: ../plugins/bluetooth/bluetooth.c:1377
+msgid "_Pair"
+msgstr "_Par"
+
+#: ../plugins/bluetooth/bluetooth.c:1377
+msgid "_Remove"
+msgstr "Fje_rn"
+
+#. add a label
+#: ../plugins/bluetooth/bluetooth.c:1383
+msgid "Searching for Bluetooth devices..."
+msgstr "Søker etter Bluetooth-enheter …"
+
+#: ../plugins/bluetooth/bluetooth.c:1383
+msgid "Paired Bluetooth devices"
+msgstr "Parede Bluetooth-enheter"
+
+#: ../plugins/bluetooth/bluetooth.c:1422
+#, c-format
+msgid "Removing paired device '%s'..."
+msgstr "Fjerner den parede enheten '%s' …"
+
+#: ../plugins/bluetooth/bluetooth.c:1422
+#, c-format
+msgid "Removal failed - %s"
+msgstr "Fjerning mislyktes - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1426
+#, c-format
+msgid "Connect Device"
+msgstr "Koble til enhet"
+
+#: ../plugins/bluetooth/bluetooth.c:1427
+#, c-format
+msgid "Connecting to device '%s'..."
+msgstr "Kobler til '%s'-enheten …"
+
+#: ../plugins/bluetooth/bluetooth.c:1427
+#, c-format
+msgid "Connection failed - %s"
+msgstr "Tilkobling mislyktes - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1431
+#, c-format
+msgid "Disconnect Device"
+msgstr "Koble fra enhet"
+
+#: ../plugins/bluetooth/bluetooth.c:1432
+#, c-format
+msgid "Disconnecting from device '%s'..."
+msgstr "Kobler fra '%s'-enheten …"
+
+#: ../plugins/bluetooth/bluetooth.c:1432
+#, c-format
+msgid "Disconnection failed - %s"
+msgstr "Frakobling mislyktes - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1515
+msgid "Use the audio menu to connect to this device"
+msgstr "Bruk lydmenyen for å koble til denne enheten"
+
+#: ../plugins/bluetooth/bluetooth.c:1517
+msgid "No usable services on this device"
+msgstr "Ingen benyttbare tjenester på denne enheten"
+
+#: ../plugins/bluetooth/bluetooth.c:1585
+msgid "Disconnect..."
+msgstr "Frakoble …"
+
+#: ../plugins/bluetooth/bluetooth.c:1591
+msgid "Connect..."
+msgstr "Tilkoble …"
+
+#. warn if no BT hardware detected
+#: ../plugins/bluetooth/bluetooth.c:1788
+msgid "No Bluetooth adapter found"
+msgstr "Ingen Bluetooth-adaptere ble funnet"
+
+#. add enable bt option
+#: ../plugins/bluetooth/bluetooth.c:1795
+msgid "Turn On Bluetooth"
+msgstr "Skru på Bluetooth"
+
+#. add disable bt option
+#: ../plugins/bluetooth/bluetooth.c:1804
+msgid "Turn Off Bluetooth"
+msgstr "Skru av Bluetooth"
+
+#. discoverable toggle
+#: ../plugins/bluetooth/bluetooth.c:1812
+msgid "Stop Discoverable"
+msgstr "Avslutt oppdagbarhet"
+
+#: ../plugins/bluetooth/bluetooth.c:1813
+msgid "Make Discoverable"
+msgstr "Gjør oppdagbar"
+
+#. add and remove dialogs
+#: ../plugins/bluetooth/bluetooth.c:1820
+msgid "Add Device..."
+msgstr "Legg til enhet …"
+
+#: ../plugins/bluetooth/bluetooth.c:1823
+msgid "Remove Device..."
+msgstr "Fjern enhet …"
+
+#: ../plugins/bluetooth/bluetooth.c:1905
+msgid "Manage Bluetooth devices"
+msgstr "Behandle Bluetooth-enheter"
+
+#: ../plugins/bluetooth/bluetooth.c:1940
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+#: ../plugins/bluetooth/bluetooth.c:1941
+msgid "Manages Bluetooth devices"
+msgstr "Behandler Bluetooth-enheter"
