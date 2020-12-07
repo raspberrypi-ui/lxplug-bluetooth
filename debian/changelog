@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.18) buster; urgency=medium
+
+  * Added Slovak translation
+
+ -- Simon Long <simon@raspberrypi.com>  Mon, 07 Dec 2020 08:04:24 +0000
+
 lxplug-bluetooth (0.17) buster; urgency=medium
 
   * Change order of alternative dependencies
