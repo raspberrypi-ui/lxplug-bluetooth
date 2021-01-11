@@ -1,0 +1,246 @@
+# English translations for PACKAGE package.
+# Copyright (C) 2017 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#  <simon@raspberrypi.org>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-01-10 22:09+0900\n"
+"PO-Revision-Date: 2017-03-06 14:18+0000\n"
+"Last-Translator:  Akira Ouchi <akkiesoft@marokun.net>\n"
+"Language-Team: Japanese\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. create the dialog, asking user to accept the pairing
+#: ../plugins/bluetooth/bluetooth.c:1024
+#, c-format
+msgid "Do you accept pairing from device '%s'?"
+msgstr "デバイス '%s' からのペアリングを承認しますか？"
+
+#: ../plugins/bluetooth/bluetooth.c:1025
+msgid "Pairing Request"
+msgstr "ペアリングのリクエスト"
+
+#: ../plugins/bluetooth/bluetooth.c:1149
+#, c-format
+msgid "Pairing Device '%s'"
+msgstr "デバイス '%s' のペアリング"
+
+#: ../plugins/bluetooth/bluetooth.c:1155
+msgid "Pairing request sent to device - waiting for response..."
+msgstr "ペアリングのリクエストをデバイスに送信しました。返答を待っています..."
+
+#. add the buttons
+#: ../plugins/bluetooth/bluetooth.c:1162 ../plugins/bluetooth/bluetooth.c:1256
+#: ../plugins/bluetooth/bluetooth.c:1416
+msgid "_Cancel"
+msgstr "キャンセル(_C)"
+
+#: ../plugins/bluetooth/bluetooth.c:1163 ../plugins/bluetooth/bluetooth.c:1257
+#: ../plugins/bluetooth/bluetooth.c:1496
+msgid "_OK"
+msgstr "OK(_O)"
+
+#: ../plugins/bluetooth/bluetooth.c:1176
+#, c-format
+msgid "Pairing failed - %s"
+msgstr "ペアリングに失敗しました - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1185
+msgid "Pairing successful - creating connection..."
+msgstr "ペアリングに成功しました。接続しています..."
+
+#: ../plugins/bluetooth/bluetooth.c:1192
+msgid "Connected successfully"
+msgstr "正常に接続されました"
+
+#: ../plugins/bluetooth/bluetooth.c:1199
+#, c-format
+msgid "Connection failed - %s. Try to connect manually."
+msgstr "接続に失敗しました - %s 。手動で接続を試してください。"
+
+#: ../plugins/bluetooth/bluetooth.c:1207
+#, c-format
+msgid "Please enter code '%s' on device '%s'"
+msgstr "コード '%s' をデバイス '%s'上で入力してください"
+
+#: ../plugins/bluetooth/bluetooth.c:1215
+#, c-format
+msgid "Please confirm that device '%s' is showing the code '%s' to connect"
+msgstr "デバイス '%s' が接続のために表示しているコード '%s' を確認してください。"
+
+#: ../plugins/bluetooth/bluetooth.c:1225
+#, c-format
+msgid "Please enter PIN code for device '%s'"
+msgstr "デバイス '%s' のPINコードを入力してください"
+
+#: ../plugins/bluetooth/bluetooth.c:1238
+msgid "Waiting for response from device..."
+msgstr "デバイスからの返答を待っています..."
+
+#: ../plugins/bluetooth/bluetooth.c:1246
+msgid "Pairing Requested"
+msgstr "ペアリングのリクエスト"
+
+#: ../plugins/bluetooth/bluetooth.c:1250
+#, c-format
+msgid "Device '%s' has requested a pairing. Do you accept the request?"
+msgstr ""
+"デバイス '%s' がペアリングをリクエストしました。リクエストを承認しますか？"
+
+#: ../plugins/bluetooth/bluetooth.c:1266
+#, c-format
+msgid "Rejecting pairing..."
+msgstr "ペアリングを却下しています..."
+
+#: ../plugins/bluetooth/bluetooth.c:1273
+#, c-format
+msgid "Removal of pairing failed - %s. Remove the device manually."
+msgstr "ペアリングの削除に失敗しました - %s。 手動でデバイスを削除してください。"
+
+#: ../plugins/bluetooth/bluetooth.c:1281
+msgid "Paired successfully. Use the audio menu to select as output device."
+msgstr ""
+"ペアリングに成功しました。 オーディオメニューを使用して出力デバイスとして選択"
+"してください。"
+
+#: ../plugins/bluetooth/bluetooth.c:1288
+msgid ""
+"Paired successfully, but this device has no services which can be used with "
+"Raspberry Pi."
+msgstr ""
+"ペアリングに成功しましたが、デバイスにはRaspberry Piで使用可能なサービスはありません。"
+
+#. create the window
+#: ../plugins/bluetooth/bluetooth.c:1408
+msgid "Add New Device"
+msgstr "新しいデバイスの追加"
+
+#: ../plugins/bluetooth/bluetooth.c:1408 ../plugins/bluetooth/bluetooth.c:1463
+#, c-format
+msgid "Remove Device"
+msgstr "デバイスの削除"
+
+#: ../plugins/bluetooth/bluetooth.c:1417
+msgid "_Pair"
+msgstr "ペア(_P)"
+
+#: ../plugins/bluetooth/bluetooth.c:1417
+msgid "_Remove"
+msgstr "削除(_R)"
+
+#. add a label
+#: ../plugins/bluetooth/bluetooth.c:1423
+msgid "Searching for Bluetooth devices..."
+msgstr "Bluetooth デバイスを検索中..."
+
+#: ../plugins/bluetooth/bluetooth.c:1423
+msgid "Paired Bluetooth devices"
+msgstr "ペアリング済みの Bluetooth デバイス"
+
+#: ../plugins/bluetooth/bluetooth.c:1464
+#, c-format
+msgid "Removing paired device '%s'..."
+msgstr "ペアリング済みのデバイス '%s' を削除しています..."
+
+#: ../plugins/bluetooth/bluetooth.c:1464
+#, c-format
+msgid "Removal failed - %s"
+msgstr "削除に失敗しました - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1468
+#, c-format
+msgid "Connect Device"
+msgstr "デバイスに接続"
+
+#: ../plugins/bluetooth/bluetooth.c:1469
+#, c-format
+msgid "Connecting to device '%s'..."
+msgstr "デバイス '%s' に接続中..."
+
+#: ../plugins/bluetooth/bluetooth.c:1469
+#, c-format
+msgid "Connection failed - %s"
+msgstr "接続に失敗しました - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1473
+#, c-format
+msgid "Disconnect Device"
+msgstr "デバイスを切断"
+
+#: ../plugins/bluetooth/bluetooth.c:1474
+#, c-format
+msgid "Disconnecting from device '%s'..."
+msgstr "デバイス '%s' から切断中..."
+
+#: ../plugins/bluetooth/bluetooth.c:1474
+#, c-format
+msgid "Disconnection failed - %s"
+msgstr "切断に失敗しました - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1556
+msgid "Use the audio menu to connect to this device"
+msgstr "オーディオメニューを使用してデバイスに接続してください"
+
+#: ../plugins/bluetooth/bluetooth.c:1558
+msgid "No usable services on this device"
+msgstr "このデバイス上には利用可能なサービスがありません"
+
+#: ../plugins/bluetooth/bluetooth.c:1623
+msgid "Disconnect..."
+msgstr "切断..."
+
+#: ../plugins/bluetooth/bluetooth.c:1629
+msgid "Connect..."
+msgstr "接続..."
+
+#. warn if no BT hardware detected
+#: ../plugins/bluetooth/bluetooth.c:1836
+msgid "No Bluetooth adapter found"
+msgstr "Bluetooth アダプターがありません"
+
+#. add enable bt option
+#: ../plugins/bluetooth/bluetooth.c:1843
+msgid "Turn On Bluetooth"
+msgstr "Bluetoothをオンにする"
+
+#. add disable bt option
+#: ../plugins/bluetooth/bluetooth.c:1852
+msgid "Turn Off Bluetooth"
+msgstr "Bluetoothをオフにする"
+
+#. discoverable toggle
+#: ../plugins/bluetooth/bluetooth.c:1860
+msgid "Stop Discoverable"
+msgstr "検出不可能にする"
+
+#: ../plugins/bluetooth/bluetooth.c:1861
+msgid "Make Discoverable"
+msgstr "検出可能にする"
+
+#. add and remove dialogs
+#: ../plugins/bluetooth/bluetooth.c:1868
+msgid "Add Device..."
+msgstr "デバイスを追加..."
+
+#: ../plugins/bluetooth/bluetooth.c:1871
+msgid "Remove Device..."
+msgstr "デバイスを削除..."
+
+#: ../plugins/bluetooth/bluetooth.c:1981
+msgid "Manage Bluetooth devices"
+msgstr "Bluetooth デバイスの管理"
+
+#: ../plugins/bluetooth/bluetooth.c:2021
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+#: ../plugins/bluetooth/bluetooth.c:2022
+msgid "Manages Bluetooth devices"
+msgstr "Bluetooth デバイスを管理する"
