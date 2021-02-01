@@ -1,0 +1,244 @@
+# Armenian translations for PACKAGE package.
+# Copyright (C) 2017 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#  <simon@raspberrypi.org>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-03-06 14:18+0000\n"
+"PO-Revision-Date: 2017-03-06 14:18+0000\n"
+"Last-Translator:  <info@armath.am>\n"
+"Language-Team: Armenian\n"
+"Language: hy\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. create the dialog, asking user to accept the pairing
+#: ../plugins/bluetooth/bluetooth.c:987
+#, c-format
+msgid "Do you accept pairing from device '%s'?"
+msgstr "Do you accept pairing from device '%s'?"
+
+#: ../plugins/bluetooth/bluetooth.c:988
+msgid "Pairing Request"
+msgstr "Միացման հարցում"
+
+#: ../plugins/bluetooth/bluetooth.c:1113
+#, c-format
+msgid "Pairing Device '%s'"
+msgstr "Միացում '%s' սարքի հետ"
+
+#: ../plugins/bluetooth/bluetooth.c:1120
+msgid "Pairing request sent to device - waiting for response..."
+msgstr "Միացման հայցն ուղարկվել է սարքին - սպասում է պատասխանին..."
+
+#. add the buttons
+#: ../plugins/bluetooth/bluetooth.c:1127 ../plugins/bluetooth/bluetooth.c:1222
+#: ../plugins/bluetooth/bluetooth.c:1376
+msgid "_Cancel"
+msgstr "Չեղարկել"
+
+#: ../plugins/bluetooth/bluetooth.c:1128 ../plugins/bluetooth/bluetooth.c:1223
+#: ../plugins/bluetooth/bluetooth.c:1455
+msgid "_OK"
+msgstr "Լավ"
+
+#: ../plugins/bluetooth/bluetooth.c:1141
+#, c-format
+msgid "Pairing failed - %s"
+msgstr "Միացումը ձախողվեց - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1150
+msgid "Pairing successful - creating connection..."
+msgstr "Միացումը ստացվեց - ստեղծում է կապակցումը..."
+
+#: ../plugins/bluetooth/bluetooth.c:1157
+msgid "Connected successfully"
+msgstr "Միացված է հաջողությամբ"
+
+#: ../plugins/bluetooth/bluetooth.c:1164
+#, c-format
+msgid "Connection failed - %s. Try to connect manually."
+msgstr "Կապակցումը ձախողվեց - %s. Փորձեք ձեռքով միացնել։"
+
+#: ../plugins/bluetooth/bluetooth.c:1172
+#, c-format
+msgid "Please enter code '%s' on device '%s'"
+msgstr "Մուտքագրել '%s' ծածկագիրը '%s' սարքի վրա"
+
+#: ../plugins/bluetooth/bluetooth.c:1180
+#, c-format
+msgid "Please confirm that device '%s' is showing the code '%s' to connect"
+msgstr "Խնդրում ենք հաստատել, որ '%s' սարքը ցույց է տալիս ծածկագիրը '%s' -ին միանալու համար"
+
+#: ../plugins/bluetooth/bluetooth.c:1190
+#, c-format
+msgid "Please enter PIN code for device '%s'"
+msgstr "Խնդրում ենք մուտքագրել PIN ծածկագիրը'%s' -ի համար"
+
+#: ../plugins/bluetooth/bluetooth.c:1203
+msgid "Waiting for response from device..."
+msgstr "Սպասում է սարքի պատասխանին..."
+
+#: ../plugins/bluetooth/bluetooth.c:1211
+msgid "Pairing Requested"
+msgstr "Միացումը հարցման մեջ է"
+
+#: ../plugins/bluetooth/bluetooth.c:1216
+#, c-format
+msgid "Device '%s' has requested a pairing. Do you accept the request?"
+msgstr "'%s' սարքն ունի միացման հայց։ Ցանկանո՞ւմ եք հաստատել այն։"
+
+#: ../plugins/bluetooth/bluetooth.c:1232
+#, c-format
+msgid "Rejecting pairing..."
+msgstr "Միացման մերժում..."
+
+#: ../plugins/bluetooth/bluetooth.c:1239
+#, c-format
+msgid "Removal of pairing failed - %s. Remove the device manually."
+msgstr "Միացման հեռացումը ձախողվեց - %s։ Ձեռքով հեռացրեք սարքը"
+
+#: ../plugins/bluetooth/bluetooth.c:1247
+msgid "Paired successfully. Use the audio menu to select as output device."
+msgstr "Հաջողությամբ միացվեց։ Ձայնային մենյուից ընտրեք արտաքին սարքը"
+
+#: ../plugins/bluetooth/bluetooth.c:1254
+msgid ""
+"Paired successfully, but this device has no services which can be used with "
+"Raspberry Pi."
+msgstr ""
+"Հաջողությամբ միացվեց, բայց այս սարքը չունի ծառայությունները, որոնք կարող են օգտագործվել"
+"Raspberry Pi-ի համար"
+
+#. create the window
+#: ../plugins/bluetooth/bluetooth.c:1367
+msgid "Add New Device"
+msgstr "Ավելացնել նոր սարք"
+
+#: ../plugins/bluetooth/bluetooth.c:1367 ../plugins/bluetooth/bluetooth.c:1421
+#, c-format
+msgid "Remove Device"
+msgstr "Հեռացնել սարքը"
+
+#: ../plugins/bluetooth/bluetooth.c:1377
+msgid "_Pair"
+msgstr "Միացնել"
+
+#: ../plugins/bluetooth/bluetooth.c:1377
+msgid "_Remove"
+msgstr "Հեռացնել"
+
+#. add a label
+#: ../plugins/bluetooth/bluetooth.c:1383
+msgid "Searching for Bluetooth devices..."
+msgstr "Բլութութ սարքի որոնում..."
+
+#: ../plugins/bluetooth/bluetooth.c:1383
+msgid "Paired Bluetooth devices"
+msgstr "Բլութութ սարքերը միացված են"
+
+#: ../plugins/bluetooth/bluetooth.c:1422
+#, c-format
+msgid "Removing paired device '%s'..."
+msgstr "ՀԵռացնել կապակցված '%s' սարքը ..."
+
+#: ../plugins/bluetooth/bluetooth.c:1422
+#, c-format
+msgid "Removal failed - %s"
+msgstr "Հեռացումը ձախողվեց - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1426
+#, c-format
+msgid "Connect Device"
+msgstr "Միացնել սարքը"
+
+#: ../plugins/bluetooth/bluetooth.c:1427
+#, c-format
+msgid "Connecting to device '%s'..."
+msgstr "Միացում '%s' սարքին..."
+
+#: ../plugins/bluetooth/bluetooth.c:1427
+#, c-format
+msgid "Connection failed - %s"
+msgstr "Կապակցումը ձախողվեց - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1431
+#, c-format
+msgid "Disconnect Device"
+msgstr "Անջատել սարքը"
+
+#: ../plugins/bluetooth/bluetooth.c:1432
+#, c-format
+msgid "Disconnecting from device '%s'..."
+msgstr "Անջատվել '%s' սարքից..."
+
+#: ../plugins/bluetooth/bluetooth.c:1432
+#, c-format
+msgid "Disconnection failed - %s"
+msgstr "Անջատումը ձախողվեց - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1515
+msgid "Use the audio menu to connect to this device"
+msgstr "Ձայնային մենյուից միացեք այս սարքին"
+
+#: ../plugins/bluetooth/bluetooth.c:1517
+msgid "No usable services on this device"
+msgstr "Այս սարքը չունի համապատասխան ծառայություններ"
+
+#: ../plugins/bluetooth/bluetooth.c:1585
+msgid "Disconnect..."
+msgstr "Անջատել..."
+
+#: ../plugins/bluetooth/bluetooth.c:1591
+msgid "Connect..."
+msgstr "Միացնել..."
+
+#. warn if no BT hardware detected
+#: ../plugins/bluetooth/bluetooth.c:1788
+msgid "No Bluetooth adapter found"
+msgstr "Բլութութ ադապտերը չի գտնվել"
+
+#. add enable bt option
+#: ../plugins/bluetooth/bluetooth.c:1795
+msgid "Turn On Bluetooth"
+msgstr "Միացնել բլութութը"
+
+#. add disable bt option
+#: ../plugins/bluetooth/bluetooth.c:1804
+msgid "Turn Off Bluetooth"
+msgstr "Անջատել բլութութը"
+
+#. discoverable toggle
+#: ../plugins/bluetooth/bluetooth.c:1812
+msgid "Stop Discoverable"
+msgstr "Կասեցնել հայտնաբերումը"
+
+#: ../plugins/bluetooth/bluetooth.c:1813
+msgid "Make Discoverable"
+msgstr "Դարձնել հայտնաբերվող"
+
+#. add and remove dialogs
+#: ../plugins/bluetooth/bluetooth.c:1820
+msgid "Add Device..."
+msgstr "Ավելացնել սարք.."
+
+#: ../plugins/bluetooth/bluetooth.c:1823
+msgid "Remove Device..."
+msgstr "Հեռացնել սարք..."
+
+#: ../plugins/bluetooth/bluetooth.c:1905
+msgid "Manage Bluetooth devices"
+msgstr "Կառավարել բլութութ սարքերը"
+
+#: ../plugins/bluetooth/bluetooth.c:1940
+msgid "Bluetooth"
+msgstr "Բլութութ"
+
+#: ../plugins/bluetooth/bluetooth.c:1941
+msgid "Manages Bluetooth devices"
+msgstr "Կառավարում է բլութութ սարքերը"
