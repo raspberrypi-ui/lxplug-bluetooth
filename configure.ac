@@ -30,7 +30,7 @@ AC_HELP_STRING([--enable-gtk3],[enable to use gtk-3.0 instead of gtk-2.0]),
   yes)  enable_gtk3=yes ;;
   no)   enable_gtk3=no ;;
   *) AC_MSG_ERROR([bad value "${enableval}" for --enable-gtk3, use "yes" (default) or "no".]) ;;
-esac],[])
+esac],[enable_gtk3=yes])
 
 if test "x$enable_gtk3" = "xyes" ; then
   CFLAGS="$CFLAGS -DENABLE_GTK3"
