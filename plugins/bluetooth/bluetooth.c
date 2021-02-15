@@ -37,6 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <gio/gio.h>
 
 #include "plugin.h"
+#include "obex.h"
 
 #define DEBUG_ON
 #ifdef DEBUG_ON
@@ -95,6 +96,7 @@ typedef struct {
     guint flash_timer;
     guint flash_state;
     GdkPixbuf *icon_ref[ICON_CACHE_SIZE];
+    Obex *obex;
 } BluetoothPlugin;
 
 typedef enum {
@@ -332,6 +334,7 @@ static void initialise (BluetoothPlugin *bt)
         g_signal_connect (bt->objmanager, "interface-proxy-signal", G_CALLBACK (cb_interface_signal), bt);
         g_signal_connect (bt->objmanager, "interface-proxy-properties-changed", G_CALLBACK (cb_interface_properties), bt);
     }
+    bt->obex->btobjmanager = bt->objmanager;
 
     // get a connection to the system DBus
     error = NULL;
@@ -373,6 +376,7 @@ static void clear (BluetoothPlugin *bt)
 {
     if (bt->objmanager) g_object_unref (bt->objmanager);
     bt->objmanager = NULL;
+    bt->obex->btobjmanager = NULL;
     if (bt->busconnection)
     {
         if (bt->agentobj) g_dbus_connection_unregister_object (bt->busconnection, bt->agentobj);
@@ -385,8 +389,8 @@ static void clear (BluetoothPlugin *bt)
 }
 
 /* Scan for BlueZ objects on DBus, identifying the agent manager
-   (of which there should be only one per BlueZ instance) and an adapter (the object 
-   which corresponds to the Bluetooth hardware on the host computer). */ 
+   (of which there should be only one per BlueZ instance) and an adapter (the object
+   which corresponds to the Bluetooth hardware on the host computer). */
 
 static void find_hardware (BluetoothPlugin *bt)
 {
@@ -396,7 +400,6 @@ static void find_hardware (BluetoothPlugin *bt)
     GDBusProxy *newagentmanager = NULL, *newadapter = NULL;
     GError *error;
     GVariant *res;
-    int bt_state;
 
     // if there's no object manager, you won't find anything, and it'll crash...
     if (!bt->objmanager) return;
@@ -719,7 +722,7 @@ static void cb_discover_start (GObject *source, GAsyncResult *res, gpointer user
     BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
     GError *error = NULL;
     GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
-    
+
     if (error)
     {
         DEBUG ("Discoverable start - error %s", error->message);
@@ -739,7 +742,7 @@ static void cb_discover_end (GObject *source, GAsyncResult *res, gpointer user_d
     BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
     GError *error = NULL;
     GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
-    
+
     if (error)
     {
         DEBUG ("Discoverable end - error %s", error->message);
@@ -1297,7 +1300,7 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
 
 static gboolean selected_path (BluetoothPlugin *bt, char **path, char **name)
 {
-    GtkTreeSelection *sel; 
+    GtkTreeSelection *sel;
     GtkTreeModel *model;
     GtkTreeIter iter;
 
@@ -1311,7 +1314,7 @@ static gboolean selected_path (BluetoothPlugin *bt, char **path, char **name)
     {
         *path = NULL;
         return FALSE;
-    }    
+    }
     gtk_tree_model_get (model, &iter, 0, path, 1, name, -1);
     return TRUE;
 }
@@ -1567,7 +1570,7 @@ static void handle_menu_connect (GtkWidget *widget, gpointer user_data)
         }
         g_free (name);
         g_free (path);
-        valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (bt->pair_list), &iter);    
+        valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (bt->pair_list), &iter);
     }
 }
 
@@ -1605,7 +1608,7 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     gchar *name, *path;
     GtkWidget *item, *submenu, *smi, *icon;
- 
+
     gtk_tree_model_get (model, iter, 0, &path, 1, &name, -1);
     item = gtk_image_menu_item_new_with_label (name);
     gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (item), TRUE);
@@ -1699,7 +1702,7 @@ static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *
 
     gtk_list_store_set (lst, &iter, 0, g_dbus_object_get_object_path (object),
         1, var1 ? g_variant_get_string (var1, NULL) : "Unnamed device", 2, g_variant_get_boolean (var2),
-        3, g_variant_get_boolean (var3), 4, g_variant_get_boolean (var4), 
+        3, g_variant_get_boolean (var3), 4, g_variant_get_boolean (var4),
         5, icon, -1);
 
     if (var1) g_variant_unref (var1);
@@ -1811,7 +1814,7 @@ static void menu_popup_set_position (GtkMenu *menu, gint *px, gint *py, gboolean
 
 static void show_menu (BluetoothPlugin *bt)
 {
-    GtkWidget *item, *sel = gtk_image_new ();
+    GtkWidget *item;
     GtkTreeIter iter;
     GList *items;
     int bt_state;
@@ -1960,6 +1963,7 @@ static void bluetooth_destructor (gpointer user_data)
     BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
 
     /* Deallocate memory */
+    obex_destroy(bt->obex);
     g_free (bt);
 }
 
@@ -1968,6 +1972,8 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
 {
     /* Allocate and initialize plugin context */
     BluetoothPlugin *bt = g_new0 (BluetoothPlugin, 1);
+    bt->obex = (gpointer) obex_create ();
+    obex_read_settings(bt->obex, settings);
 
 #ifdef ENABLE_NLS
     setlocale (LC_ALL, "");
@@ -2014,6 +2020,29 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
     return bt->plugin;
 }
 
+static gboolean obex_apply_configuration (gpointer user_data)
+{
+    BluetoothPlugin *bt = lxpanel_plugin_get_data ((GtkWidget *)user_data);
+
+    config_group_set_int (bt->settings, "AcceptTrusted", bt->obex->accept_trusted);
+    config_group_set_string (bt->settings, "IncomingDir", bt->obex->incoming_dir);
+    return TRUE;
+}
+
+/* Callback when the configuration dialog is to be shown. */
+static GtkWidget* obex_configure (LXPanel *panel, GtkWidget *p)
+{
+    BluetoothPlugin * bt = lxpanel_plugin_get_data(p);
+#ifdef ENABLE_NLS
+    textdomain (GETTEXT_PACKAGE);
+#endif
+    return lxpanel_generic_config_dlg(_("File Transfer Settings"), panel,
+        obex_apply_configuration, p,
+        _("Incoming Folder"), &bt->obex->incoming_dir, CONF_TYPE_DIRECTORY_ENTRY,
+        _("Auto-accept files from trusted devices"), &bt->obex->accept_trusted, CONF_TYPE_BOOL,
+        NULL);
+}
+
 FM_DEFINE_MODULE(lxpanel_gtk, bluetooth)
 
 /* Plugin descriptor. */
@@ -2021,6 +2050,7 @@ LXPanelPluginInit fm_module_init_lxpanel_gtk = {
     .name = N_("Bluetooth"),
     .description = N_("Manages Bluetooth devices"),
     .new_instance = bluetooth_constructor,
+    .config = obex_configure,
     .reconfigure = bluetooth_configuration_changed,
     .button_press_event = bluetooth_button_press_event,
     .gettext_package = GETTEXT_PACKAGE
