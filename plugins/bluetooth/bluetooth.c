@@ -1022,13 +1022,19 @@ static guint request_authorization (BluetoothPlugin *bt, const gchar *device)
 
     // create the dialog, asking user to accept the pairing
     sprintf (buffer, _("Do you accept pairing from device '%s'?"), device);
+#if GTK_CHECK_VERSION(3, 0, 0)
+    bt->pair_dialog = gtk_dialog_new_with_buttons (_("Pairing Request"), NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, _("_Cancel"), 0, _("_OK"), 1, NULL);
+#else
     bt->pair_dialog = gtk_dialog_new_with_buttons (_("Pairing Request"), NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_CANCEL, 0, GTK_STOCK_OK, 1, NULL);
+#endif
     gtk_window_set_icon_name (GTK_WINDOW (bt->pair_dialog), "preferences-system-bluetooth");
     gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER);
     bt->pair_label = gtk_label_new (buffer);
     gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
     gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
+#if !GTK_CHECK_VERSION(3, 0, 0)
     gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
+#endif
     gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label , TRUE, TRUE, 0);
     gtk_widget_show_all (bt->pair_dialog);
 
@@ -1155,7 +1161,9 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             bt->pair_label = gtk_label_new (_("Pairing request sent to device - waiting for response..."));
             gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
             gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
+#if !GTK_CHECK_VERSION(3, 0, 0)
             gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
+#endif
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label, TRUE, TRUE, 0);
             bt->pair_entry = gtk_entry_new_with_buffer (bt->pinbuf);
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_entry, TRUE, TRUE, 0);
@@ -1251,7 +1259,9 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             bt->pair_label = gtk_label_new (buffer);
             gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
             gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
+#if !GTK_CHECK_VERSION(3, 0, 0)
             gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
+#endif
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label, TRUE, TRUE, 0);
             bt->pair_cancel = gtk_dialog_add_button (GTK_DIALOG (bt->pair_dialog), _("_Cancel"), 0);
             bt->pair_ok = gtk_dialog_add_button (GTK_DIALOG (bt->pair_dialog), _("_OK"), 1);
@@ -1421,7 +1431,9 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 
     // add a label
     lbl = gtk_label_new (type == DIALOG_PAIR ? _("Searching for Bluetooth devices...") : _("Paired Bluetooth devices"));
+#if !GTK_CHECK_VERSION(3, 0, 0)
     gtk_misc_set_alignment (GTK_MISC (lbl), 0.0, 0.5);
+#endif
     gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), lbl, FALSE, FALSE, 0);
 
     // add a scrolled window
@@ -1485,7 +1497,9 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STA
             bt->conn_label = gtk_label_new (buffer2);
             gtk_label_set_line_wrap (GTK_LABEL (bt->conn_label), TRUE);
             gtk_label_set_justify (GTK_LABEL (bt->conn_label), GTK_JUSTIFY_LEFT);
+#if !GTK_CHECK_VERSION(3, 0, 0)
             gtk_misc_set_alignment (GTK_MISC (bt->conn_label), 0.0, 0.0);
+#endif
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->conn_dialog))), bt->conn_label, TRUE, TRUE, 0);
             g_signal_connect (bt->conn_dialog, "delete_event", G_CALLBACK (delete_conn), bt);
             gtk_widget_show_all (bt->conn_dialog);
@@ -1607,8 +1621,15 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     GtkWidget *item, *submenu, *smi, *icon;
  
     gtk_tree_model_get (model, iter, 0, &path, 1, &name, -1);
+#if GTK_CHECK_VERSION(3, 0, 0)
+    GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+    GtkWidget *label = gtk_label_new (name);
+    item = gtk_menu_item_new ();
+    gtk_container_add (GTK_CONTAINER (item), box);
+#else
     item = gtk_image_menu_item_new_with_label (name);
     gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (item), TRUE);
+#endif
 
     // create a submenu for each paired device
     submenu = gtk_menu_new ();
@@ -1619,15 +1640,20 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     if (is_connected (bt, path))
     {
         lxpanel_plugin_set_menu_icon (bt->panel, icon, "bluetooth-online");
-        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), icon);
         smi = gtk_menu_item_new_with_label (_("Disconnect..."));
     }
     else
     {
         lxpanel_plugin_set_menu_icon (bt->panel, icon, "bluetooth-offline");
-        gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), icon);
         smi = gtk_menu_item_new_with_label (_("Connect..."));
     }
+
+#if GTK_CHECK_VERSION(3, 0, 0)
+    gtk_container_add (GTK_CONTAINER (box), icon);
+    gtk_container_add (GTK_CONTAINER (box), label);
+#else
+    gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), icon);
+#endif
 
     // use the widget name of the menu item to store the unique path of the paired device
     gtk_widget_set_name (smi, path);
@@ -1828,6 +1854,9 @@ static void show_menu (BluetoothPlugin *bt)
         g_list_free (items);
     }
     else bt->menu = gtk_menu_new ();
+#if GTK_CHECK_VERSION(3, 0, 0)
+    gtk_menu_set_reserve_toggle_size (GTK_MENU (bt->menu), FALSE);
+#endif
 
     bt_state = bt_enabled ();
     if ((bt_state == -2 && bt->adapter == NULL) || bt_state == -1)
@@ -1895,7 +1924,11 @@ static void show_menu (BluetoothPlugin *bt)
     }
 
     gtk_widget_show_all (bt->menu);
+#if GTK_CHECK_VERSION(3, 0, 0)
+    gtk_menu_popup_at_widget (GTK_MENU (bt->menu), bt->plugin, GDK_GRAVITY_NORTH_WEST, GDK_GRAVITY_NORTH_WEST, NULL);
+#else
     gtk_menu_popup (GTK_MENU (bt->menu), NULL, NULL, menu_popup_set_position, bt, 1, gtk_get_current_event_time ());
+#endif
 }
 
 static void update_icon (BluetoothPlugin *bt)
