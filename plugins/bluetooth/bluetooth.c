@@ -1947,7 +1947,11 @@ static void update_icon (BluetoothPlugin *bt)
             g_source_remove (bt->flash_timer);
             bt->flash_timer = 0;
         }
+#if GTK_CHECK_VERSION(3, 0, 0)
         gtk_widget_hide (bt->plugin);
+#else
+        gtk_widget_hide_all (bt->plugin);
+#endif
         gtk_widget_set_sensitive (bt->plugin, FALSE);
         return;
     }
@@ -2028,7 +2032,11 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
 
     /* Show the widget */
     gtk_widget_show_all (bt->plugin);
+#if GTK_CHECK_VERSION(3, 0, 0)
     gtk_widget_hide (bt->plugin);
+#else
+    gtk_widget_hide_all (bt->plugin);
+#endif
     gtk_widget_set_sensitive (bt->plugin, FALSE);
 
     /* Initialise plugin data */
