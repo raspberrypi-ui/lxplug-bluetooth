@@ -1835,13 +1835,6 @@ static void menu_popup_set_position (GtkMenu *menu, gint *px, gint *py, gboolean
     *push_in = TRUE;
 }
 
-static gboolean volumealsa_mouse_out (GtkWidget *widget, GdkEventButton *event, BluetoothPlugin *bt)
-{
-    /* Hide the widget. */
-    gtk_widget_hide (bt->menu);
-    printf ("bt mouse out\n");
-    return FALSE;
-}
 static void show_menu (BluetoothPlugin *bt)
 {
     GtkWidget *item, *sel = gtk_image_new ();
@@ -1933,7 +1926,6 @@ static void show_menu (BluetoothPlugin *bt)
     gtk_widget_show_all (bt->menu);
 #if GTK_CHECK_VERSION(3, 0, 0)
     gtk_menu_popup_at_widget (GTK_MENU (bt->menu), bt->plugin, GDK_GRAVITY_NORTH_WEST, GDK_GRAVITY_NORTH_WEST, NULL);
-    //g_signal_connect (bt->menu, "focus-out-event", G_CALLBACK (volumealsa_mouse_out), bt);
 #else
     gtk_menu_popup (GTK_MENU (bt->menu), NULL, NULL, menu_popup_set_position, bt, 1, gtk_get_current_event_time ());
 #endif
