@@ -1622,10 +1622,7 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
  
     gtk_tree_model_get (model, iter, 0, &path, 1, &name, -1);
 #if GTK_CHECK_VERSION(3, 0, 0)
-    GtkWidget *box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, MENU_ICON_SPACE);
-    GtkWidget *label = gtk_label_new (name);
-    item = gtk_menu_item_new ();
-    gtk_container_add (GTK_CONTAINER (item), box);
+    item = lxpanel_plugin_new_menu_item (bt->panel, name, 0, NULL);
 #else
     item = gtk_image_menu_item_new_with_label (name);
     gtk_image_menu_item_set_always_show_image (GTK_IMAGE_MENU_ITEM (item), TRUE);
@@ -1649,8 +1646,7 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     }
 
 #if GTK_CHECK_VERSION(3, 0, 0)
-    gtk_container_add (GTK_CONTAINER (box), icon);
-    gtk_container_add (GTK_CONTAINER (box), label);
+    lxpanel_plugin_update_menu_icon (item, icon);
 #else
     gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (item), icon);
 #endif
@@ -1862,14 +1858,22 @@ static void show_menu (BluetoothPlugin *bt)
     if ((bt_state == -2 && bt->adapter == NULL) || bt_state == -1)
     {
         // warn if no BT hardware detected
+#if GTK_CHECK_VERSION(3, 0, 0)
+        item = lxpanel_plugin_new_menu_item (bt->panel, _("No Bluetooth adapter found"), 0, NULL);
+#else
         item = gtk_menu_item_new_with_label (_("No Bluetooth adapter found"));
+#endif
         gtk_widget_set_sensitive (item, FALSE);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
     }
     else if (bt_state == 0)
     {
         // add enable bt option
+#if GTK_CHECK_VERSION(3, 0, 0)
+        item = lxpanel_plugin_new_menu_item (bt->panel, _("Turn On Bluetooth"), 0, NULL);
+#else
         item = gtk_menu_item_new_with_label (_("Turn On Bluetooth"));
+#endif
         g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (toggle_bt), bt);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
     }
@@ -1878,7 +1882,11 @@ static void show_menu (BluetoothPlugin *bt)
         if (bt_state == 1)
         {
             // add disable bt option
+#if GTK_CHECK_VERSION(3, 0, 0)
+            item = lxpanel_plugin_new_menu_item (bt->panel, _("Turn Off Bluetooth"), 0, NULL);
+#else
             item = gtk_menu_item_new_with_label (_("Turn Off Bluetooth"));
+#endif
             g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (toggle_bt), bt);
             gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
             item = gtk_separator_menu_item_new ();
@@ -1886,18 +1894,36 @@ static void show_menu (BluetoothPlugin *bt)
         }
 
         // discoverable toggle
-        if (is_discoverable (bt)) item = gtk_menu_item_new_with_label (_("Stop Discoverable"));
-        else item = gtk_menu_item_new_with_label (_("Make Discoverable"));
+        if (is_discoverable (bt))
+#if GTK_CHECK_VERSION(3, 0, 0)
+            item = lxpanel_plugin_new_menu_item (bt->panel, _("Stop Discoverable"), 0, NULL);
+#else
+            item = gtk_menu_item_new_with_label (_("Stop Discoverable"));
+#endif
+        else
+#if GTK_CHECK_VERSION(3, 0, 0)
+            item = lxpanel_plugin_new_menu_item (bt->panel, _("Make Discoverable"), 0, NULL);
+#else
+            item = gtk_menu_item_new_with_label (_("Make Discoverable"));
+#endif
         g_signal_connect (item, "activate", G_CALLBACK (handle_menu_discover), bt);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
         item = gtk_separator_menu_item_new ();
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
 
         // add and remove dialogs
+#if GTK_CHECK_VERSION(3, 0, 0)
+        item = lxpanel_plugin_new_menu_item (bt->panel, _("Add Device..."), 0, NULL);
+#else
         item = gtk_menu_item_new_with_label (_("Add Device..."));
+#endif
         g_signal_connect (item, "activate", G_CALLBACK (handle_menu_add), bt);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
+#if GTK_CHECK_VERSION(3, 0, 0)
+        item = lxpanel_plugin_new_menu_item (bt->panel, _("Remove Device..."), 0, NULL);
+#else
         item = gtk_menu_item_new_with_label (_("Remove Device..."));
+#endif
         g_signal_connect (item, "activate", G_CALLBACK (handle_menu_remove), bt);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
 
