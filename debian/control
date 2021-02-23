@@ -1,9 +1,9 @@
 Source: lxplug-bluetooth
 Section: x11
 Priority: optional
-Maintainer: Simon Long <simon@raspberrypi.org>
+Maintainer: Simon Long <simon@raspberrypi.com>
 Build-Depends:
- debhelper (>= 9), dh-autoreconf, intltool, libgtk2.0-dev (>= 2.18), 
+ debhelper (>= 9), dh-autoreconf, intltool, libgtk-3-dev (>= 3.24),
  libiw-dev [linux-any], libmenu-cache-dev | libmenu-cache1-dev,
  libwnck-dev, libfm-gtk-dev (>= 1.2.0), lxpanel-dev (>= 0.10.0-2+rpt8)
 Standards-Version: 4.3.0
@@ -11,7 +11,7 @@ Homepage: http://raspberrypi.org/
 
 Package: lxplug-bluetooth
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}, lxmenu-data,
+Depends: ${misc:Depends}, ${shlibs:Depends}, lxmenu-data, libgtk-3-0 (>= 3.24),
  lxpanel (>= 0.10.0-2+rpt8), lxpanel-data (>= 0.10.0-2+rpt8), libfm-modules
 Recommends: pulseaudio-module-bluetooth | bluealsa, pi-bluetooth
 Description: Bluetooth plugin for lxpanel
