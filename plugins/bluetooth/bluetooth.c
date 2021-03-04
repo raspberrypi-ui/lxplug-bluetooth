@@ -230,11 +230,12 @@ static void remove_device (BluetoothPlugin *bt, const gchar *path);
 static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data);
 static DEVICE_TYPE check_uuids (BluetoothPlugin *bt, const gchar *path);
 
-static guint request_authorization (BluetoothPlugin *bt, const gchar *device);
 static void handle_pin_entered (GtkButton *button, gpointer user_data);
 static void handle_pass_entered (GtkButton *button, gpointer user_data);
 static void handle_pin_confirmed (GtkButton *button, gpointer user_data);
 static void handle_pin_rejected (GtkButton *button, gpointer user_data);
+static void handle_authorize_yes (GtkButton *button, gpointer user_data);
+static void handle_authorize_no (GtkButton *button, gpointer user_data);
 static void handle_cancel_pair (GtkButton *button, gpointer user_data);
 static void handle_close_pair_dialog (GtkButton *button, gpointer user_data);
 static gint delete_pair (GtkWidget *widget, GdkEvent *event, gpointer user_data);
@@ -536,10 +537,7 @@ static void handle_method_call (GDBusConnection *connection, const gchar *sender
     }
     else if (g_strcmp0 (method_name, "RequestAuthorization") == 0)
     {
-        if (request_authorization (bt, g_variant_get_string (var, NULL)))
-            g_dbus_method_invocation_return_value (invocation, NULL);
-        else
-            g_dbus_method_invocation_return_dbus_error (invocation, "org.bluez.Error.Rejected", "Pairing rejected by user");
+        show_pairing_dialog (bt, STATE_PAIR_REQUEST, g_variant_get_string (var, NULL), NULL);
     }
     g_variant_unref (var);
     g_object_unref (interface);
@@ -1018,36 +1016,6 @@ static DEVICE_TYPE check_uuids (BluetoothPlugin *bt, const gchar *path)
 
 /* Functions to respond to method calls on the agent */
 
-static guint request_authorization (BluetoothPlugin *bt, const gchar *device)
-{
-    char buffer[256];
-    guint res;
-
-    // create the dialog, asking user to accept the pairing
-    sprintf (buffer, _("Do you accept pairing from device '%s'?"), device);
-#if GTK_CHECK_VERSION(3, 0, 0)
-    bt->pair_dialog = gtk_dialog_new_with_buttons (_("Pairing Request"), NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, _("_Cancel"), 0, _("_OK"), 1, NULL);
-#else
-    bt->pair_dialog = gtk_dialog_new_with_buttons (_("Pairing Request"), NULL, GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT, GTK_STOCK_CANCEL, 0, GTK_STOCK_OK, 1, NULL);
-#endif
-    gtk_window_set_icon_name (GTK_WINDOW (bt->pair_dialog), "preferences-system-bluetooth");
-    gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER);
-    bt->pair_label = gtk_label_new (buffer);
-    gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
-    gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
-#if !GTK_CHECK_VERSION(3, 0, 0)
-    gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
-#endif
-    gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label , TRUE, TRUE, 0);
-    gtk_widget_show_all (bt->pair_dialog);
-
-    // block while waiting for user response
-    res = gtk_dialog_run (GTK_DIALOG (bt->pair_dialog));
-    gtk_widget_destroy (bt->pair_dialog);
-    bt->pair_dialog = NULL;
-    return res;
-}
-
 static void handle_pin_entered (GtkButton *button, gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
@@ -1085,6 +1053,26 @@ static void handle_pin_rejected (GtkButton *button, gpointer user_data)
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     DEBUG ("PIN rejected by user");
     g_dbus_method_invocation_return_dbus_error (bt->invocation, "org.bluez.Error.Rejected", "Confirmation rejected by user");
+    if (bt->pairing_object)
+    {
+        g_free (bt->pairing_object);
+        bt->pairing_object = NULL;
+    }
+}
+
+static void handle_authorize_yes (GtkButton *button, gpointer user_data)
+{
+    BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+    DEBUG ("Pairing authorized by user");
+    show_pairing_dialog (bt, STATE_WAITING, NULL, NULL);
+    g_dbus_method_invocation_return_value (bt->invocation, NULL);
+}
+
+static void handle_authorize_no (GtkButton *button, gpointer user_data)
+{
+    BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+    DEBUG ("Pairing not authorized by user");
+    g_dbus_method_invocation_return_dbus_error (bt->invocation, "org.bluez.Error.Rejected", "Pairing rejected by user");
     if (bt->pairing_object)
     {
         g_free (bt->pairing_object);
@@ -1254,25 +1242,38 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             break;
 
         case STATE_PAIR_REQUEST:
-            bt->pair_dialog = gtk_dialog_new_with_buttons (_("Pairing Requested"), NULL, 0, NULL);
-            gtk_window_set_icon_name (GTK_WINDOW (bt->pair_dialog), "preferences-system-bluetooth");
-            gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER);
-            gtk_container_set_border_width (GTK_CONTAINER (bt->pair_dialog), 10);
-            sprintf (buffer, _("Device '%s' has requested a pairing. Do you accept the request?"), device);
-            bt->pair_label = gtk_label_new (buffer);
-            gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
-            gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
+            if (bt->pair_dialog)
+            {
+                sprintf (buffer, _("Device '%s' has requested a pairing. Do you accept the request?"), device);
+                gtk_label_set_text (GTK_LABEL (bt->pair_label), buffer);
+                connect_cancel (bt, G_CALLBACK (handle_authorize_no));
+                connect_ok (bt, G_CALLBACK (handle_authorize_yes));
+                gtk_widget_hide (bt->pair_entry);
+                gtk_widget_show (bt->pair_ok);
+                gtk_widget_show (bt->pair_cancel);
+            }
+            else
+            {
+                bt->pair_dialog = gtk_dialog_new_with_buttons (_("Pairing Requested"), NULL, 0, NULL);
+                gtk_window_set_icon_name (GTK_WINDOW (bt->pair_dialog), "preferences-system-bluetooth");
+                gtk_window_set_position (GTK_WINDOW (bt->pair_dialog), GTK_WIN_POS_CENTER);
+                gtk_container_set_border_width (GTK_CONTAINER (bt->pair_dialog), 10);
+                sprintf (buffer, _("Device '%s' has requested a pairing. Do you accept the request?"), device);
+                bt->pair_label = gtk_label_new (buffer);
+                gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
+                gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
 #if !GTK_CHECK_VERSION(3, 0, 0)
-            gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
+                gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
 #endif
-            gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label, TRUE, TRUE, 0);
-            bt->pair_cancel = gtk_dialog_add_button (GTK_DIALOG (bt->pair_dialog), _("_Cancel"), 0);
-            bt->pair_ok = gtk_dialog_add_button (GTK_DIALOG (bt->pair_dialog), _("_OK"), 1);
-            bt->ok_instance = 0;
-            bt->cancel_instance = 0;
-            connect_cancel (bt, G_CALLBACK (handle_reject_pair));
-            connect_ok (bt, G_CALLBACK (handle_accept_pair));
-            gtk_widget_show_all (bt->pair_dialog);
+                gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label, TRUE, TRUE, 0);
+                bt->pair_cancel = gtk_dialog_add_button (GTK_DIALOG (bt->pair_dialog), _("_Cancel"), 0);
+                bt->pair_ok = gtk_dialog_add_button (GTK_DIALOG (bt->pair_dialog), _("_OK"), 1);
+                bt->ok_instance = 0;
+                bt->cancel_instance = 0;
+                connect_cancel (bt, G_CALLBACK (handle_reject_pair));
+                connect_ok (bt, G_CALLBACK (handle_accept_pair));
+                gtk_widget_show_all (bt->pair_dialog);
+            }
             break;
 
         case STATE_REMOVING:
