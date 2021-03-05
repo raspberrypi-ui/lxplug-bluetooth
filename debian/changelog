@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.20) buster; urgency=medium
+
+  * Add authorisation dialog required by some BT-LE pairings
+
+ -- Simon Long <simon@raspberrypi.com>  Thu, 04 Mar 2021 16:44:36 +0000
+
 lxplug-bluetooth (0.19) buster; urgency=medium
 
   * Added Japanese translation
