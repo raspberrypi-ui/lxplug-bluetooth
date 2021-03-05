@@ -1,0 +1,245 @@
+# Icelandic translation for lxplug-bluetooth package.
+# Copyright (C) 2021 Free Software Foundation, Inc.
+# This file is distributed under the same license as the lxplug-bluetooth package.
+#
+# Sveinn í Felli <sv1@fellsnet.is>, 2021.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-04-21 22:24+0300\n"
+"PO-Revision-Date: 2021-03-05 12:00+0000\n"
+"Last-Translator: Sveinn í Felli <sv1@fellsnet.is>\n"
+"Language-Team: Icelandic <translation-team-is@lists.sourceforge.net>\n"
+"Language: is\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 2.0\n"
+
+#. create the dialog, asking user to accept the pairing
+#: ../plugins/bluetooth/bluetooth.c:987
+#, c-format
+msgid "Do you accept pairing from device '%s'?"
+msgstr "Samþykkir þú pörun við tækið '%s'?"
+
+#: ../plugins/bluetooth/bluetooth.c:988
+msgid "Pairing Request"
+msgstr "Beiðni um pörun"
+
+#: ../plugins/bluetooth/bluetooth.c:1113
+#, c-format
+msgid "Pairing Device '%s'"
+msgstr "Para tæki '%s'"
+
+#: ../plugins/bluetooth/bluetooth.c:1120
+msgid "Pairing request sent to device - waiting for response..."
+msgstr "Beiðni um pörun send til tækis - bíð eftir svari..."
+
+#. add the buttons
+#: ../plugins/bluetooth/bluetooth.c:1127 ../plugins/bluetooth/bluetooth.c:1222
+#: ../plugins/bluetooth/bluetooth.c:1376
+msgid "_Cancel"
+msgstr "_Hætta við"
+
+#: ../plugins/bluetooth/bluetooth.c:1128 ../plugins/bluetooth/bluetooth.c:1223
+#: ../plugins/bluetooth/bluetooth.c:1455
+msgid "_OK"
+msgstr "Í _lagi"
+
+#: ../plugins/bluetooth/bluetooth.c:1141
+#, c-format
+msgid "Pairing failed - %s"
+msgstr "Pörun mistókst - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1150
+msgid "Pairing successful - creating connection..."
+msgstr "Pörun mistókst - útbý tengingu..."
+
+#: ../plugins/bluetooth/bluetooth.c:1157
+msgid "Connected successfully"
+msgstr "Tókst að tengjast"
+
+#: ../plugins/bluetooth/bluetooth.c:1164
+#, c-format
+msgid "Connection failed - %s. Try to connect manually."
+msgstr "Tenging mistókst - %s. Reyndu að tengjast handvirkt."
+
+#: ../plugins/bluetooth/bluetooth.c:1172
+#, c-format
+msgid "Please enter code '%s' on device '%s'"
+msgstr "Settu inn kóðann '%s' á tækinu '%s'"
+
+#: ../plugins/bluetooth/bluetooth.c:1180
+#, c-format
+msgid "Please confirm that device '%s' is showing the code '%s' to connect"
+msgstr "Staðfestu að tækið '%s' sýni kóðann '%s' til að tengjast"
+
+#: ../plugins/bluetooth/bluetooth.c:1190
+#, c-format
+msgid "Please enter PIN code for device '%s'"
+msgstr "Settu inn PIN-kóðann fyrir tækið '%s'"
+
+#: ../plugins/bluetooth/bluetooth.c:1203
+msgid "Waiting for response from device..."
+msgstr "Bíð eftir svari frá tæki..."
+
+#: ../plugins/bluetooth/bluetooth.c:1211
+msgid "Pairing Requested"
+msgstr "Beðið um pörun"
+
+#: ../plugins/bluetooth/bluetooth.c:1216
+#, c-format
+msgid "Device '%s' has requested a pairing. Do you accept the request?"
+msgstr "Tækið '%s' hefur beðið um pörun. Samþykkir þú beiðnina?"
+
+#: ../plugins/bluetooth/bluetooth.c:1232
+#, c-format
+msgid "Rejecting pairing..."
+msgstr "Hafna pörun..."
+
+#: ../plugins/bluetooth/bluetooth.c:1239
+#, c-format
+msgid "Removal of pairing failed - %s. Remove the device manually."
+msgstr "Fjarlæging pörunar mistókst - %s. Fjarlægðu tækið handvirkt."
+
+#: ../plugins/bluetooth/bluetooth.c:1247
+msgid "Paired successfully. Use the audio menu to select as output device."
+msgstr "Pörun tókst. Notaðu hljóðvalmyndina til að velja úttakstæki."
+
+#: ../plugins/bluetooth/bluetooth.c:1254
+msgid ""
+"Paired successfully, but this device has no services which can be used with "
+"Raspberry Pi."
+msgstr ""
+"Pörun tókst, en þetta tæki er ekki með neinar þjónustur sem hægt er að nota"
+" með Raspberry Pi."
+
+#. create the window
+#: ../plugins/bluetooth/bluetooth.c:1367
+msgid "Add New Device"
+msgstr "Bæta við nýju tæki"
+
+#: ../plugins/bluetooth/bluetooth.c:1367 ../plugins/bluetooth/bluetooth.c:1421
+#, c-format
+msgid "Remove Device"
+msgstr "Fjarlægja tæki"
+
+#: ../plugins/bluetooth/bluetooth.c:1377
+msgid "_Pair"
+msgstr "_Para"
+
+#: ../plugins/bluetooth/bluetooth.c:1377
+msgid "_Remove"
+msgstr "Fja_rlægja"
+
+#. add a label
+#: ../plugins/bluetooth/bluetooth.c:1383
+msgid "Searching for Bluetooth devices..."
+msgstr "Leita að Bluetooth-tækjum..."
+
+#: ../plugins/bluetooth/bluetooth.c:1383
+msgid "Paired Bluetooth devices"
+msgstr "Pöruð Bluetooth-tæki"
+
+#: ../plugins/bluetooth/bluetooth.c:1422
+#, c-format
+msgid "Removing paired device '%s'..."
+msgstr "Fjarlægi parað tæki '%s'..."
+
+#: ../plugins/bluetooth/bluetooth.c:1422
+#, c-format
+msgid "Removal failed - %s"
+msgstr "Fjarlæging mistókst - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1426
+#, c-format
+msgid "Connect Device"
+msgstr "Tengja tæki"
+
+#: ../plugins/bluetooth/bluetooth.c:1427
+#, c-format
+msgid "Connecting to device '%s'..."
+msgstr "Tengist við tæki '%s'..."
+
+#: ../plugins/bluetooth/bluetooth.c:1427
+#, c-format
+msgid "Connection failed - %s"
+msgstr "Tenging mistókst - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1431
+#, c-format
+msgid "Disconnect Device"
+msgstr "Aftengja tæki"
+
+#: ../plugins/bluetooth/bluetooth.c:1432
+#, c-format
+msgid "Disconnecting from device '%s'..."
+msgstr "Aftengist tæki '%s'..."
+
+#: ../plugins/bluetooth/bluetooth.c:1432
+#, c-format
+msgid "Disconnection failed - %s"
+msgstr "Aftenging mistókst - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1515
+msgid "Use the audio menu to connect to this device"
+msgstr "Notaðu hljóðvalmyndina til að tengjast þessu tæki"
+
+#: ../plugins/bluetooth/bluetooth.c:1517
+msgid "No usable services on this device"
+msgstr "Engar nothæfar þjónustur á þessu tæki"
+
+#: ../plugins/bluetooth/bluetooth.c:1585
+msgid "Disconnect..."
+msgstr "Aftengjast..."
+
+#: ../plugins/bluetooth/bluetooth.c:1591
+msgid "Connect..."
+msgstr "Tengjast..."
+
+#. warn if no BT hardware detected
+#: ../plugins/bluetooth/bluetooth.c:1788
+msgid "No Bluetooth adapter found"
+msgstr "Enginn Bluetooth-búnaður fannst"
+
+#. add enable bt option
+#: ../plugins/bluetooth/bluetooth.c:1795
+msgid "Turn On Bluetooth"
+msgstr "Kveikja á Bluetooth"
+
+#. add disable bt option
+#: ../plugins/bluetooth/bluetooth.c:1804
+msgid "Turn Off Bluetooth"
+msgstr "Slökkva á Bluetooth"
+
+#. discoverable toggle
+#: ../plugins/bluetooth/bluetooth.c:1812
+msgid "Stop Discoverable"
+msgstr "Stöðva útvörpun"
+
+#: ../plugins/bluetooth/bluetooth.c:1813
+msgid "Make Discoverable"
+msgstr "Gera finnanlegt"
+
+#. add and remove dialogs
+#: ../plugins/bluetooth/bluetooth.c:1820
+msgid "Add Device..."
+msgstr "Bæta við tæki..."
+
+#: ../plugins/bluetooth/bluetooth.c:1823
+msgid "Remove Device..."
+msgstr "Fjarlægja tæki..."
+
+#: ../plugins/bluetooth/bluetooth.c:1905
+msgid "Manage Bluetooth devices"
+msgstr "Sýsla með Bluetooth-tæki"
+
+#: ../plugins/bluetooth/bluetooth.c:1940
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+#: ../plugins/bluetooth/bluetooth.c:1941
+msgid "Manages Bluetooth devices"
+msgstr "Sýslar með Bluetooth-tæki"
