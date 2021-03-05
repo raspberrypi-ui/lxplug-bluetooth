@@ -1703,7 +1703,11 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     // loop forward from the first element, comparing against the new label
     while (l)
     {
+#if GTK_CHECK_VERSION(3, 0, 0)
+        if (g_strcmp0 (name, lxpanel_plugin_get_menu_label (GTK_WIDGET (l->data))) < 0) break;
+#else
         if (g_strcmp0 (name, gtk_menu_item_get_label (GTK_MENU_ITEM (l->data))) < 0) break;
+#endif
         count++;
         l = l->next;
     }
