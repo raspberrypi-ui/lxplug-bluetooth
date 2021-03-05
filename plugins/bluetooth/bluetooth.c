@@ -1152,7 +1152,10 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             bt->pair_label = gtk_label_new (_("Pairing request sent to device - waiting for response..."));
             gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
             gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
-#if !GTK_CHECK_VERSION(3, 0, 0)
+#if GTK_CHECK_VERSION(3, 0, 0)
+            gtk_label_set_xalign (GTK_LABEL (bt->pair_label), 0.0);
+            gtk_widget_set_size_request (bt->pair_label, 250, 10);
+#else
             gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
 #endif
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label, TRUE, TRUE, 0);
@@ -1262,7 +1265,9 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
                 bt->pair_label = gtk_label_new (buffer);
                 gtk_label_set_line_wrap (GTK_LABEL (bt->pair_label), TRUE);
                 gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
-#if !GTK_CHECK_VERSION(3, 0, 0)
+#if GTK_CHECK_VERSION(3, 0, 0)
+                gtk_label_set_xalign (GTK_LABEL (bt->pair_label), 0.0);
+#else
                 gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
 #endif
                 gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label, TRUE, TRUE, 0);
@@ -1435,7 +1440,9 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 
     // add a label
     lbl = gtk_label_new (type == DIALOG_PAIR ? _("Searching for Bluetooth devices...") : _("Paired Bluetooth devices"));
-#if !GTK_CHECK_VERSION(3, 0, 0)
+#if GTK_CHECK_VERSION(3, 0, 0)
+    gtk_label_set_xalign (GTK_LABEL (lbl), 0.0);
+#else
     gtk_misc_set_alignment (GTK_MISC (lbl), 0.0, 0.5);
 #endif
     gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->list_dialog))), lbl, FALSE, FALSE, 0);
@@ -1450,7 +1457,11 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
     bt->list = gtk_tree_view_new ();
     gtk_tree_view_set_fixed_height_mode (GTK_TREE_VIEW (bt->list), TRUE);
     gtk_tree_view_set_headers_visible (GTK_TREE_VIEW (bt->list), FALSE);
+#if GTK_CHECK_VERSION(3, 0, 0)
+    gtk_widget_set_size_request (scrl, -1, 175);
+#else
     gtk_widget_set_size_request (bt->list, -1, 150);
+#endif
     rend = gtk_cell_renderer_pixbuf_new ();
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Icon", rend, "pixbuf", 5, NULL);
     gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (bt->list), 0), 50);
@@ -1501,7 +1512,10 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STA
             bt->conn_label = gtk_label_new (buffer2);
             gtk_label_set_line_wrap (GTK_LABEL (bt->conn_label), TRUE);
             gtk_label_set_justify (GTK_LABEL (bt->conn_label), GTK_JUSTIFY_LEFT);
-#if !GTK_CHECK_VERSION(3, 0, 0)
+#if GTK_CHECK_VERSION(3, 0, 0)
+            gtk_label_set_xalign (GTK_LABEL (bt->conn_label), 0.0);
+            gtk_widget_set_size_request (bt->conn_label, 250, 10);
+#else
             gtk_misc_set_alignment (GTK_MISC (bt->conn_label), 0.0, 0.0);
 #endif
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->conn_dialog))), bt->conn_label, TRUE, TRUE, 0);
