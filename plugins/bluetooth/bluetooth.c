@@ -1154,10 +1154,11 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             gtk_label_set_justify (GTK_LABEL (bt->pair_label), GTK_JUSTIFY_LEFT);
 #if GTK_CHECK_VERSION(3, 0, 0)
             gtk_label_set_xalign (GTK_LABEL (bt->pair_label), 0.0);
-            gtk_widget_set_size_request (bt->pair_label, 250, 10);
+            gtk_label_set_yalign (GTK_LABEL (bt->pair_label), 0.0);
 #else
             gtk_misc_set_alignment (GTK_MISC (bt->pair_label), 0.0, 0.0);
 #endif
+            gtk_widget_set_size_request (bt->pair_label, 350, -1);
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_label, TRUE, TRUE, 0);
             bt->pair_entry = gtk_entry_new_with_buffer (bt->pinbuf);
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->pair_dialog))), bt->pair_entry, TRUE, TRUE, 0);
@@ -1514,10 +1515,11 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STA
             gtk_label_set_justify (GTK_LABEL (bt->conn_label), GTK_JUSTIFY_LEFT);
 #if GTK_CHECK_VERSION(3, 0, 0)
             gtk_label_set_xalign (GTK_LABEL (bt->conn_label), 0.0);
-            gtk_widget_set_size_request (bt->conn_label, 250, 10);
+            gtk_label_set_yalign (GTK_LABEL (bt->conn_label), 0.0);
 #else
             gtk_misc_set_alignment (GTK_MISC (bt->conn_label), 0.0, 0.0);
 #endif
+            gtk_widget_set_size_request (bt->conn_label, 350, -1);
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->conn_dialog))), bt->conn_label, TRUE, TRUE, 0);
             g_signal_connect (bt->conn_dialog, "delete_event", G_CALLBACK (delete_conn), bt);
             gtk_widget_show_all (bt->conn_dialog);
