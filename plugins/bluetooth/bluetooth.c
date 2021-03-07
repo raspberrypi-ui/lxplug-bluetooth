@@ -491,6 +491,18 @@ static void find_hardware (BluetoothPlugin *bt)
     update_device_list (bt);
 }
 
+/* Debug helper for printing GVariant */
+
+static gchar *dbg_variant_print(GVariant *value, gboolean type_annotate)
+{
+    static __thread gchar *msg = NULL;
+    if (msg != NULL) {
+        g_free(msg);
+    }
+    msg = g_variant_print(value, type_annotate);
+    return msg;
+}
+
 /* Handler for method calls on the agent */
 
 static void handle_method_call (GDBusConnection *connection, const gchar *sender, const gchar *object_path,
@@ -503,7 +515,7 @@ static void handle_method_call (GDBusConnection *connection, const gchar *sender
     gchar buffer[16];
 
     DEBUG ("Agent method %s called", method_name);
-    if (parameters) DEBUG ("with parameters %s", g_variant_print (parameters, TRUE));
+    if (parameters) DEBUG ("with parameters %s", dbg_variant_print (parameters, TRUE));
 
     if (g_strcmp0 (method_name, "Cancel") == 0) return;
 
@@ -587,7 +599,7 @@ static void cb_object_removed (GDBusObjectManager *manager, GDBusObject *object,
 
 static void cb_interface_signal (GDBusObjectManagerClient *manager, GDBusObjectProxy *object_proxy, GDBusProxy *proxy, gchar *sender, gchar *signal, GVariant *parameters, gpointer user_data)
 {
-    DEBUG ("Object manager - object at %s interface signal %s %s %s", g_dbus_proxy_get_object_path (proxy), sender, signal, g_variant_print (parameters, TRUE));
+    DEBUG ("Object manager - object at %s interface signal %s %s %s", g_dbus_proxy_get_object_path (proxy), sender, signal, dbg_variant_print (parameters, TRUE));
 }
 
 static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObjectProxy *object_proxy, GDBusProxy *proxy, GVariant *parameters, GStrv inval, gpointer user_data)
@@ -595,7 +607,7 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
     BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
     GVariant *var, *var1, *icon;
 
-    DEBUG ("Object manager - object at %s property changed - %s %s",  g_dbus_proxy_get_object_path (proxy), g_dbus_proxy_get_interface_name (proxy), g_variant_print (parameters, TRUE));
+    DEBUG ("Object manager - object at %s property changed - %s %s", g_dbus_proxy_get_object_path (proxy), g_dbus_proxy_get_interface_name (proxy), dbg_variant_print (parameters, TRUE));
     update_device_list (bt);
 
     // hack to reconnect after successful pairing
@@ -671,7 +683,7 @@ static void cb_search_start (GObject *source, GAsyncResult *res, gpointer user_d
         DEBUG ("Search start - error %s", error->message);
         g_error_free (error);
     }
-    else DEBUG ("Search start - result %s", g_variant_print (var, TRUE));
+    else DEBUG ("Search start - result %s", dbg_variant_print (var, TRUE));
     if (var) g_variant_unref (var);
 }
 
@@ -685,7 +697,7 @@ static void cb_search_end (GObject *source, GAsyncResult *res, gpointer user_dat
         DEBUG ("Search end - error %s", error->message);
         g_error_free (error);
     }
-    else DEBUG ("Search end - result %s", g_variant_print (var, TRUE));
+    else DEBUG ("Search end - result %s", dbg_variant_print (var, TRUE));
     if (var) g_variant_unref (var);
 }
 
@@ -730,7 +742,7 @@ static void cb_discover_start (GObject *source, GAsyncResult *res, gpointer user
     }
     else
     {
-        DEBUG ("Discoverable start - result %s", g_variant_print (var, TRUE));
+        DEBUG ("Discoverable start - result %s", dbg_variant_print (var, TRUE));
         if (bt->flash_timer) g_source_remove (bt->flash_timer);
         bt->flash_timer = g_timeout_add (500, flash_icon, bt);
     }
@@ -750,7 +762,7 @@ static void cb_discover_end (GObject *source, GAsyncResult *res, gpointer user_d
     }
     else
     {
-        DEBUG ("Discoverable end - result %s", g_variant_print (var, TRUE));
+        DEBUG ("Discoverable end - result %s", dbg_variant_print (var, TRUE));
         if (bt->flash_timer) g_source_remove (bt->flash_timer);
         bt->flash_timer = 0;
         lxpanel_plugin_set_taskbar_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth");
@@ -807,7 +819,7 @@ static void cb_paired (GObject *source, GAsyncResult *res, gpointer user_data)
     }
     else
     {
-        DEBUG ("Pairing result %s", g_variant_print (var, TRUE));
+        DEBUG ("Pairing result %s", dbg_variant_print (var, TRUE));
 
         // check services available
         dev = check_uuids (bt, bt->pairing_object);
@@ -847,7 +859,7 @@ static void cb_cancelled (GObject *source, GAsyncResult *res, gpointer user_data
         DEBUG ("Cancelling error %s", error->message);
         g_error_free (error);
     }
-    else DEBUG ("Cancelling result %s", g_variant_print (var, TRUE));
+    else DEBUG ("Cancelling result %s", dbg_variant_print (var, TRUE));
     if (var) g_variant_unref (var);
 }
 
@@ -886,7 +898,7 @@ static void cb_trusted (GObject *source, GAsyncResult *res, gpointer user_data)
         DEBUG ("Trusting error %s", error->message);
         g_error_free (error);
     }
-    else DEBUG ("Trusting result %s", g_variant_print (var, TRUE));
+    else DEBUG ("Trusting result %s", dbg_variant_print (var, TRUE));
     if (var) g_variant_unref (var);
 }
 
@@ -938,7 +950,7 @@ static void cb_connected (GObject *source, GAsyncResult *res, gpointer user_data
     }
     else
     {
-        DEBUG ("Connect result %s", g_variant_print (var, TRUE));
+        DEBUG ("Connect result %s", dbg_variant_print (var, TRUE));
         if (bt->pair_dialog) show_pairing_dialog (bt, STATE_CONNECTED, NULL, NULL);
         if (bt->conn_dialog) handle_close_connect_dialog (NULL, bt);
     }
@@ -959,7 +971,7 @@ static void cb_disconnected (GObject *source, GAsyncResult *res, gpointer user_d
     }
     else
     {
-        DEBUG ("Disconnect result %s", g_variant_print (var, TRUE));
+        DEBUG ("Disconnect result %s", dbg_variant_print (var, TRUE));
         if (bt->conn_dialog) handle_close_connect_dialog (NULL, bt);
     }
     if (var) g_variant_unref (var);
@@ -988,7 +1000,7 @@ static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data)
     }
     else
     {
-        DEBUG ("Remove result %s", g_variant_print (var, TRUE));
+        DEBUG ("Remove result %s", dbg_variant_print (var, TRUE));
         if (bt->pair_dialog) handle_close_pair_dialog (NULL, bt);
         if (bt->conn_dialog) handle_close_connect_dialog (NULL, bt);
     }
