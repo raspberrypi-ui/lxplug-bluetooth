@@ -621,16 +621,18 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
     var = g_variant_lookup_value (parameters, "Paired", NULL);
     if (var && g_variant_get_boolean (var) == TRUE)
     {
+        g_variant_unref (var);
         var = g_variant_lookup_value (parameters, "Modalias", NULL);
         var1 = g_variant_lookup_value (parameters, "UUIDs", NULL);
         if (var && var1 && bt->pairing_object == NULL)
         {
             DEBUG ("New pairing detected");
+            g_variant_unref (var1);
             var1 = g_dbus_proxy_get_cached_property (proxy, "Alias");
             bt->incoming_object = g_dbus_proxy_get_object_path (proxy);
             show_pairing_dialog (bt, STATE_PAIR_REQUEST, g_variant_get_string (var1, NULL), NULL);
-            if (var1) g_variant_unref (var1);
         }
+        if (var1) g_variant_unref (var1);
     }
     if (var) g_variant_unref (var);
 }
