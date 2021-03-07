@@ -1363,8 +1363,10 @@ static void handle_pair (GtkButton *button, gpointer user_data)
             show_pairing_dialog (bt, STATE_PAIR_INIT, name, NULL);
             bt->pairing_object = path;
             pair_device (bt, path, TRUE);
+            // path is freed as bt->pairing_object later...
+        } else {
+            g_free (path);
         }
-        // path is freed as bt->pairing_object later...
         g_free (name);
     }
 }
@@ -1738,15 +1740,17 @@ gboolean find_path (GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, g
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) data;
 
+    gboolean found = FALSE;
     char *btpath;
     gtk_tree_model_get (model, iter, 0, &btpath, -1);
     if (!g_strcmp0 (btpath, bt->selection))
     {
         GtkTreeSelection *sel = gtk_tree_view_get_selection (GTK_TREE_VIEW (bt->list));
         gtk_tree_selection_select_iter (sel, iter);
-        return TRUE;
+        found = TRUE;
     }
-    return FALSE;
+    g_free(btpath);
+    return found;
 }
 
 static void update_device_list (BluetoothPlugin *bt)
