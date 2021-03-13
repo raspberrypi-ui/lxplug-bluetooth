@@ -409,14 +409,14 @@ static void find_hardware (BluetoothPlugin *bt)
 
     objects = g_dbus_object_manager_get_objects (bt->objmanager);
 
-    while (objects != NULL)
+    for (GList *obj_elem = objects; obj_elem != NULL; obj_elem = obj_elem->next)
     {
-        object = (GDBusObject*) objects->data;
+        object = (GDBusObject*) obj_elem->data;
 
         interfaces = g_dbus_object_get_interfaces (object);
-        while (interfaces != NULL)
+        for (GList *if_elem = interfaces; if_elem != NULL; if_elem = if_elem->next)
         {
-            interface = G_DBUS_INTERFACE (interfaces->data);
+            interface = G_DBUS_INTERFACE (if_elem->data);
             if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.Adapter1") == 0)
             {
                 if (newadapter == NULL) newadapter = G_DBUS_PROXY (interface);
@@ -427,10 +427,8 @@ static void find_hardware (BluetoothPlugin *bt)
                 if (newagentmanager == NULL) newagentmanager = G_DBUS_PROXY (interface);
                 else DEBUG ("Multiple agent managers found");
             }
-            interfaces = interfaces->next;
         }
         g_list_free_full (interfaces, g_object_unref);
-        objects = objects->next;
     }
     g_list_free_full (objects, g_object_unref);
 
@@ -1786,14 +1784,14 @@ static void update_device_list (BluetoothPlugin *bt)
 
     // iterate all the objects the manager knows about
     objects = g_dbus_object_manager_get_objects (bt->objmanager);
-    while (objects != NULL)
+    for (GList *obj_elem = objects; obj_elem != NULL; obj_elem = obj_elem->next)
     {
-        object = (GDBusObject *) objects->data;
+        object = (GDBusObject *) obj_elem->data;
         interfaces = g_dbus_object_get_interfaces (object);
-        while (interfaces != NULL)
+        for (GList *if_elem = interfaces; if_elem != NULL; if_elem = if_elem->next)
         {
             // if an object has a Device1 interface, it is a Bluetooth device - add it to the list
-            interface = G_DBUS_INTERFACE (interfaces->data);
+            interface = G_DBUS_INTERFACE (if_elem->data);
             if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.Device1") == 0)
             {
                 var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Paired");
@@ -1802,10 +1800,8 @@ static void update_device_list (BluetoothPlugin *bt)
                 g_variant_unref (var);
                 break;
             }
-            interfaces = interfaces->next;
         }
         g_list_free_full (interfaces, g_object_unref);
-        objects = objects->next;
     }
     g_list_free_full (objects, g_object_unref);
 
@@ -1854,7 +1850,7 @@ static void menu_popup_set_position (GtkMenu *menu, gint *px, gint *py, gboolean
 
 static void show_menu (BluetoothPlugin *bt)
 {
-    GtkWidget *item, *sel = gtk_image_new ();
+    GtkWidget *item;
     GtkTreeIter iter;
     GList *items;
     int bt_state;
@@ -1863,12 +1859,7 @@ static void show_menu (BluetoothPlugin *bt)
     if (bt->menu && gtk_widget_get_visible (bt->menu))
     {
         items = gtk_container_get_children (GTK_CONTAINER (bt->menu));
-        while (items)
-        {
-            gtk_widget_destroy (GTK_WIDGET (items->data));
-            items = items->next;
-        }
-        g_list_free (items);
+        g_list_free_full(items, (GDestroyNotify) gtk_widget_destroy);
     }
     else bt->menu = gtk_menu_new ();
 
@@ -1929,10 +1920,9 @@ static void show_menu (BluetoothPlugin *bt)
     if (bt->list_dialog || bt->pair_dialog || bt->conn_dialog)
     {
         items = gtk_container_get_children (GTK_CONTAINER (bt->menu));
-        while (items)
+        for (GList *elem = items; elem != NULL; elem = elem->next)
         {
             gtk_widget_set_sensitive (GTK_WIDGET (items->data), FALSE);
-            items = items->next;
         }
         g_list_free (items);
     }
