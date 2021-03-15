@@ -398,7 +398,7 @@ static void find_hardware (BluetoothPlugin *bt)
 {
     GDBusInterface *interface;
     GDBusObject *object;
-    GList *objects, *interfaces;
+    GList *objects, *interfaces, *obj_elem, *if_elem;
     GDBusProxy *newagentmanager = NULL, *newadapter = NULL;
     GError *error;
     GVariant *res, *arg;
@@ -409,12 +409,12 @@ static void find_hardware (BluetoothPlugin *bt)
 
     objects = g_dbus_object_manager_get_objects (bt->objmanager);
 
-    for (GList *obj_elem = objects; obj_elem != NULL; obj_elem = obj_elem->next)
+    for (obj_elem = objects; obj_elem != NULL; obj_elem = obj_elem->next)
     {
         object = (GDBusObject*) obj_elem->data;
 
         interfaces = g_dbus_object_get_interfaces (object);
-        for (GList *if_elem = interfaces; if_elem != NULL; if_elem = if_elem->next)
+        for (if_elem = interfaces; if_elem != NULL; if_elem = if_elem->next)
         {
             interface = G_DBUS_INTERFACE (if_elem->data);
             if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.Adapter1") == 0)
@@ -1770,7 +1770,7 @@ static void update_device_list (BluetoothPlugin *bt)
 {
     GDBusInterface *interface;
     GDBusObject *object;
-    GList *objects, *interfaces;
+    GList *objects, *interfaces, *obj_elem, *if_elem;
     GVariant *var;
     gchar *name = NULL;
 
@@ -1784,11 +1784,11 @@ static void update_device_list (BluetoothPlugin *bt)
 
     // iterate all the objects the manager knows about
     objects = g_dbus_object_manager_get_objects (bt->objmanager);
-    for (GList *obj_elem = objects; obj_elem != NULL; obj_elem = obj_elem->next)
+    for (obj_elem = objects; obj_elem != NULL; obj_elem = obj_elem->next)
     {
         object = (GDBusObject *) obj_elem->data;
         interfaces = g_dbus_object_get_interfaces (object);
-        for (GList *if_elem = interfaces; if_elem != NULL; if_elem = if_elem->next)
+        for (if_elem = interfaces; if_elem != NULL; if_elem = if_elem->next)
         {
             // if an object has a Device1 interface, it is a Bluetooth device - add it to the list
             interface = G_DBUS_INTERFACE (if_elem->data);
@@ -1852,14 +1852,14 @@ static void show_menu (BluetoothPlugin *bt)
 {
     GtkWidget *item;
     GtkTreeIter iter;
-    GList *items;
+    GList *items, *elem;
     int bt_state;
 
     // if the menu is currently on screen, delete all the items and rebuild rather than creating a new one
     if (bt->menu && gtk_widget_get_visible (bt->menu))
     {
         items = gtk_container_get_children (GTK_CONTAINER (bt->menu));
-        g_list_free_full(items, (GDestroyNotify) gtk_widget_destroy);
+        g_list_free_full (items, (GDestroyNotify) gtk_widget_destroy);
     }
     else bt->menu = gtk_menu_new ();
 
@@ -1920,7 +1920,7 @@ static void show_menu (BluetoothPlugin *bt)
     if (bt->list_dialog || bt->pair_dialog || bt->conn_dialog)
     {
         items = gtk_container_get_children (GTK_CONTAINER (bt->menu));
-        for (GList *elem = items; elem != NULL; elem = elem->next)
+        for (elem = items; elem != NULL; elem = elem->next)
         {
             gtk_widget_set_sensitive (GTK_WIDGET (items->data), FALSE);
         }
