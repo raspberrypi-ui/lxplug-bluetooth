@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.22) buster; urgency=medium
+
+  * GTK+3 version
+
+ -- Simon Long <simon@raspberrypi.com>  Fri, 26 Mar 2021 11:51:08 +0000
+
 lxplug-bluetooth (0.21) buster; urgency=medium
 
   * Fix some memory leaks
