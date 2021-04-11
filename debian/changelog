@@ -1,4 +1,4 @@
-lxplug-bluetooth (0.22) buster; urgency=medium
+lxplug-bluetooth (0.22) bullseye; urgency=medium
 
   * GTK+3 version
 
