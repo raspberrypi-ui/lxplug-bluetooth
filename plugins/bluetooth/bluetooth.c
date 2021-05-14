@@ -2029,11 +2029,6 @@ static void show_menu (BluetoothPlugin *bt)
     }
 
     gtk_widget_show_all (bt->menu);
-#if GTK_CHECK_VERSION(3, 0, 0)
-    gtk_menu_popup_at_widget (GTK_MENU (bt->menu), bt->plugin, GDK_GRAVITY_NORTH_WEST, GDK_GRAVITY_NORTH_WEST, NULL);
-#else
-    gtk_menu_popup (GTK_MENU (bt->menu), NULL, NULL, menu_popup_set_position, bt, 1, gtk_get_current_event_time ());
-#endif
 }
 
 static void update_icon (BluetoothPlugin *bt)
@@ -2083,6 +2078,11 @@ static gboolean bluetooth_button_press_event (GtkWidget *widget, GdkEventButton 
     if (event->button == 1)
     {
         show_menu (bt);
+#if GTK_CHECK_VERSION(3, 0, 0)
+        gtk_menu_popup_at_widget (GTK_MENU (bt->menu), bt->plugin, GDK_GRAVITY_NORTH_WEST, GDK_GRAVITY_NORTH_WEST, (GdkEvent *) event);
+#else
+        gtk_menu_popup (GTK_MENU (bt->menu), NULL, NULL, menu_popup_set_position, bt, 1, gtk_get_current_event_time ());
+#endif
         return TRUE;
     }
     else return FALSE;
