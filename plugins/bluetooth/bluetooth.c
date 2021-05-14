@@ -1612,7 +1612,24 @@ static void handle_menu_add (GtkWidget *widget, gpointer user_data)
 static void handle_menu_remove (GtkWidget *widget, gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
-    show_list_dialog (bt, DIALOG_REMOVE);
+    gchar *name, *path;
+    gboolean valid;
+    GtkTreeIter iter;
+
+    valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (bt->pair_list), &iter);
+    while (valid)
+    {
+        gtk_tree_model_get (GTK_TREE_MODEL (bt->pair_list), &iter, 0, &path, 1, &name, -1);
+        if (!g_strcmp0 (gtk_widget_get_name (widget), path))
+        {
+            show_connect_dialog (bt, DIALOG_REMOVE, STATE_PAIR_INIT, name);
+            remove_device (bt, path);
+            break;
+        }
+        g_free (name);
+        g_free (path);
+        valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (bt->pair_list), &iter);
+    }
 }
 
 static void handle_menu_connect (GtkWidget *widget, gpointer user_data)
@@ -1721,6 +1738,12 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
 
     // connect the connect toggle function and add the submenu item to the submenu
     g_signal_connect (smi, "activate", G_CALLBACK (handle_menu_connect), bt);
+    gtk_menu_shell_append (GTK_MENU_SHELL (submenu), smi);
+
+    // add the remove option to the submenu
+    smi = gtk_menu_item_new_with_label (_("Remove..."));
+    gtk_widget_set_name (smi, path);
+    g_signal_connect (smi, "activate", G_CALLBACK (handle_menu_remove), bt);
     gtk_menu_shell_append (GTK_MENU_SHELL (submenu), smi);
 
     // count the list first - we need indices...
@@ -1982,13 +2005,6 @@ static void show_menu (BluetoothPlugin *bt)
         item = gtk_menu_item_new_with_label (_("Add Device..."));
 #endif
         g_signal_connect (item, "activate", G_CALLBACK (handle_menu_add), bt);
-        gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
-#if GTK_CHECK_VERSION(3, 0, 0)
-        item = lxpanel_plugin_new_menu_item (bt->panel, _("Remove Device..."), 0, NULL);
-#else
-        item = gtk_menu_item_new_with_label (_("Remove Device..."));
-#endif
-        g_signal_connect (item, "activate", G_CALLBACK (handle_menu_remove), bt);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
 
         // paired devices
