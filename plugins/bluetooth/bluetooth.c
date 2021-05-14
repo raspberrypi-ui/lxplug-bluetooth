@@ -78,6 +78,7 @@ typedef struct {
     GtkWidget *menu;                /* Popup menu */
     GtkListStore *pair_list;
     GtkListStore *unpair_list;
+    GtkTreeModelFilter *filter_list; /* Filtered device list used in connect dialog */
     GtkTreeModelSort *sorted_list;  /* Sorted device list used in connect dialog */
     gchar *selection;               /* Connect dialog selected item */
     GDBusConnection *busconnection;
@@ -1448,6 +1449,17 @@ static gint delete_list (GtkWidget *widget, GdkEvent *event, gpointer user_data)
     return TRUE;
 }
 
+static gboolean filter_unknowns (GtkTreeModel *model, GtkTreeIter *iter, gpointer data)
+{
+    char *str;
+    gboolean res = FALSE;
+
+    gtk_tree_model_get (model, iter, 6, &str, -1);
+    if (g_strcmp0 (str, "dialog-question")) res = TRUE;
+    g_free (str);
+    return res;
+}
+
 static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 {
     GtkWidget *btn_cancel, *btn_act, *frm, *lbl, *scrl;
@@ -1498,7 +1510,11 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
     rend = gtk_cell_renderer_text_new ();
     gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW (bt->list), -1, "Name", rend, "text", 1, NULL);
     gtk_tree_view_column_set_fixed_width (gtk_tree_view_get_column (GTK_TREE_VIEW (bt->list), 1), 300);
-    bt->sorted_list = GTK_TREE_MODEL_SORT (gtk_tree_model_sort_new_with_model (type == DIALOG_PAIR ? GTK_TREE_MODEL (bt->unpair_list) : GTK_TREE_MODEL (bt->pair_list)));
+
+    bt->filter_list = GTK_TREE_MODEL_FILTER (gtk_tree_model_filter_new (type == DIALOG_PAIR ? GTK_TREE_MODEL (bt->unpair_list) : GTK_TREE_MODEL (bt->pair_list), NULL));
+    gtk_tree_model_filter_set_visible_func (bt->filter_list, (GtkTreeModelFilterVisibleFunc) filter_unknowns, NULL, NULL);
+
+    bt->sorted_list = GTK_TREE_MODEL_SORT (gtk_tree_model_sort_new_with_model (GTK_TREE_MODEL (bt->filter_list)));
     gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (bt->sorted_list), 1, GTK_SORT_ASCENDING);
     gtk_tree_view_set_model (GTK_TREE_VIEW (bt->list), GTK_TREE_MODEL (bt->sorted_list));
     gtk_tree_view_set_tooltip_column (GTK_TREE_VIEW (bt->list), 0);
@@ -1775,7 +1791,7 @@ static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *
     gtk_list_store_set (lst, &iter, 0, g_dbus_object_get_object_path (object),
         1, var1 ? g_variant_get_string (var1, NULL) : "Unnamed device", 2, g_variant_get_boolean (var2),
         3, g_variant_get_boolean (var3), 4, g_variant_get_boolean (var4), 
-        5, icon, -1);
+        5, icon, 6, var5 ? g_variant_get_string (var5, NULL) : "dialog-question", -1);
 
     if (var1) g_variant_unref (var1);
     if (var2) g_variant_unref (var2);
@@ -2113,8 +2129,8 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
     gtk_widget_set_sensitive (bt->plugin, FALSE);
 
     /* Initialise plugin data */
-    bt->pair_list = gtk_list_store_new (6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF);
-    bt->unpair_list = gtk_list_store_new (6, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF);
+    bt->pair_list = gtk_list_store_new (7, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF, G_TYPE_STRING);
+    bt->unpair_list = gtk_list_store_new (7, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF, G_TYPE_STRING);
     bt->ok_instance = 0;
     bt->cancel_instance = 0;
     clear (bt);
