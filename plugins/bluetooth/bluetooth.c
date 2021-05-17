@@ -1522,6 +1522,10 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 
     // window ready
     gtk_widget_show_all (bt->list_dialog);
+
+    // remove the selection which mysteriously appears when the widget is shown...
+    gtk_tree_selection_unselect_all (gtk_tree_view_get_selection (GTK_TREE_VIEW (bt->list)));
+    bt->selection = NULL;
 }
 
 /* Functions to manage connect / disconnect / remove notification dialogs */
@@ -1886,6 +1890,7 @@ static void update_device_list (BluetoothPlugin *bt)
         GtkTreeModel *mod = gtk_tree_view_get_model (GTK_TREE_VIEW (bt->list));
         if (mod) gtk_tree_model_foreach (mod, find_path, bt);
         g_free (bt->selection);
+        bt->selection = NULL;
     }
     if (name) g_free (name);
 
