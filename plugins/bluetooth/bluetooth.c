@@ -87,10 +87,12 @@ typedef struct {
     GDBusProxy *adapter;
     guint agentobj;
     gchar *pairing_object;
+    gchar *device_name;
+    gchar *device_path;
     const gchar *incoming_object;
     GtkWidget *list_dialog, *list;
     GtkWidget *pair_dialog, *pair_label, *pair_entry, *pair_ok, *pair_cancel;
-    GtkWidget *conn_dialog, *conn_label, *conn_ok;
+    GtkWidget *conn_dialog, *conn_label, *conn_ok, *conn_cancel;
     GtkEntryBuffer *pinbuf;
     GDBusMethodInvocation *invocation;
     gulong ok_instance;
@@ -124,6 +126,13 @@ typedef enum {
     STATE_PAIRED_AUDIO,
     STATE_PAIRED_UNUSABLE
 } PAIR_STATE;
+
+typedef enum {
+    STATE_CONFIRM,
+    STATE_CONFIRMED,
+    STATE_INIT,
+    STATE_FAIL
+} CONN_STATE;
 
 typedef enum {
     DEV_HID,
@@ -253,7 +262,7 @@ static void handle_remove (GtkButton *button, gpointer user_data);
 static void handle_close_list_dialog (GtkButton *button, gpointer user_data);
 static gint delete_list (GtkWidget *widget, GdkEvent *event, gpointer user_data);
 static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type);
-static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STATE state, const gchar *param);
+static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STATE state, const gchar *param);
 static void handle_close_connect_dialog (GtkButton *button, gpointer user_data);
 static gint delete_conn (GtkWidget *widget, GdkEvent *event, gpointer user_data);
 static void handle_menu_add (GtkWidget *widget, gpointer user_data);
@@ -957,7 +966,7 @@ static void cb_connected (GObject *source, GAsyncResult *res, gpointer user_data
     {
         DEBUG ("Connect error %s", error->message);
         if (bt->pair_dialog) show_pairing_dialog (bt, STATE_CONNECT_FAIL, NULL, error->message);
-        if (bt->conn_dialog) show_connect_dialog (bt, DIALOG_CONNECT, STATE_PAIR_FAIL, error->message);
+        if (bt->conn_dialog) show_connect_dialog (bt, DIALOG_CONNECT, STATE_FAIL, error->message);
         g_error_free (error);
     }
     else
@@ -978,7 +987,7 @@ static void cb_disconnected (GObject *source, GAsyncResult *res, gpointer user_d
     if (error)
     {
         DEBUG ("Disconnect error %s", error->message);
-        if (bt->conn_dialog) show_connect_dialog (bt, DIALOG_DISCONNECT, STATE_PAIR_FAIL, error->message);
+        if (bt->conn_dialog) show_connect_dialog (bt, DIALOG_DISCONNECT, STATE_FAIL, error->message);
         g_error_free (error);
     }
     else
@@ -1010,7 +1019,7 @@ static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data)
     {
         DEBUG ("Remove error %s", error->message);
         if (bt->pair_dialog) show_pairing_dialog (bt, STATE_REMOVE_FAIL, NULL, error->message);
-        if (bt->conn_dialog) show_connect_dialog (bt, DIALOG_REMOVE, STATE_PAIR_FAIL, error->message);
+        if (bt->conn_dialog) show_connect_dialog (bt, DIALOG_REMOVE, STATE_FAIL, error->message);
         g_error_free (error);
     }
     else
@@ -1397,25 +1406,13 @@ static void handle_pair (GtkButton *button, gpointer user_data)
 
 static void handle_remove (GtkButton *button, gpointer user_data)
 {
-    BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
-    gchar *path, *name;
-
-    if (selected_path (bt, &path, &name))
-    {
-        if (bt->list_dialog)
-        {
-            g_object_unref (bt->sorted_list);
-            bt->sorted_list = NULL;
-            gtk_widget_destroy (bt->list);
-            bt->list = NULL;
-            gtk_widget_destroy (bt->list_dialog);
-            bt->list_dialog = NULL;
-        }
-        show_connect_dialog (bt, DIALOG_REMOVE, STATE_PAIR_INIT, name);
-        remove_device (bt, path);
-        g_free (path);
-        g_free (name);
-    }
+    BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+    show_connect_dialog (bt, DIALOG_REMOVE, STATE_CONFIRMED, bt->device_name);
+    remove_device (bt, bt->device_path);
+    g_free (bt->device_path);
+    g_free (bt->device_name);
+    bt->device_path = NULL;
+    bt->device_name = NULL;
 }
 
 static void handle_close_list_dialog (GtkButton *button, gpointer user_data)
@@ -1530,7 +1527,7 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 
 /* Functions to manage connect / disconnect / remove notification dialogs */
 
-static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STATE state, const gchar *param)
+static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STATE state, const gchar *param)
 {
     char buffer1[256], buffer2[256];
 
@@ -1538,23 +1535,35 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STA
     {
         case DIALOG_REMOVE:
             sprintf (buffer1, _("Remove Device"));
-            sprintf (buffer2, state == STATE_PAIR_INIT ? _("Removing paired device '%s'...") : _("Removal failed - %s"), param);
+            switch (state)
+            {
+                case STATE_CONFIRM:
+                    sprintf (buffer2, _("Do you want to unpair '%s'?"), param);
+                    break;
+                case STATE_CONFIRMED:
+                    sprintf (buffer2, _("Removing paired device '%s'..."), param);
+                    break;
+                case STATE_FAIL:
+                    sprintf (buffer2, _("Removal failed - %s"), param);
+                    break;
+            }
             break;
 
         case DIALOG_CONNECT:
             sprintf (buffer1, _("Connect Device"));
-            sprintf (buffer2, state == STATE_PAIR_INIT ? _("Connecting to device '%s'...") : _("Connection failed - %s"), param);
+            sprintf (buffer2, state == STATE_INIT ? _("Connecting to device '%s'...") : _("Connection failed - %s"), param);
             break;
 
         case DIALOG_DISCONNECT:
             sprintf (buffer1, _("Disconnect Device"));
-            sprintf (buffer2, state == STATE_PAIR_INIT ? _("Disconnecting from device '%s'...") : _("Disconnection failed - %s"), param);
+            sprintf (buffer2, state == STATE_INIT ? _("Disconnecting from device '%s'...") : _("Disconnection failed - %s"), param);
             break;
     }
 
     switch (state)
     {
-        case STATE_PAIR_INIT:
+        case STATE_INIT:
+        case STATE_CONFIRM:
             bt->conn_dialog = gtk_dialog_new_with_buttons (buffer1, NULL, 0, NULL);
             gtk_window_set_icon_name (GTK_WINDOW (bt->conn_dialog), "preferences-system-bluetooth");
             gtk_window_set_position (GTK_WINDOW (bt->conn_dialog), GTK_WIN_POS_CENTER);
@@ -1571,14 +1580,27 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STA
             gtk_widget_set_size_request (bt->conn_label, 350, -1);
             gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->conn_dialog))), bt->conn_label, TRUE, TRUE, 0);
             g_signal_connect (bt->conn_dialog, "delete_event", G_CALLBACK (delete_conn), bt);
+            if (state == STATE_CONFIRM)
+            {
+                bt->conn_cancel = gtk_dialog_add_button (GTK_DIALOG (bt->conn_dialog), _("_Cancel"), 0);
+                g_signal_connect (bt->conn_cancel, "clicked", G_CALLBACK (handle_close_connect_dialog), bt);
+                bt->conn_ok = gtk_dialog_add_button (GTK_DIALOG (bt->conn_dialog), _("_OK"), 1);
+                g_signal_connect (bt->conn_ok, "clicked", G_CALLBACK (handle_remove), bt);
+            }
             gtk_widget_show_all (bt->conn_dialog);
             break;
 
-        case STATE_PAIR_FAIL:
+        case STATE_FAIL:
             gtk_label_set_text (GTK_LABEL (bt->conn_label), buffer2);
             bt->conn_ok = gtk_dialog_add_button (GTK_DIALOG (bt->conn_dialog), _("_OK"), 1);
             g_signal_connect (bt->conn_ok, "clicked", G_CALLBACK (handle_close_connect_dialog), bt);
             gtk_widget_show (bt->conn_ok);
+            break;
+
+        case STATE_CONFIRMED:
+            gtk_label_set_text (GTK_LABEL (bt->conn_label), buffer2);
+            gtk_widget_hide (bt->conn_ok);
+            gtk_widget_hide (bt->conn_cancel);
             break;
     }
 }
@@ -1586,6 +1608,12 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, PAIR_STA
 static void handle_close_connect_dialog (GtkButton *button, gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+
+    if (bt->device_name) g_free (bt->device_name);
+    if (bt->device_path) g_free (bt->device_path);
+    bt->device_path = NULL;
+    bt->device_name = NULL;
+
     if (bt->conn_dialog)
     {
         gtk_widget_destroy (bt->conn_dialog);
@@ -1596,6 +1624,12 @@ static void handle_close_connect_dialog (GtkButton *button, gpointer user_data)
 static gint delete_conn (GtkWidget *widget, GdkEvent *event, gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+
+    if (bt->device_name) g_free (bt->device_name);
+    if (bt->device_path) g_free (bt->device_path);
+    bt->device_path = NULL;
+    bt->device_name = NULL;
+
     if (bt->conn_dialog)
     {
         gtk_widget_destroy (bt->conn_dialog);
@@ -1626,8 +1660,9 @@ static void handle_menu_remove (GtkWidget *widget, gpointer user_data)
         gtk_tree_model_get (GTK_TREE_MODEL (bt->pair_list), &iter, 0, &path, 1, &name, -1);
         if (!g_strcmp0 (gtk_widget_get_name (widget), path))
         {
-            show_connect_dialog (bt, DIALOG_REMOVE, STATE_PAIR_INIT, name);
-            remove_device (bt, path);
+            bt->device_path = path;
+            bt->device_name = name;
+            show_connect_dialog (bt, DIALOG_REMOVE, STATE_CONFIRM, name);
             break;
         }
         g_free (name);
@@ -1651,16 +1686,16 @@ static void handle_menu_connect (GtkWidget *widget, gpointer user_data)
         {
             if (!is_connected (bt, path))
             {
-                show_connect_dialog (bt, DIALOG_CONNECT, STATE_PAIR_INIT, name);
+                show_connect_dialog (bt, DIALOG_CONNECT, STATE_INIT, name);
                 if (check_uuids (bt, path) == DEV_AUDIO_SINK)
-                    show_connect_dialog (bt, DIALOG_CONNECT, STATE_PAIR_FAIL, _("Use the audio menu to connect to this device"));
+                    show_connect_dialog (bt, DIALOG_CONNECT, STATE_FAIL, _("Use the audio menu to connect to this device"));
                 else if (check_uuids (bt, path) == DEV_OTHER)
-                    show_connect_dialog (bt, DIALOG_CONNECT, STATE_PAIR_FAIL, _("No usable services on this device"));
+                    show_connect_dialog (bt, DIALOG_CONNECT, STATE_FAIL, _("No usable services on this device"));
                 else connect_device (bt, path, TRUE);
             }
             else
             {
-                show_connect_dialog (bt, DIALOG_DISCONNECT, STATE_PAIR_INIT, name);
+                show_connect_dialog (bt, DIALOG_DISCONNECT, STATE_INIT, name);
                 connect_device (bt, path, FALSE);
             }
             break;
@@ -2154,6 +2189,8 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
     bt->unpair_list = gtk_list_store_new (7, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT, GDK_TYPE_PIXBUF, G_TYPE_STRING);
     bt->ok_instance = 0;
     bt->cancel_instance = 0;
+    bt->device_name = NULL;
+    bt->device_path = NULL;
     clear (bt);
 
     /* Load icon cache */
