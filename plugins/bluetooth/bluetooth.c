@@ -1967,7 +1967,7 @@ static void show_menu (BluetoothPlugin *bt)
 {
     GtkWidget *item;
     GtkTreeIter iter;
-    GList *items, *elem;
+    GList *items;
     int bt_state;
 
     // if the menu is currently on screen, delete all the items and rebuild rather than creating a new one
@@ -2061,9 +2061,10 @@ static void show_menu (BluetoothPlugin *bt)
     if (bt->list_dialog || bt->pair_dialog || bt->conn_dialog)
     {
         items = gtk_container_get_children (GTK_CONTAINER (bt->menu));
-        for (elem = items; elem != NULL; elem = elem->next)
+        while (items)
         {
-            gtk_widget_set_sensitive (GTK_WIDGET (elem->data), FALSE);
+            gtk_widget_set_sensitive (GTK_WIDGET (items->data), FALSE);
+            items = items->next;
         }
         g_list_free (items);
     }
