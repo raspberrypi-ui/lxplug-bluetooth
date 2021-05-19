@@ -1740,6 +1740,8 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     gchar *name, *path;
     GtkWidget *item, *submenu, *smi, *icon;
+    GList *list, *l;
+    int count;
  
     gtk_tree_model_get (model, iter, 0, &path, 1, &name, -1);
 #if GTK_CHECK_VERSION(3, 0, 0)
@@ -1785,17 +1787,10 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     g_signal_connect (smi, "activate", G_CALLBACK (handle_menu_remove), bt);
     gtk_menu_shell_append (GTK_MENU_SHELL (submenu), smi);
 
-    // count the list first - we need indices...
-    int count = 0;
-    GList *l = g_list_first (gtk_container_get_children (GTK_CONTAINER (bt->menu)));
-    while (l)
-    {
-        count++;
-        l = l->next;
-    }
-
     // find the start point of the last section - either a separator or the beginning of the list
-    l = g_list_last (gtk_container_get_children (GTK_CONTAINER (bt->menu)));
+    list = gtk_container_get_children (GTK_CONTAINER (bt->menu));
+    count = g_list_length (list);
+    l = g_list_last (list);
     while (l)
     {
         if (G_OBJECT_TYPE (l->data) == GTK_TYPE_SEPARATOR_MENU_ITEM) break;
@@ -1804,7 +1799,7 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     }
 
     // if l is NULL, init to element after start; if l is non-NULL, init to element after separator
-    if (!l) l = gtk_container_get_children (GTK_CONTAINER (bt->menu));
+    if (!l) l = list;
     else l = l->next;
 
     // loop forward from the first element, comparing against the new label
@@ -1822,6 +1817,7 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
     // insert at the relevant offset
     gtk_menu_shell_insert (GTK_MENU_SHELL (bt->menu), item, count);
 
+    g_list_free (list);
     g_free (name);
     g_free (path);
 
@@ -1967,7 +1963,7 @@ static void show_menu (BluetoothPlugin *bt)
 {
     GtkWidget *item;
     GtkTreeIter iter;
-    GList *items;
+    GList *items, *head;
     int bt_state;
 
     // if the menu is currently on screen, delete all the items and rebuild rather than creating a new one
@@ -2061,12 +2057,13 @@ static void show_menu (BluetoothPlugin *bt)
     if (bt->list_dialog || bt->pair_dialog || bt->conn_dialog)
     {
         items = gtk_container_get_children (GTK_CONTAINER (bt->menu));
+        head = items;
         while (items)
         {
             gtk_widget_set_sensitive (GTK_WIDGET (items->data), FALSE);
             items = items->next;
         }
-        g_list_free (items);
+        g_list_free (head);
     }
 
     gtk_widget_show_all (bt->menu);
