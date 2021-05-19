@@ -2063,7 +2063,7 @@ static void show_menu (BluetoothPlugin *bt)
         items = gtk_container_get_children (GTK_CONTAINER (bt->menu));
         for (elem = items; elem != NULL; elem = elem->next)
         {
-            gtk_widget_set_sensitive (GTK_WIDGET (items->data), FALSE);
+            gtk_widget_set_sensitive (GTK_WIDGET (elem->data), FALSE);
         }
         g_list_free (items);
     }
@@ -2191,6 +2191,9 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
     bt->cancel_instance = 0;
     bt->device_name = NULL;
     bt->device_path = NULL;
+    bt->pair_dialog = NULL;
+    bt->conn_dialog = NULL;
+    bt->list_dialog = NULL;
     clear (bt);
 
     /* Load icon cache */
