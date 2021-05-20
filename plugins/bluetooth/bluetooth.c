@@ -90,7 +90,7 @@ typedef struct {
     gchar *device_name;
     gchar *device_path;
     const gchar *incoming_object;
-    GtkWidget *list_dialog, *list;
+    GtkWidget *list_dialog, *list, *list_ok;
     GtkWidget *pair_dialog, *pair_label, *pair_entry, *pair_ok, *pair_cancel;
     GtkWidget *conn_dialog, *conn_label, *conn_ok, *conn_cancel;
     GtkEntryBuffer *pinbuf;
@@ -261,6 +261,8 @@ static void handle_pair (GtkButton *button, gpointer user_data);
 static void handle_remove (GtkButton *button, gpointer user_data);
 static void handle_close_list_dialog (GtkButton *button, gpointer user_data);
 static gint delete_list (GtkWidget *widget, GdkEvent *event, gpointer user_data);
+static gboolean filter_unknowns (GtkTreeModel *model, GtkTreeIter *iter, gpointer data);
+static void sel_changed (GtkTreeSelection *sel, gpointer user_data);
 static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type);
 static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STATE state, const gchar *param);
 static void handle_close_connect_dialog (GtkButton *button, gpointer user_data);
@@ -1457,9 +1459,16 @@ static gboolean filter_unknowns (GtkTreeModel *model, GtkTreeIter *iter, gpointe
     return res;
 }
 
+static void sel_changed (GtkTreeSelection *sel, gpointer user_data)
+{
+    BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
+    GtkTreeModel *mod;
+    gtk_widget_set_sensitive (bt->list_ok, gtk_tree_selection_get_selected (sel, &mod, NULL));
+}
+
 static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 {
-    GtkWidget *btn_cancel, *btn_act, *frm, *lbl, *scrl;
+    GtkWidget *btn_cancel, *frm, *lbl, *scrl;
     GtkCellRenderer *rend;
 
     // create the window
@@ -1472,10 +1481,11 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 
     // add the buttons
     btn_cancel = gtk_dialog_add_button (GTK_DIALOG (bt->list_dialog), _("_Cancel"), 0);
-    btn_act = gtk_dialog_add_button (GTK_DIALOG (bt->list_dialog), type == DIALOG_PAIR ? _("_Pair") : _("_Remove"), 1);
-    g_signal_connect (btn_act, "clicked", type == DIALOG_PAIR ? G_CALLBACK (handle_pair) : G_CALLBACK (handle_remove), bt);
+    bt->list_ok = gtk_dialog_add_button (GTK_DIALOG (bt->list_dialog), type == DIALOG_PAIR ? _("_Pair") : _("_Remove"), 1);
+    g_signal_connect (bt->list_ok, "clicked", type == DIALOG_PAIR ? G_CALLBACK (handle_pair) : G_CALLBACK (handle_remove), bt);
     g_signal_connect (btn_cancel, "clicked", G_CALLBACK (handle_close_list_dialog), bt);
     g_signal_connect (bt->list_dialog, "delete_event", G_CALLBACK (delete_list), bt);
+    gtk_widget_set_sensitive (bt->list_ok, FALSE);
 
     // add a label
     lbl = gtk_label_new (type == DIALOG_PAIR ? _("Searching for Bluetooth devices...") : _("Paired Bluetooth devices"));
@@ -1522,6 +1532,7 @@ static void show_list_dialog (BluetoothPlugin * bt, DIALOG_TYPE type)
 
     // remove the selection which mysteriously appears when the widget is shown...
     gtk_tree_selection_unselect_all (gtk_tree_view_get_selection (GTK_TREE_VIEW (bt->list)));
+    g_signal_connect (gtk_tree_view_get_selection (GTK_TREE_VIEW (bt->list)), "changed", G_CALLBACK (sel_changed), bt);
     bt->selection = NULL;
 }
 
