@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-06 14:18+0000\n"
+"POT-Creation-Date: 2021-05-26 12:36+0100\n"
 "PO-Revision-Date: 2017-03-06 14:18+0000\n"
 "Last-Translator:  <simon@raspberrypi.org>\n"
 "Language-Team: English (British)\n"
@@ -17,97 +17,87 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#. create the dialog, asking user to accept the pairing
-#: ../plugins/bluetooth/bluetooth.c:987
-#, c-format
-msgid "Do you accept pairing from device '%s'?"
-msgstr "Do you accept pairing from device '%s'?"
-
-#: ../plugins/bluetooth/bluetooth.c:988
-msgid "Pairing Request"
-msgstr "Pairing Request"
-
-#: ../plugins/bluetooth/bluetooth.c:1113
+#: ../plugins/bluetooth/bluetooth.c:1186
 #, c-format
 msgid "Pairing Device '%s'"
 msgstr "Pairing Device '%s'"
 
-#: ../plugins/bluetooth/bluetooth.c:1120
+#: ../plugins/bluetooth/bluetooth.c:1192
 msgid "Pairing request sent to device - waiting for response..."
 msgstr "Pairing request sent to device - waiting for response..."
 
 #. add the buttons
-#: ../plugins/bluetooth/bluetooth.c:1127 ../plugins/bluetooth/bluetooth.c:1222
-#: ../plugins/bluetooth/bluetooth.c:1376
+#: ../plugins/bluetooth/bluetooth.c:1205 ../plugins/bluetooth/bluetooth.c:1315
+#: ../plugins/bluetooth/bluetooth.c:1483 ../plugins/bluetooth/bluetooth.c:1596
 msgid "_Cancel"
 msgstr "_Cancel"
 
-#: ../plugins/bluetooth/bluetooth.c:1128 ../plugins/bluetooth/bluetooth.c:1223
-#: ../plugins/bluetooth/bluetooth.c:1455
+#: ../plugins/bluetooth/bluetooth.c:1206 ../plugins/bluetooth/bluetooth.c:1316
+#: ../plugins/bluetooth/bluetooth.c:1598 ../plugins/bluetooth/bluetooth.c:1606
 msgid "_OK"
 msgstr "_OK"
 
-#: ../plugins/bluetooth/bluetooth.c:1141
+#: ../plugins/bluetooth/bluetooth.c:1219
 #, c-format
 msgid "Pairing failed - %s"
 msgstr "Pairing failed - %s"
 
-#: ../plugins/bluetooth/bluetooth.c:1150
+#: ../plugins/bluetooth/bluetooth.c:1228
 msgid "Pairing successful - creating connection..."
 msgstr "Pairing successful - creating connection..."
 
-#: ../plugins/bluetooth/bluetooth.c:1157
+#: ../plugins/bluetooth/bluetooth.c:1235
 msgid "Connected successfully"
 msgstr "Connected successfully"
 
-#: ../plugins/bluetooth/bluetooth.c:1164
+#: ../plugins/bluetooth/bluetooth.c:1242
 #, c-format
 msgid "Connection failed - %s. Try to connect manually."
 msgstr "Connection failed - %s. Try to connect manually."
 
-#: ../plugins/bluetooth/bluetooth.c:1172
+#: ../plugins/bluetooth/bluetooth.c:1250
 #, c-format
 msgid "Please enter code '%s' on device '%s'"
 msgstr "Please enter code '%s' on device '%s'"
 
-#: ../plugins/bluetooth/bluetooth.c:1180
+#: ../plugins/bluetooth/bluetooth.c:1258
 #, c-format
 msgid "Please confirm that device '%s' is showing the code '%s' to connect"
 msgstr "Please confirm that device '%s' is showing the code '%s' to connect"
 
-#: ../plugins/bluetooth/bluetooth.c:1190
+#: ../plugins/bluetooth/bluetooth.c:1268
 #, c-format
 msgid "Please enter PIN code for device '%s'"
 msgstr "Please enter PIN code for device '%s'"
 
-#: ../plugins/bluetooth/bluetooth.c:1203
+#: ../plugins/bluetooth/bluetooth.c:1281
 msgid "Waiting for response from device..."
 msgstr "Waiting for response from device..."
 
-#: ../plugins/bluetooth/bluetooth.c:1211
-msgid "Pairing Requested"
-msgstr "Pairing Requested"
-
-#: ../plugins/bluetooth/bluetooth.c:1216
+#: ../plugins/bluetooth/bluetooth.c:1291 ../plugins/bluetooth/bluetooth.c:1305
 #, c-format
 msgid "Device '%s' has requested a pairing. Do you accept the request?"
 msgstr "Device '%s' has requested a pairing. Do you accept the request?"
 
-#: ../plugins/bluetooth/bluetooth.c:1232
+#: ../plugins/bluetooth/bluetooth.c:1301
+msgid "Pairing Requested"
+msgstr "Pairing Requested"
+
+#: ../plugins/bluetooth/bluetooth.c:1326
 #, c-format
 msgid "Rejecting pairing..."
 msgstr "Rejecting pairing..."
 
-#: ../plugins/bluetooth/bluetooth.c:1239
+#: ../plugins/bluetooth/bluetooth.c:1333
 #, c-format
 msgid "Removal of pairing failed - %s. Remove the device manually."
 msgstr "Removal of pairing failed - %s. Remove the device manually."
 
-#: ../plugins/bluetooth/bluetooth.c:1247
+#: ../plugins/bluetooth/bluetooth.c:1341
 msgid "Paired successfully. Use the audio menu to select as output device."
 msgstr "Paired successfully. Use the audio menu to select as output device."
 
-#: ../plugins/bluetooth/bluetooth.c:1254
+#: ../plugins/bluetooth/bluetooth.c:1348
 msgid ""
 "Paired successfully, but this device has no services which can be used with "
 "Raspberry Pi."
@@ -116,129 +106,129 @@ msgstr ""
 "Raspberry Pi."
 
 #. create the window
-#: ../plugins/bluetooth/bluetooth.c:1367
+#: ../plugins/bluetooth/bluetooth.c:1475
 msgid "Add New Device"
 msgstr "Add New Device"
 
-#: ../plugins/bluetooth/bluetooth.c:1367 ../plugins/bluetooth/bluetooth.c:1421
+#: ../plugins/bluetooth/bluetooth.c:1475 ../plugins/bluetooth/bluetooth.c:1548
 #, c-format
 msgid "Remove Device"
 msgstr "Remove Device"
 
-#: ../plugins/bluetooth/bluetooth.c:1377
+#: ../plugins/bluetooth/bluetooth.c:1484
 msgid "_Pair"
 msgstr "_Pair"
 
-#: ../plugins/bluetooth/bluetooth.c:1377
+#: ../plugins/bluetooth/bluetooth.c:1484
 msgid "_Remove"
 msgstr "_Remove"
 
 #. add a label
-#: ../plugins/bluetooth/bluetooth.c:1383
+#: ../plugins/bluetooth/bluetooth.c:1491
 msgid "Searching for Bluetooth devices..."
 msgstr "Searching for Bluetooth devices..."
 
-#: ../plugins/bluetooth/bluetooth.c:1383
+#: ../plugins/bluetooth/bluetooth.c:1491
 msgid "Paired Bluetooth devices"
 msgstr "Paired Bluetooth devices"
 
-#: ../plugins/bluetooth/bluetooth.c:1422
+#: ../plugins/bluetooth/bluetooth.c:1552
+msgid "Do you want to unpair '%s'?"
+msgstr "Do you want to unpair '%s'?"
+
+#: ../plugins/bluetooth/bluetooth.c:1555
 #, c-format
 msgid "Removing paired device '%s'..."
 msgstr "Removing paired device '%s'..."
 
-#: ../plugins/bluetooth/bluetooth.c:1422
+#: ../plugins/bluetooth/bluetooth.c:1558
 #, c-format
 msgid "Removal failed - %s"
 msgstr "Removal failed - %s"
 
-#: ../plugins/bluetooth/bluetooth.c:1426
+#: ../plugins/bluetooth/bluetooth.c:1564
 #, c-format
 msgid "Connect Device"
 msgstr "Connect Device"
 
-#: ../plugins/bluetooth/bluetooth.c:1427
+#: ../plugins/bluetooth/bluetooth.c:1565
 #, c-format
 msgid "Connecting to device '%s'..."
 msgstr "Connecting to device '%s'..."
 
-#: ../plugins/bluetooth/bluetooth.c:1427
+#: ../plugins/bluetooth/bluetooth.c:1565
 #, c-format
 msgid "Connection failed - %s"
 msgstr "Connection failed - %s"
 
-#: ../plugins/bluetooth/bluetooth.c:1431
+#: ../plugins/bluetooth/bluetooth.c:1569
 #, c-format
 msgid "Disconnect Device"
 msgstr "Disconnect Device"
 
-#: ../plugins/bluetooth/bluetooth.c:1432
+#: ../plugins/bluetooth/bluetooth.c:1570
 #, c-format
 msgid "Disconnecting from device '%s'..."
 msgstr "Disconnecting from device '%s'..."
 
-#: ../plugins/bluetooth/bluetooth.c:1432
+#: ../plugins/bluetooth/bluetooth.c:1570
 #, c-format
 msgid "Disconnection failed - %s"
 msgstr "Disconnection failed - %s"
 
-#: ../plugins/bluetooth/bluetooth.c:1515
+#: ../plugins/bluetooth/bluetooth.c:1702
 msgid "Use the audio menu to connect to this device"
 msgstr "Use the audio menu to connect to this device"
 
-#: ../plugins/bluetooth/bluetooth.c:1517
+#: ../plugins/bluetooth/bluetooth.c:1704
 msgid "No usable services on this device"
 msgstr "No usable services on this device"
 
-#: ../plugins/bluetooth/bluetooth.c:1585
+#: ../plugins/bluetooth/bluetooth.c:1774
 msgid "Disconnect..."
 msgstr "Disconnect..."
 
-#: ../plugins/bluetooth/bluetooth.c:1591
+#: ../plugins/bluetooth/bluetooth.c:1779
 msgid "Connect..."
 msgstr "Connect..."
 
-#. warn if no BT hardware detected
-#: ../plugins/bluetooth/bluetooth.c:1788
+#. add the remove option to the submenu
+#: ../plugins/bluetooth/bluetooth.c:1796
+msgid "Remove..."
+msgstr "Remove..."
+
+#: ../plugins/bluetooth/bluetooth.c:1996 ../plugins/bluetooth/bluetooth.c:1998
 msgid "No Bluetooth adapter found"
 msgstr "No Bluetooth adapter found"
 
-#. add enable bt option
-#: ../plugins/bluetooth/bluetooth.c:1795
+#: ../plugins/bluetooth/bluetooth.c:2007 ../plugins/bluetooth/bluetooth.c:2009
 msgid "Turn On Bluetooth"
 msgstr "Turn On Bluetooth"
 
-#. add disable bt option
-#: ../plugins/bluetooth/bluetooth.c:1804
+#: ../plugins/bluetooth/bluetooth.c:2020 ../plugins/bluetooth/bluetooth.c:2022
 msgid "Turn Off Bluetooth"
 msgstr "Turn Off Bluetooth"
 
-#. discoverable toggle
-#: ../plugins/bluetooth/bluetooth.c:1812
+#: ../plugins/bluetooth/bluetooth.c:2033 ../plugins/bluetooth/bluetooth.c:2035
 msgid "Stop Discoverable"
 msgstr "Stop Discoverable"
 
-#: ../plugins/bluetooth/bluetooth.c:1813
+#: ../plugins/bluetooth/bluetooth.c:2039 ../plugins/bluetooth/bluetooth.c:2041
 msgid "Make Discoverable"
 msgstr "Make Discoverable"
 
-#. add and remove dialogs
-#: ../plugins/bluetooth/bluetooth.c:1820
+#: ../plugins/bluetooth/bluetooth.c:2050 ../plugins/bluetooth/bluetooth.c:2052
 msgid "Add Device..."
 msgstr "Add Device..."
 
-#: ../plugins/bluetooth/bluetooth.c:1823
-msgid "Remove Device..."
-msgstr "Remove Device..."
-
-#: ../plugins/bluetooth/bluetooth.c:1905
+#: ../plugins/bluetooth/bluetooth.c:2172
 msgid "Manage Bluetooth devices"
 msgstr "Manage Bluetooth devices"
 
-#: ../plugins/bluetooth/bluetooth.c:1940
+#: ../plugins/bluetooth/bluetooth.c:2221
 msgid "Bluetooth"
 msgstr "Bluetooth"
 
-#: ../plugins/bluetooth/bluetooth.c:1941
+#: ../plugins/bluetooth/bluetooth.c:2222
 msgid "Manages Bluetooth devices"
 msgstr "Manages Bluetooth devices"
