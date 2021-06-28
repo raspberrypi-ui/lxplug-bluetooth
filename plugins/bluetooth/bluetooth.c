@@ -1512,7 +1512,7 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STA
 {
     GtkBuilder *builder;
     GtkWidget *msg_pb;
-    char buffer[256];
+    char *buffer;
 
     switch (type)
     {
@@ -1520,23 +1520,23 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STA
             switch (state)
             {
                 case STATE_CONFIRM:
-                    sprintf (buffer, _("Do you want to unpair '%s'?"), param);
+                    buffer = g_strdup_printf (_("Do you want to unpair '%s'?"), param);
                     break;
                 case STATE_CONFIRMED:
-                    sprintf (buffer, _("Removing paired device '%s'..."), param);
+                    buffer = g_strdup_printf (_("Removing paired device '%s'..."), param);
                     break;
                 case STATE_FAIL:
-                    sprintf (buffer, _("Removal failed - %s"), param);
+                    buffer = g_strdup_printf (_("Removal failed - %s"), param);
                     break;
             }
             break;
 
         case DIALOG_CONNECT:
-            sprintf (buffer, state == STATE_INIT ? _("Connecting to device '%s'...") : _("Connection failed - %s"), param);
+            buffer = g_strdup_printf (state == STATE_INIT ? _("Connecting to device '%s'...") : _("Connection failed - %s"), param);
             break;
 
         case DIALOG_DISCONNECT:
-            sprintf (buffer, state == STATE_INIT ? _("Disconnecting from device '%s'...") : _("Disconnection failed - %s"), param);
+            buffer = g_strdup_printf (state == STATE_INIT ? _("Disconnecting from device '%s'...") : _("Disconnection failed - %s"), param);
             break;
     }
 
@@ -1581,6 +1581,8 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STA
             gtk_widget_hide (bt->conn_cancel);
             break;
     }
+
+    g_free (buffer);
 }
 
 static void handle_close_connect_dialog (GtkButton *button, gpointer user_data)
