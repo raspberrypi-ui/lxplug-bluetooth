@@ -1510,34 +1510,33 @@ static void show_list_dialog (BluetoothPlugin *bt)
 
 static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STATE state, const gchar *param)
 {
-    char buffer1[256], buffer2[256];
+    GtkBuilder *builder;
+    GtkWidget *msg_pb;
+    char buffer[256];
 
     switch (type)
     {
         case DIALOG_REMOVE:
-            sprintf (buffer1, _("Remove Device"));
             switch (state)
             {
                 case STATE_CONFIRM:
-                    sprintf (buffer2, _("Do you want to unpair '%s'?"), param);
+                    sprintf (buffer, _("Do you want to unpair '%s'?"), param);
                     break;
                 case STATE_CONFIRMED:
-                    sprintf (buffer2, _("Removing paired device '%s'..."), param);
+                    sprintf (buffer, _("Removing paired device '%s'..."), param);
                     break;
                 case STATE_FAIL:
-                    sprintf (buffer2, _("Removal failed - %s"), param);
+                    sprintf (buffer, _("Removal failed - %s"), param);
                     break;
             }
             break;
 
         case DIALOG_CONNECT:
-            sprintf (buffer1, _("Connect Device"));
-            sprintf (buffer2, state == STATE_INIT ? _("Connecting to device '%s'...") : _("Connection failed - %s"), param);
+            sprintf (buffer, state == STATE_INIT ? _("Connecting to device '%s'...") : _("Connection failed - %s"), param);
             break;
 
         case DIALOG_DISCONNECT:
-            sprintf (buffer1, _("Disconnect Device"));
-            sprintf (buffer2, state == STATE_INIT ? _("Disconnecting from device '%s'...") : _("Disconnection failed - %s"), param);
+            sprintf (buffer, state == STATE_INIT ? _("Disconnecting from device '%s'...") : _("Disconnection failed - %s"), param);
             break;
     }
 
@@ -1545,41 +1544,39 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STA
     {
         case STATE_INIT:
         case STATE_CONFIRM:
-            bt->conn_dialog = gtk_dialog_new_with_buttons (buffer1, NULL, 0, NULL);
-            gtk_window_set_icon_name (GTK_WINDOW (bt->conn_dialog), "preferences-system-bluetooth");
-            gtk_window_set_position (GTK_WINDOW (bt->conn_dialog), GTK_WIN_POS_CENTER);
-            gtk_container_set_border_width (GTK_CONTAINER (bt->conn_dialog), 10);
-            bt->conn_label = gtk_label_new (buffer2);
-            gtk_label_set_line_wrap (GTK_LABEL (bt->conn_label), TRUE);
-            gtk_label_set_justify (GTK_LABEL (bt->conn_label), GTK_JUSTIFY_LEFT);
-#if GTK_CHECK_VERSION(3, 0, 0)
-            gtk_label_set_xalign (GTK_LABEL (bt->conn_label), 0.0);
-            gtk_label_set_yalign (GTK_LABEL (bt->conn_label), 0.0);
-#else
-            gtk_misc_set_alignment (GTK_MISC (bt->conn_label), 0.0, 0.0);
-#endif
-            gtk_widget_set_size_request (bt->conn_label, 350, -1);
-            gtk_box_pack_start (GTK_BOX (gtk_dialog_get_content_area (GTK_DIALOG (bt->conn_dialog))), bt->conn_label, TRUE, TRUE, 0);
-            g_signal_connect (bt->conn_dialog, "delete_event", G_CALLBACK (delete_conn), bt);
+            builder = gtk_builder_new ();
+            gtk_builder_add_from_file (builder, PACKAGE_DATA_DIR "/ui/lxplug-bluetooth.ui", NULL);
+
+            bt->conn_dialog = (GtkWidget *) gtk_builder_get_object (builder, "modal");
+            bt->conn_label = (GtkWidget *) gtk_builder_get_object (builder, "modal_msg");
+            bt->conn_ok = (GtkWidget *) gtk_builder_get_object (builder, "modal_ok");
+            bt->conn_cancel = (GtkWidget *) gtk_builder_get_object (builder, "modal_cancel");
+            msg_pb = (GtkWidget *) gtk_builder_get_object (builder, "modal_pb");
+            gtk_widget_hide (msg_pb);
+            g_object_unref (builder);
+
+            gtk_label_set_text (GTK_LABEL (bt->conn_label), buffer);
+            gtk_widget_set_visible (bt->conn_ok, state == STATE_CONFIRM);
+            gtk_widget_set_visible (bt->conn_cancel, state == STATE_CONFIRM);
             if (state == STATE_CONFIRM)
             {
-                bt->conn_cancel = gtk_dialog_add_button (GTK_DIALOG (bt->conn_dialog), _("_Cancel"), 0);
-                g_signal_connect (bt->conn_cancel, "clicked", G_CALLBACK (handle_close_connect_dialog), bt);
-                bt->conn_ok = gtk_dialog_add_button (GTK_DIALOG (bt->conn_dialog), _("_OK"), 1);
                 g_signal_connect (bt->conn_ok, "clicked", G_CALLBACK (handle_remove), bt);
+                g_signal_connect (bt->conn_cancel, "clicked", G_CALLBACK (handle_close_connect_dialog), bt);
             }
-            gtk_widget_show_all (bt->conn_dialog);
+
+            gtk_widget_show (bt->conn_dialog);
             break;
 
         case STATE_FAIL:
-            gtk_label_set_text (GTK_LABEL (bt->conn_label), buffer2);
-            bt->conn_ok = gtk_dialog_add_button (GTK_DIALOG (bt->conn_dialog), _("_OK"), 1);
+            gtk_label_set_text (GTK_LABEL (bt->conn_label), buffer);
+            g_signal_handlers_disconnect_by_func (bt->conn_ok, G_CALLBACK (handle_remove), bt);
             g_signal_connect (bt->conn_ok, "clicked", G_CALLBACK (handle_close_connect_dialog), bt);
             gtk_widget_show (bt->conn_ok);
+            gtk_widget_hide (bt->conn_cancel);
             break;
 
         case STATE_CONFIRMED:
-            gtk_label_set_text (GTK_LABEL (bt->conn_label), buffer2);
+            gtk_label_set_text (GTK_LABEL (bt->conn_label), buffer);
             gtk_widget_hide (bt->conn_ok);
             gtk_widget_hide (bt->conn_cancel);
             break;
