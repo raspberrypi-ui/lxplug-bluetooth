@@ -657,13 +657,24 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
         {
             var_m = g_variant_lookup_value (parameters, "Modalias", NULL);
             var_u = g_variant_lookup_value (parameters, "UUIDs", NULL);
-            if (var_m && var_u && bt->pairing_object == NULL)
+            if (var_u && bt->pairing_object == NULL)
             {
+                // This seems to have changed in recent BlueZ - some incoming devices have already been
+                // authorized by an earlier RequestConfirmation. These seem to have no Modalias in the
+                // paired message - so just finish the connection at that point. Due to the unique way
+                // BlueZ is written and documented, this is just based on observation of what seems topairing
+                // happen... :(
                 DEBUG ("New pairing detected");
-                var_a = g_dbus_proxy_get_cached_property (proxy, "Alias");
-                bt->incoming_object = g_dbus_proxy_get_object_path (proxy);
-                show_pairing_dialog (bt, STATE_PAIR_REQUEST, g_variant_get_string (var_a, NULL), NULL);
-                if (var_a) g_variant_unref (var_a);
+                if (var_m)
+                {
+                    // the old way...
+                    var_a = g_dbus_proxy_get_cached_property (proxy, "Alias");
+                    bt->incoming_object = g_dbus_proxy_get_object_path (proxy);
+                    show_pairing_dialog (bt, STATE_PAIR_REQUEST, g_variant_get_string (var_a, NULL), NULL);
+                    if (var_a) g_variant_unref (var_a);
+                }
+                // the new way...
+                else show_pairing_dialog (bt, STATE_CONNECTED, NULL, NULL);
             }
             if (var_m) g_variant_unref (var_m);
             if (var_u) g_variant_unref (var_u);
