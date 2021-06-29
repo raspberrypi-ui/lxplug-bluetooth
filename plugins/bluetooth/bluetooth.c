@@ -1691,6 +1691,13 @@ static gboolean flash_icon (gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
 
+    if (!is_discoverable (bt))
+    {
+        if (bt->flash_timer) g_source_remove (bt->flash_timer);
+        bt->flash_timer = 0;
+        return FALSE;
+    }
+
     if (bt->flash_timer == 0) return FALSE;
     lxpanel_plugin_set_taskbar_icon (bt->panel, bt->tray_icon, bt->flash_state ? "preferences-system-bluetooth-active" : "preferences-system-bluetooth");
     bt->flash_state ^= 1;
