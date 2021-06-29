@@ -645,6 +645,7 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
         }
         g_variant_unref (var);
     }
+
     // hack to accept incoming pairing
     var = g_variant_lookup_value (parameters, "Paired", NULL);
     if (var)
@@ -1508,7 +1509,7 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STA
                     buffer = g_strdup_printf (_("Do you want to unpair '%s'?"), param);
                     break;
                 case STATE_CONFIRMED:
-                    buffer = g_strdup_printf (_("Removing paired device '%s'..."), param);
+                    buffer = g_strdup_printf (_("Removing pairing with '%s'..."), param);
                     break;
                 case STATE_FAIL:
                     buffer = g_strdup_printf (_("Removal failed - %s"), param);
@@ -1517,11 +1518,11 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STA
             break;
 
         case DIALOG_CONNECT:
-            buffer = g_strdup_printf (state == STATE_INIT ? _("Connecting to device '%s'...") : _("Connection failed - %s"), param);
+            buffer = g_strdup_printf (state == STATE_INIT ? _("Connecting to '%s'...") : _("Connection failed - %s"), param);
             break;
 
         case DIALOG_DISCONNECT:
-            buffer = g_strdup_printf (state == STATE_INIT ? _("Disconnecting from device '%s'...") : _("Disconnection failed - %s"), param);
+            buffer = g_strdup_printf (state == STATE_INIT ? _("Disconnecting from '%s'...") : _("Disconnection failed - %s"), param);
             break;
     }
 
