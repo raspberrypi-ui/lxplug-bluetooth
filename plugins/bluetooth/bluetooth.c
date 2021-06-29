@@ -1215,8 +1215,7 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
 
     if (!bt->pair_dialog)
     {
-        builder = gtk_builder_new ();
-        gtk_builder_add_from_file (builder, PACKAGE_DATA_DIR "/ui/lxplug-bluetooth.ui", NULL);
+        builder = gtk_builder_new_from_file (PACKAGE_DATA_DIR "/ui/lxplug-bluetooth.ui");
 
         bt->pair_dialog = (GtkWidget *) gtk_builder_get_object (builder, "pair_dlg");
         bt->pair_label = (GtkWidget *) gtk_builder_get_object (builder, "pair_msg");
@@ -1457,8 +1456,7 @@ static void show_list_dialog (BluetoothPlugin *bt)
     GtkBuilder *builder;
     GtkCellRenderer *rend;
 
-    builder = gtk_builder_new ();
-    gtk_builder_add_from_file (builder, PACKAGE_DATA_DIR "/ui/lxplug-bluetooth.ui", NULL);
+    builder = gtk_builder_new_from_file (PACKAGE_DATA_DIR "/ui/lxplug-bluetooth.ui");
     bt->list_dialog = (GtkWidget *) gtk_builder_get_object (builder, "list_dlg");
     bt->list_ok = (GtkWidget *) gtk_builder_get_object (builder, "list_pair");
     bt->list = (GtkWidget *) gtk_builder_get_object (builder, "list_treeview");
@@ -1530,8 +1528,7 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STA
     {
         case STATE_INIT:
         case STATE_CONFIRM:
-            builder = gtk_builder_new ();
-            gtk_builder_add_from_file (builder, PACKAGE_DATA_DIR "/ui/lxplug-bluetooth.ui", NULL);
+            builder = gtk_builder_new_from_file (PACKAGE_DATA_DIR "/ui/lxplug-bluetooth.ui");
 
             bt->conn_dialog = (GtkWidget *) gtk_builder_get_object (builder, "modal");
             bt->conn_label = (GtkWidget *) gtk_builder_get_object (builder, "modal_msg");
