@@ -1,3 +1,10 @@
+lxplug-bluetooth (0.24) bullseye; urgency=medium
+
+  * Use standard dialog design
+  * Simplify response to incoming connection requests
+
+ -- Simon Long <simon@raspberrypi.com>  Tue, 29 Jun 2021 14:03:58 +0100
+
 lxplug-bluetooth (0.23) bullseye; urgency=medium
 
   * Remove separate unpair dialog; filter out unknown devices
