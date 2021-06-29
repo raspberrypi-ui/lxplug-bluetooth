@@ -89,7 +89,6 @@ typedef struct {
     gchar *pairing_object;
     gchar *device_name;
     gchar *device_path;
-    const gchar *incoming_object;
     GtkWidget *list_dialog, *list, *list_ok;
     GtkWidget *pair_dialog, *pair_label, *pair_entry, *pair_ok, *pair_cancel;
     GtkWidget *conn_dialog, *conn_label, *conn_ok, *conn_cancel;
@@ -239,6 +238,7 @@ static void connect_device (BluetoothPlugin *bt, const gchar *path, gboolean sta
 static void cb_connected (GObject *source, GAsyncResult *res, gpointer user_data);
 static void cb_disconnected (GObject *source, GAsyncResult *res, gpointer user_data);
 static void remove_device (BluetoothPlugin *bt, const gchar *path);
+static void cb_disc_remove (GObject *source, GAsyncResult *res, gpointer user_data);
 static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data);
 static DEVICE_TYPE check_uuids (BluetoothPlugin *bt, const gchar *path);
 
@@ -251,8 +251,6 @@ static void handle_authorize_no (GtkButton *button, gpointer user_data);
 static void handle_cancel_pair (GtkButton *button, gpointer user_data);
 static void handle_close_pair_dialog (GtkButton *button, gpointer user_data);
 static gint delete_pair (GtkWidget *widget, GdkEvent *event, gpointer user_data);
-static void handle_reject_pair (GtkButton *button, gpointer user_data);
-static void handle_accept_pair (GtkButton *button, gpointer user_data);
 static void connect_ok (BluetoothPlugin *bt, void (*cb) (void));
 static void connect_cancel (BluetoothPlugin *bt, void (*cb) (void));
 static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gchar *device, const gchar *param);
@@ -1005,8 +1003,42 @@ static void cb_disconnected (GObject *source, GAsyncResult *res, gpointer user_d
 
 static void remove_device (BluetoothPlugin *bt, const gchar *path)
 {
-    DEBUG ("Removing %s", path);
-    GVariant *var = g_variant_new ("(o)", path);
+    if (is_connected (bt, path))
+    {
+        DEBUG ("Disconnecting %s before removal", path);
+        GDBusInterface *interface = g_dbus_object_manager_get_interface (bt->objmanager, path, "org.bluez.Device1");
+        g_dbus_proxy_call (G_DBUS_PROXY (interface), "Disconnect", NULL, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_disc_remove, bt);
+        g_object_unref (interface);
+    }
+    else
+    {
+        DEBUG ("Removing %s", path);
+        GVariant *var = g_variant_new ("(o)", path);
+        g_variant_ref_sink (var);
+        g_dbus_proxy_call (bt->adapter, "RemoveDevice", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_removed, bt);
+        g_variant_unref (var);
+    }
+}
+
+static void cb_disc_remove (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+    BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+    GError *error = NULL;
+    GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+
+    if (error)
+    {
+        DEBUG ("Disconnect error %s", error->message);
+        g_error_free (error);
+    }
+    else
+    {
+        DEBUG_VAR ("Disconnect result %s", var);
+    }
+    if (var) g_variant_unref (var);
+
+    DEBUG ("Removing");
+    var = g_variant_new ("(o)", bt->device_path);
     g_variant_ref_sink (var);
     g_dbus_proxy_call (bt->adapter, "RemoveDevice", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_removed, bt);
     g_variant_unref (var);
@@ -1032,6 +1064,10 @@ static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data)
         if (bt->conn_dialog) handle_close_connect_dialog (NULL, bt);
     }
     if (var) g_variant_unref (var);
+    g_free (bt->device_path);
+    g_free (bt->device_name);
+    bt->device_path = NULL;
+    bt->device_name = NULL;
 }
 
 static DEVICE_TYPE check_uuids (BluetoothPlugin *bt, const gchar *path)
@@ -1149,20 +1185,6 @@ static gint delete_pair (GtkWidget *widget, GdkEvent *event, gpointer user_data)
     if (bt->pairing_object) pair_device (bt, bt->pairing_object, FALSE);
     handle_close_pair_dialog (NULL, bt);
     return TRUE;
-}
-
-static void handle_reject_pair (GtkButton *button, gpointer user_data)
-{
-    BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
-    show_pairing_dialog (bt, STATE_REMOVING, NULL, NULL);
-    remove_device (bt, bt->incoming_object);
-}
-
-static void handle_accept_pair (GtkButton *button, gpointer user_data)
-{
-    BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
-    show_pairing_dialog (bt, STATE_PAIRED, NULL, NULL);
-    connect_device (bt, bt->incoming_object, TRUE);
 }
 
 static void connect_ok (BluetoothPlugin *bt, void (*cb) (void))
@@ -1384,10 +1406,6 @@ static void handle_remove (GtkButton *button, gpointer user_data)
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     show_connect_dialog (bt, DIALOG_REMOVE, STATE_CONFIRMED, bt->device_name);
     remove_device (bt, bt->device_path);
-    g_free (bt->device_path);
-    g_free (bt->device_name);
-    bt->device_path = NULL;
-    bt->device_name = NULL;
 }
 
 static void handle_close_list_dialog (GtkButton *button, gpointer user_data)
