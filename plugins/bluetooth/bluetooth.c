@@ -1130,6 +1130,11 @@ static void handle_pin_rejected (GtkButton *button, gpointer user_data)
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     DEBUG ("PIN rejected by user");
     g_dbus_method_invocation_return_dbus_error (bt->invocation, "org.bluez.Error.Rejected", "Confirmation rejected by user");
+    if (bt->pair_dialog)
+    {
+        gtk_widget_destroy (bt->pair_dialog);
+        bt->pair_dialog = NULL;
+    }
     if (bt->pairing_object)
     {
         g_free (bt->pairing_object);
@@ -1150,6 +1155,11 @@ static void handle_authorize_no (GtkButton *button, gpointer user_data)
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
     DEBUG ("Pairing not authorized by user");
     g_dbus_method_invocation_return_dbus_error (bt->invocation, "org.bluez.Error.Rejected", "Pairing rejected by user");
+    if (bt->pair_dialog)
+    {
+        gtk_widget_destroy (bt->pair_dialog);
+        bt->pair_dialog = NULL;
+    }
     if (bt->pairing_object)
     {
         g_free (bt->pairing_object);
