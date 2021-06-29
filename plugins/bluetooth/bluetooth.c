@@ -120,8 +120,6 @@ typedef enum {
     STATE_PAIR_FAIL,
     STATE_CONNECTED,
     STATE_CONNECT_FAIL,
-    STATE_REMOVING,
-    STATE_REMOVE_FAIL,
     STATE_PAIRED_AUDIO,
     STATE_PAIRED_UNUSABLE
 } PAIR_STATE;
@@ -1053,14 +1051,12 @@ static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data)
     if (error)
     {
         DEBUG ("Remove error %s", error->message);
-        if (bt->pair_dialog) show_pairing_dialog (bt, STATE_REMOVE_FAIL, NULL, error->message);
         if (bt->conn_dialog) show_connect_dialog (bt, DIALOG_REMOVE, STATE_FAIL, error->message);
         g_error_free (error);
     }
     else
     {
         DEBUG_VAR ("Remove result %s", var);
-        if (bt->pair_dialog) handle_close_pair_dialog (NULL, bt);
         if (bt->conn_dialog) handle_close_connect_dialog (NULL, bt);
     }
     if (var) g_variant_unref (var);
@@ -1294,14 +1290,18 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             break;
 
         case STATE_REQUEST_PIN:
-        case STATE_REQUEST_PASS:
             buffer = g_strdup_printf (_("Please enter PIN code shown on '%s'"), device);
             gtk_label_set_text (GTK_LABEL (bt->pair_label), buffer);
             gtk_widget_show (bt->pair_entry);
-            if (state == STATE_REQUEST_PIN)
-                connect_ok (bt, G_CALLBACK (handle_pin_entered));
-            else
-                connect_ok (bt, G_CALLBACK (handle_pass_entered));
+            connect_ok (bt, G_CALLBACK (handle_pin_entered));
+            connect_cancel (bt, G_CALLBACK (handle_cancel_pair));
+            break;
+
+        case STATE_REQUEST_PASS:
+            buffer = g_strdup_printf (_("Please enter passcode shown on '%s'"), device);
+            gtk_label_set_text (GTK_LABEL (bt->pair_label), buffer);
+            gtk_widget_show (bt->pair_entry);
+            connect_ok (bt, G_CALLBACK (handle_pass_entered));
             connect_cancel (bt, G_CALLBACK (handle_cancel_pair));
             break;
 
@@ -1320,22 +1320,6 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             connect_ok (bt, G_CALLBACK (handle_authorize_yes));
             connect_cancel (bt, G_CALLBACK (handle_authorize_no));
            break;
-
-        case STATE_REMOVING:
-            buffer = g_strdup_printf (_("Rejecting pairing..."));
-            gtk_label_set_text (GTK_LABEL (bt->pair_label), buffer);
-            gtk_widget_hide (bt->pair_entry);
-            gtk_widget_hide (bt->pair_ok);
-            gtk_widget_hide (bt->pair_cancel);
-            break;
-
-        case STATE_REMOVE_FAIL:
-            buffer = g_strdup_printf (_("Removal of pairing failed - %s"), param);
-            gtk_label_set_text (GTK_LABEL (bt->pair_label), buffer);
-            gtk_widget_hide (bt->pair_entry);
-            connect_ok (bt, G_CALLBACK (handle_close_pair_dialog));
-            gtk_widget_hide (bt->pair_cancel);
-            break;
 
         case STATE_PAIRED_AUDIO:
             buffer = g_strdup_printf (_("Pairing successful - right-click the volume icon to connect as audio device"));
