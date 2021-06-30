@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.25) bullseye; urgency=medium
+
+  * Fix pairing dialog being shown on taskbar
+
+ -- Simon Long <simon@raspberrypi.com>  Wed, 30 Jun 2021 20:09:36 +0100
+
 lxplug-bluetooth (0.24) bullseye; urgency=medium
 
   * Use standard dialog design
