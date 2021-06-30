@@ -1528,7 +1528,7 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STA
     {
         case STATE_INIT:
         case STATE_CONFIRM:
-            builder = gtk_builder_new_from_file (PACKAGE_DATA_DIR "/ui/lxplug-bluetooth.ui");
+            builder = gtk_builder_new_from_file (PACKAGE_DATA_DIR "/ui/lxpanel-modal.ui");
 
             bt->conn_dialog = (GtkWidget *) gtk_builder_get_object (builder, "modal");
             bt->conn_label = (GtkWidget *) gtk_builder_get_object (builder, "modal_msg");
