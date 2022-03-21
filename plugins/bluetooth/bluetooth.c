@@ -848,6 +848,8 @@ static void cb_paired (GObject *source, GAsyncResult *res, gpointer user_data)
         else if (dev == DEV_HID_LE)
         {
             show_pairing_dialog (bt, STATE_CONNECTED, NULL, NULL);
+            g_free (bt->pairing_object);
+            bt->pairing_object = NULL;
         }
         else if (dev == DEV_AUDIO_SINK)
         {
