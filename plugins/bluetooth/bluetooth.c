@@ -2152,7 +2152,11 @@ static gboolean bluetooth_control_msg (GtkWidget *plugin, const char *cmd)
 {
     BluetoothPlugin *bt = lxpanel_plugin_get_data (plugin);
 
-    if (!g_strcmp0 (cmd, "apstop")) bt->hid_autopair = 0;
+    if (!g_strcmp0 (cmd, "apstop"))
+    {
+        if (bt->list_dialog == NULL) set_search (bt, FALSE);
+        bt->hid_autopair = 0;
+    }
 
     return TRUE;
 }
