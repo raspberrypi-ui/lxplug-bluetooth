@@ -47,6 +47,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DEBUG_VAR
 #endif
 
+#define AP_MOUSE    0x01
+#define AP_KEYBOARD 0x02
+
 /* Name table for cached icons */
 
 #define ICON_CACHE_SIZE 13
@@ -99,6 +102,7 @@ typedef struct {
     guint flash_timer;
     guint flash_state;
     GdkPixbuf *icon_ref[ICON_CACHE_SIZE];
+    guint hid_autopair;
 } BluetoothPlugin;
 
 typedef enum {
@@ -239,6 +243,7 @@ static void remove_device (BluetoothPlugin *bt, const gchar *path);
 static void cb_disc_remove (GObject *source, GAsyncResult *res, gpointer user_data);
 static void cb_removed (GObject *source, GAsyncResult *res, gpointer user_data);
 static DEVICE_TYPE check_uuids (BluetoothPlugin *bt, const gchar *path);
+static gboolean check_icon (BluetoothPlugin *bt, const gchar *path, const gchar *name);
 
 static void handle_pin_entered (GtkButton *button, gpointer user_data);
 static void handle_pass_entered (GtkButton *button, gpointer user_data);
@@ -379,6 +384,9 @@ static void initialise (BluetoothPlugin *bt)
 
     // clean up
     g_dbus_node_info_unref (introspection_data);
+
+    // enable search if autoconnecting
+    if (bt->hid_autopair) set_search (bt, TRUE);
 }
 
 /* Clear all the BlueZ data if the DBus connection is lost */
@@ -839,6 +847,16 @@ static void cb_paired (GObject *source, GAsyncResult *res, gpointer user_data)
     {
         DEBUG_VAR ("Pairing result %s", var);
 
+        // clear autopair flags and restart search if needed
+        if (bt->hid_autopair)
+        {
+            if (check_icon (bt, bt->pairing_object, "input-mouse"))
+                bt->hid_autopair &= ~AP_MOUSE;
+            if (check_icon (bt, bt->pairing_object, "input-keyboard"))
+                bt->hid_autopair &= ~AP_KEYBOARD;
+            if (bt->hid_autopair) set_search (bt, TRUE);
+        }
+
         // check services available
         dev = check_uuids (bt, bt->pairing_object);
         if (dev == DEV_HID)
@@ -1086,6 +1104,17 @@ static DEVICE_TYPE check_uuids (BluetoothPlugin *bt, const gchar *path)
     g_variant_unref (var);
     g_object_unref (interface);
     return DEV_OTHER;
+}
+
+static gboolean check_icon (BluetoothPlugin *bt, const gchar *path, const gchar *name)
+{
+    gboolean ret = FALSE;
+    GDBusInterface *interface = g_dbus_object_manager_get_interface (bt->objmanager, path, "org.bluez.Device1");
+    GVariant *var = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (interface), "Icon");
+    if (var && !g_strcmp0 (g_variant_get_string (var, NULL), name)) ret = TRUE;
+    g_variant_unref (var);
+    g_object_unref (interface);
+    return ret;
 }
 
 /* GUI... */
@@ -1823,6 +1852,18 @@ static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *
         3, g_variant_get_boolean (var3), 4, g_variant_get_boolean (var4), 
         5, icon, 6, var5 ? g_variant_get_string (var5, NULL) : "dialog-question", -1);
 
+    if (bt->hid_autopair && bt->pairing_object == NULL && var2 && !g_variant_get_boolean (var2))
+    {
+        if (((bt->hid_autopair & AP_MOUSE) && var5 && !g_strcmp0 (g_variant_get_string (var5, NULL), "input-mouse")) ||
+            ((bt->hid_autopair & AP_KEYBOARD) && var5 && !g_strcmp0 (g_variant_get_string (var5, NULL), "input-keyboard")))
+        {
+            set_search (bt, FALSE);
+            show_pairing_dialog (bt, STATE_PAIR_INIT, var1 ? g_variant_get_string (var1, NULL) : "Unnamed device", NULL);
+            bt->pairing_object = g_strdup (g_dbus_object_get_object_path (object));
+            pair_device (bt, g_dbus_object_get_object_path (object), TRUE);
+        }
+    }
+
     if (var1) g_variant_unref (var1);
     if (var2) g_variant_unref (var2);
     if (var3) g_variant_unref (var3);
@@ -2106,6 +2147,16 @@ static void bluetooth_configuration_changed (LXPanel *panel, GtkWidget *widget)
     update_icon (bt);
 }
 
+/* Handler for control message */
+static gboolean bluetooth_control_msg (GtkWidget *plugin, const char *cmd)
+{
+    BluetoothPlugin *bt = lxpanel_plugin_get_data (plugin);
+
+    if (!g_strcmp0 (cmd, "apstop")) bt->hid_autopair = 0;
+
+    return TRUE;
+}
+
 /* Plugin destructor. */
 static void bluetooth_destructor (gpointer user_data)
 {
@@ -2166,6 +2217,14 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
     bt->list_dialog = NULL;
     clear (bt);
 
+    // enable autopairing if in the wizard, but not if wizard started for user change only
+    bt->hid_autopair = 0;
+    if (!system ("test -f /etc/xdg/autostart/piwiz.desktop"))
+    {
+        if (system ("grep -q useronly /etc/xdg/autostart/piwiz.desktop"))
+            bt->hid_autopair = AP_MOUSE | AP_KEYBOARD;
+    }
+
     /* Load icon cache */
     init_icon_cache (bt);
 
@@ -2184,5 +2243,6 @@ LXPanelPluginInit fm_module_init_lxpanel_gtk = {
     .new_instance = bluetooth_constructor,
     .reconfigure = bluetooth_configuration_changed,
     .button_press_event = bluetooth_button_press_event,
+    .control = bluetooth_control_msg,
     .gettext_package = GETTEXT_PACKAGE
 };
