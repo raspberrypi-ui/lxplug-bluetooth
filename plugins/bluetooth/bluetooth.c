@@ -2175,6 +2175,7 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
 {
     /* Allocate and initialize plugin context */
     BluetoothPlugin *bt = g_new0 (BluetoothPlugin, 1);
+    int val;
 
 #ifdef ENABLE_NLS
     setlocale (LC_ALL, "");
@@ -2223,10 +2224,16 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
 
     // enable autopairing if in the wizard, but not if wizard started for user change only
     bt->hid_autopair = 0;
-    if (!system ("test -f /etc/xdg/autostart/piwiz.desktop"))
+    if (config_setting_lookup_int (settings, "autopair", &val))
     {
-        if (system ("grep -q useronly /etc/xdg/autostart/piwiz.desktop"))
-            bt->hid_autopair = AP_MOUSE | AP_KEYBOARD;
+        if (val == 1)
+        {
+            if (!system ("test -f /etc/xdg/autostart/piwiz.desktop"))
+            {
+                if (system ("grep -q useronly /etc/xdg/autostart/piwiz.desktop"))
+                    bt->hid_autopair = AP_MOUSE | AP_KEYBOARD;
+            }
+        }
     }
 
     /* Load icon cache */
