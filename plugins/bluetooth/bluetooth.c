@@ -629,7 +629,7 @@ static void cb_interface_signal (GDBusObjectManagerClient *manager, GDBusObjectP
 static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObjectProxy *object_proxy, GDBusProxy *proxy, GVariant *parameters, GStrv inval, gpointer user_data)
 {
     BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
-    GVariant *var, *var_m, *var_u, *var_a;
+    GVariant *var, *var2;
 
     DEBUG_VAR ("Object manager - object at %s property changed - %s %s", parameters, g_dbus_proxy_get_object_path (proxy), g_dbus_proxy_get_interface_name (proxy));
     update_device_list (bt);
@@ -660,13 +660,22 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
     {
         if (g_variant_get_boolean (var) == TRUE && bt->pairing_object == NULL)
         {
+            var2 = g_variant_lookup_value (parameters, "UUIDs", NULL);
+            if (var2)
+            {
                 // This seems to have changed in recent BlueZ - some incoming devices have already been
                 // authorized by an earlier RequestConfirmation, so just finish the connection when the
                 // object gets a Paired status. Due to the unique way BlueZ is written and documented,
                 // this is just based on observation of what seems to happen, but it works on iOS and
                 // Android devices...
+
+                // Just to make life more fun, reconnection of a BTLE device at boot produces a similar "Paired"
+                // message, the only difference being that it doesn't contain UUIDs. So try to avoid showing an
+                // annoying dialog when that happens...
                 DEBUG ("New pairing detected");
                 show_pairing_dialog (bt, STATE_CONNECTED, NULL, NULL);
+                g_variant_unref (var2);
+            }
         }
         g_variant_unref (var);
     }
