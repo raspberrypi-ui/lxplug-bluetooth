@@ -1314,7 +1314,7 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
             break;
 
         case STATE_DISPLAY_PIN:
-            buffer = g_strdup_printf (_("Please enter code '%s' when prompted on '%s'"), param, device);
+            buffer = g_strdup_printf (_("Please enter code '%s' on '%s'"), param, device);
             gtk_label_set_text (GTK_LABEL (bt->pair_label), buffer);
             gtk_widget_hide (bt->pair_entry);
             gtk_widget_hide (bt->pair_ok);

@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.28) bullseye; urgency=medium
+
+  * Update translation file
+
+ -- Simon Long <simon@raspberrypi.com>  Tue, 29 Mar 2022 10:53:14 +0100
+
 lxplug-bluetooth (0.27) bullseye; urgency=medium
 
   * Add auto-pairing of HID devices when in wizard
