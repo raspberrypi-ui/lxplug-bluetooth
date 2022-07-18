@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.29) bullseye; urgency=medium
+
+  * Tidy constructor; fix translations
+
+ -- Simon Long <simon@raspberrypi.com>  Mon, 18 Jul 2022 13:50:16 +0100
+
 lxplug-bluetooth (0.28) bullseye; urgency=medium
 
   * Update translation file
