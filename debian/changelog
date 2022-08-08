@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.30) bullseye; urgency=medium
+
+  * Add control message to show menu
+
+ -- Simon Long <simon@raspberrypi.com>  Mon, 08 Aug 2022 10:02:02 +0100
+
 lxplug-bluetooth (0.29) bullseye; urgency=medium
 
   * Tidy constructor; fix translations
