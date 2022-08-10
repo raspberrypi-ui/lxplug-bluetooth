@@ -43,8 +43,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DEBUG(fmt,args...) if(getenv("DEBUG_BT"))g_message("bt: " fmt,##args)
 #define DEBUG_VAR(fmt,var,args...) if(getenv("DEBUG_BT")){gchar*vp=g_variant_print(var,TRUE);g_message("bt: " fmt,##args,vp);g_free(vp);}
 #else
-#define DEBUG
-#define DEBUG_VAR
+#define DEBUG(fmt,args...)
+#define DEBUG_VAR(fmt,var,args...)
 #endif
 
 #define AP_MOUSE    0x01
@@ -431,12 +431,18 @@ static void find_hardware (BluetoothPlugin *bt)
             if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.Adapter1") == 0)
             {
                 if (newadapter == NULL) newadapter = G_DBUS_PROXY (interface);
-                else DEBUG ("Multiple adapters found");
+                else
+                {
+                    DEBUG ("Multiple adapters found");
+                }
             }
             else if (g_strcmp0 (g_dbus_proxy_get_interface_name (G_DBUS_PROXY (interface)), "org.bluez.AgentManager1") == 0)
             {
                 if (newagentmanager == NULL) newagentmanager = G_DBUS_PROXY (interface);
-                else DEBUG ("Multiple agent managers found");
+                else
+                {
+                    DEBUG ("Multiple agent managers found");
+                }
             }
         }
         g_list_free_full (interfaces, g_object_unref);
@@ -520,7 +526,10 @@ static void handle_method_call (GDBusConnection *connection, const gchar *sender
     gchar buffer[16];
 
     DEBUG ("Agent method %s called", method_name);
-    if (parameters) DEBUG_VAR ("with parameters %s", parameters);
+    if (parameters)
+    {
+        DEBUG_VAR ("with parameters %s", parameters);
+    }
 
     if (g_strcmp0 (method_name, "Cancel") == 0) return;
 
@@ -710,7 +719,10 @@ static void cb_search_start (GObject *source, GAsyncResult *res, gpointer user_d
         DEBUG ("Search start - error %s", error->message);
         g_error_free (error);
     }
-    else DEBUG_VAR ("Search start - result %s", var);
+    else
+    {
+        DEBUG_VAR ("Search start - result %s", var);
+    }
     if (var) g_variant_unref (var);
 }
 
@@ -724,7 +736,10 @@ static void cb_search_end (GObject *source, GAsyncResult *res, gpointer user_dat
         DEBUG ("Search end - error %s", error->message);
         g_error_free (error);
     }
-    else DEBUG_VAR ("Search end - result %s", var);
+    else
+    {
+        DEBUG_VAR ("Search end - result %s", var);
+    }
     if (var) g_variant_unref (var);
 }
 
@@ -901,7 +916,10 @@ static void cb_cancelled (GObject *source, GAsyncResult *res, gpointer user_data
         DEBUG ("Cancelling error %s", error->message);
         g_error_free (error);
     }
-    else DEBUG_VAR ("Cancelling result %s", var);
+    else
+    {
+        DEBUG_VAR ("Cancelling result %s", var);
+    }
     if (var) g_variant_unref (var);
 }
 
@@ -949,7 +967,10 @@ static void cb_trusted (GObject *source, GAsyncResult *res, gpointer user_data)
         DEBUG ("Trusting error %s", error->message);
         g_error_free (error);
     }
-    else DEBUG_VAR ("Trusting result %s", var);
+    else
+    {
+        DEBUG_VAR ("Trusting result %s", var);
+    }
     if (var) g_variant_unref (var);
 }
 
