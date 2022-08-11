@@ -128,16 +128,16 @@ msgstr "No usable services on this device"
 
 #: ../plugins/bluetooth/bluetooth.c:1773
 msgid "Disconnect..."
-msgstr "Disconnect..."
+msgstr "_Disconnect..."
 
 #: ../plugins/bluetooth/bluetooth.c:1778
 msgid "Connect..."
-msgstr "Connect..."
+msgstr "_Connect..."
 
 #. add the remove option to the submenu
 #: ../plugins/bluetooth/bluetooth.c:1795
 msgid "Remove..."
-msgstr "Remove..."
+msgstr "_Remove..."
 
 #: ../plugins/bluetooth/bluetooth.c:2007 ../plugins/bluetooth/bluetooth.c:2009
 msgid "No Bluetooth adapter found"
@@ -145,23 +145,23 @@ msgstr "No Bluetooth adapter found"
 
 #: ../plugins/bluetooth/bluetooth.c:2018 ../plugins/bluetooth/bluetooth.c:2020
 msgid "Turn On Bluetooth"
-msgstr "Turn On Bluetooth"
+msgstr "_Turn On Bluetooth"
 
 #: ../plugins/bluetooth/bluetooth.c:2031 ../plugins/bluetooth/bluetooth.c:2033
 msgid "Turn Off Bluetooth"
-msgstr "Turn Off Bluetooth"
+msgstr "_Turn Off Bluetooth"
 
 #: ../plugins/bluetooth/bluetooth.c:2044 ../plugins/bluetooth/bluetooth.c:2046
 msgid "Stop Discoverable"
-msgstr "Stop Discoverable"
+msgstr "Stop _Discoverable"
 
 #: ../plugins/bluetooth/bluetooth.c:2050 ../plugins/bluetooth/bluetooth.c:2052
 msgid "Make Discoverable"
-msgstr "Make Discoverable"
+msgstr "Make _Discoverable"
 
 #: ../plugins/bluetooth/bluetooth.c:2061 ../plugins/bluetooth/bluetooth.c:2063
 msgid "Add Device..."
-msgstr "Add Device..."
+msgstr "_Add Device..."
 
 #: ../plugins/bluetooth/bluetooth.c:2198
 msgid "Manage Bluetooth devices"

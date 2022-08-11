@@ -755,6 +755,7 @@ static gboolean is_discoverable (BluetoothPlugin *bt)
 
 static void set_discoverable (BluetoothPlugin *bt, gboolean state)
 {
+    printf ("set disc %d\n", state);
     GVariant *vbool = g_variant_new_boolean (state);
     g_variant_ref_sink (vbool);
     GVariant *var = g_variant_new ("(ssv)", g_dbus_proxy_get_interface_name (G_DBUS_PROXY (bt->adapter)), "Discoverable", vbool);
@@ -1778,6 +1779,7 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
         lxpanel_plugin_set_menu_icon (bt->panel, icon, "bluetooth-offline");
         smi = gtk_menu_item_new_with_label (_("Connect..."));
     }
+    gtk_menu_item_set_use_underline (GTK_MENU_ITEM (smi), TRUE);
 
     lxpanel_plugin_update_menu_icon (item, icon);
 
@@ -1790,6 +1792,7 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
 
     // add the remove option to the submenu
     smi = gtk_menu_item_new_with_label (_("Remove..."));
+    gtk_menu_item_set_use_underline (GTK_MENU_ITEM (smi), TRUE);
     gtk_widget_set_name (smi, path);
     g_signal_connect (smi, "activate", G_CALLBACK (handle_menu_remove), bt);
     gtk_menu_shell_append (GTK_MENU_SHELL (submenu), smi);
@@ -1979,20 +1982,21 @@ static void show_menu (BluetoothPlugin *bt)
         g_list_free_full (items, (GDestroyNotify) gtk_widget_destroy);
     }
     else bt->menu = gtk_menu_new ();
-    gtk_menu_set_reserve_toggle_size (GTK_MENU (bt->menu), FALSE);
+    gtk_menu_set_reserve_toggle_size (GTK_MENU (bt->menu), TRUE);
 
     bt_state = bt_enabled ();
     if ((bt_state == -2 && bt->adapter == NULL) || bt_state == -1)
     {
         // warn if no BT hardware detected
-        item = lxpanel_plugin_new_menu_item (bt->panel, _("No Bluetooth adapter found"), 0, NULL);
+        item = gtk_menu_item_new_with_label (_("No Bluetooth adapter found"));
         gtk_widget_set_sensitive (item, FALSE);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
     }
     else if (bt_state == 0)
     {
         // add enable bt option
-        item = lxpanel_plugin_new_menu_item (bt->panel, _("Turn On Bluetooth"), 0, NULL);
+        item = gtk_menu_item_new_with_label (_("Turn On Bluetooth"));
+        gtk_menu_item_set_use_underline (GTK_MENU_ITEM (item), TRUE);
         g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (toggle_bt), bt);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
     }
@@ -2001,7 +2005,8 @@ static void show_menu (BluetoothPlugin *bt)
         if (bt_state == 1)
         {
             // add disable bt option
-            item = lxpanel_plugin_new_menu_item (bt->panel, _("Turn Off Bluetooth"), 0, NULL);
+            item = gtk_menu_item_new_with_label (_("Turn Off Bluetooth"));
+            gtk_menu_item_set_use_underline (GTK_MENU_ITEM (item), TRUE);
             g_signal_connect (G_OBJECT (item), "activate", G_CALLBACK (toggle_bt), bt);
             gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
             item = gtk_separator_menu_item_new ();
@@ -2010,16 +2015,18 @@ static void show_menu (BluetoothPlugin *bt)
 
         // discoverable toggle
         if (is_discoverable (bt))
-            item = lxpanel_plugin_new_menu_item (bt->panel, _("Stop Discoverable"), 0, NULL);
+            item = gtk_menu_item_new_with_label (_("Stop Discoverable"));
         else
-            item = lxpanel_plugin_new_menu_item (bt->panel, _("Make Discoverable"), 0, NULL);
+            item = gtk_menu_item_new_with_label (_("Make Discoverable"));
+        gtk_menu_item_set_use_underline (GTK_MENU_ITEM (item), TRUE);
         g_signal_connect (item, "activate", G_CALLBACK (handle_menu_discover), bt);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
         item = gtk_separator_menu_item_new ();
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
 
         // add and remove dialogs
-        item = lxpanel_plugin_new_menu_item (bt->panel, _("Add Device..."), 0, NULL);
+        item = gtk_menu_item_new_with_label (_("Add Device..."));
+        gtk_menu_item_set_use_underline (GTK_MENU_ITEM (item), TRUE);
         g_signal_connect (item, "activate", G_CALLBACK (handle_menu_add), bt);
         gtk_menu_shell_append (GTK_MENU_SHELL (bt->menu), item);
 
