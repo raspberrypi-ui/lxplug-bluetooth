@@ -227,6 +227,8 @@ static gboolean is_discoverable (BluetoothPlugin *bt);
 static void set_discoverable (BluetoothPlugin *bt, gboolean state);
 static void cb_discover_start (GObject *source, GAsyncResult *res, gpointer user_data);
 static void cb_discover_end (GObject *source, GAsyncResult *res, gpointer user_data);
+static void set_powered (BluetoothPlugin *bt, gboolean state);
+static void cb_power (GObject *source, GAsyncResult *res, gpointer user_data);
 static gboolean is_paired (BluetoothPlugin *bt, const gchar *path);
 static void pair_device (BluetoothPlugin *bt, const gchar *path, gboolean state);
 static void cb_paired (GObject *source, GAsyncResult *res, gpointer user_data);
@@ -314,6 +316,7 @@ static void toggle_bt (GtkWidget *widget, gpointer user_data)
     else
     {
         system ("/usr/sbin/rfkill unblock bluetooth");
+        set_powered (bt, TRUE);
         lxpanel_plugin_set_taskbar_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth");
     }
 }
@@ -755,7 +758,6 @@ static gboolean is_discoverable (BluetoothPlugin *bt)
 
 static void set_discoverable (BluetoothPlugin *bt, gboolean state)
 {
-    printf ("set disc %d\n", state);
     GVariant *vbool = g_variant_new_boolean (state);
     g_variant_ref_sink (vbool);
     GVariant *var = g_variant_new ("(ssv)", g_dbus_proxy_get_interface_name (G_DBUS_PROXY (bt->adapter)), "Discoverable", vbool);
@@ -812,6 +814,44 @@ static void cb_discover_end (GObject *source, GAsyncResult *res, gpointer user_d
         if (bt->flash_timer) g_source_remove (bt->flash_timer);
         bt->flash_timer = 0;
         lxpanel_plugin_set_taskbar_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth");
+    }
+    if (var) g_variant_unref (var);
+}
+
+static void set_powered (BluetoothPlugin *bt, gboolean state)
+{
+    GVariant *vbool = g_variant_new_boolean (state);
+    g_variant_ref_sink (vbool);
+    GVariant *var = g_variant_new ("(ssv)", g_dbus_proxy_get_interface_name (G_DBUS_PROXY (bt->adapter)), "Powered", vbool);
+    g_variant_ref_sink (var);
+
+    if (state)
+    {
+        DEBUG ("Powering on");
+        g_dbus_proxy_call (bt->adapter, "org.freedesktop.DBus.Properties.Set", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_power, bt);
+    }
+    else
+    {
+        DEBUG ("Powering off");
+        g_dbus_proxy_call (bt->adapter, "org.freedesktop.DBus.Properties.Set", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_power, bt);
+    }
+    g_variant_unref (vbool);
+    g_variant_unref (var);
+}
+
+static void cb_power (GObject *source, GAsyncResult *res, gpointer user_data)
+{
+    GError *error = NULL;
+    GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
+
+    if (error)
+    {
+        DEBUG ("Set powered - error %s", error->message);
+        g_error_free (error);
+    }
+    else
+    {
+        DEBUG_VAR ("Set powered - result %s", var);
     }
     if (var) g_variant_unref (var);
 }
