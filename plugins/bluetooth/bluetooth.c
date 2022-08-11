@@ -225,8 +225,7 @@ static void cb_search_start (GObject *source, GAsyncResult *res, gpointer user_d
 static void cb_search_end (GObject *source, GAsyncResult *res, gpointer user_data);
 static gboolean is_discoverable (BluetoothPlugin *bt);
 static void set_discoverable (BluetoothPlugin *bt, gboolean state);
-static void cb_discover_start (GObject *source, GAsyncResult *res, gpointer user_data);
-static void cb_discover_end (GObject *source, GAsyncResult *res, gpointer user_data);
+static void cb_discover (GObject *source, GAsyncResult *res, gpointer user_data);
 static void set_powered (BluetoothPlugin *bt, gboolean state);
 static void cb_power (GObject *source, GAsyncResult *res, gpointer user_data);
 static gboolean is_paired (BluetoothPlugin *bt, const gchar *path);
@@ -686,6 +685,21 @@ static void cb_interface_properties (GDBusObjectManagerClient *manager, GDBusObj
         }
         g_variant_unref (var);
     }
+
+    // control flashing of icon for discoverable state
+    var = g_variant_lookup_value (parameters, "Discoverable", NULL);
+    if (var)
+    {
+        if (bt->flash_timer) g_source_remove (bt->flash_timer);
+        if (g_variant_get_boolean (var) == FALSE)
+        {
+            bt->flash_timer = 0;
+            lxpanel_plugin_set_taskbar_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth");
+        }
+        else bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+
+        g_variant_unref (var);
+    }
 }
 
 /* Searching */
@@ -758,83 +772,46 @@ static gboolean is_discoverable (BluetoothPlugin *bt)
 
 static void set_discoverable (BluetoothPlugin *bt, gboolean state)
 {
+    DEBUG ("Set discoverable %d", state);
+
     GVariant *vbool = g_variant_new_boolean (state);
     g_variant_ref_sink (vbool);
     GVariant *var = g_variant_new ("(ssv)", g_dbus_proxy_get_interface_name (G_DBUS_PROXY (bt->adapter)), "Discoverable", vbool);
     g_variant_ref_sink (var);
-
-    if (state)
-    {
-        DEBUG ("Making discoverable");
-        g_dbus_proxy_call (bt->adapter, "org.freedesktop.DBus.Properties.Set", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_discover_start, bt);
-    }
-    else
-    {
-        DEBUG ("Stopping discoverable");
-        g_dbus_proxy_call (bt->adapter, "org.freedesktop.DBus.Properties.Set", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_discover_end, bt);
-    }
+    g_dbus_proxy_call (bt->adapter, "org.freedesktop.DBus.Properties.Set", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_discover, bt);
     g_variant_unref (vbool);
     g_variant_unref (var);
 }
 
-static void cb_discover_start (GObject *source, GAsyncResult *res, gpointer user_data)
+static void cb_discover (GObject *source, GAsyncResult *res, gpointer user_data)
 {
-    BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
     GError *error = NULL;
     GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
     
     if (error)
     {
-        DEBUG ("Discoverable start - error %s", error->message);
+        DEBUG ("Set discoverable - error %s", error->message);
         g_error_free (error);
     }
     else
     {
-        DEBUG_VAR ("Discoverable start - result %s", var);
-        if (bt->flash_timer) g_source_remove (bt->flash_timer);
-        bt->flash_timer = g_timeout_add (500, flash_icon, bt);
+        DEBUG_VAR ("Set discoverable - result %s", var);
     }
     if (var) g_variant_unref (var);
 }
 
-static void cb_discover_end (GObject *source, GAsyncResult *res, gpointer user_data)
-{
-    BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
-    GError *error = NULL;
-    GVariant *var = g_dbus_proxy_call_finish (G_DBUS_PROXY (source), res, &error);
-    
-    if (error)
-    {
-        DEBUG ("Discoverable end - error %s", error->message);
-        g_error_free (error);
-    }
-    else
-    {
-        DEBUG_VAR ("Discoverable end - result %s", var);
-        if (bt->flash_timer) g_source_remove (bt->flash_timer);
-        bt->flash_timer = 0;
-        lxpanel_plugin_set_taskbar_icon (bt->panel, bt->tray_icon, "preferences-system-bluetooth");
-    }
-    if (var) g_variant_unref (var);
-}
+
+/* Adapter power */
 
 static void set_powered (BluetoothPlugin *bt, gboolean state)
 {
+    DEBUG ("Set powered %d", state);
+
     GVariant *vbool = g_variant_new_boolean (state);
     g_variant_ref_sink (vbool);
     GVariant *var = g_variant_new ("(ssv)", g_dbus_proxy_get_interface_name (G_DBUS_PROXY (bt->adapter)), "Powered", vbool);
     g_variant_ref_sink (var);
-
-    if (state)
-    {
-        DEBUG ("Powering on");
-        g_dbus_proxy_call (bt->adapter, "org.freedesktop.DBus.Properties.Set", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_power, bt);
-    }
-    else
-    {
-        DEBUG ("Powering off");
-        g_dbus_proxy_call (bt->adapter, "org.freedesktop.DBus.Properties.Set", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_power, bt);
-    }
+    g_dbus_proxy_call (bt->adapter, "org.freedesktop.DBus.Properties.Set", var, G_DBUS_CALL_FLAGS_NONE, -1, NULL, cb_power, bt);
     g_variant_unref (vbool);
     g_variant_unref (var);
 }
@@ -1759,13 +1736,6 @@ static void handle_menu_connect (GtkWidget *widget, gpointer user_data)
 static gboolean flash_icon (gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
-
-    if (!is_discoverable (bt))
-    {
-        if (bt->flash_timer) g_source_remove (bt->flash_timer);
-        bt->flash_timer = 0;
-        return FALSE;
-    }
 
     if (bt->flash_timer == 0) return FALSE;
     lxpanel_plugin_set_taskbar_icon (bt->panel, bt->tray_icon, bt->flash_state ? "preferences-system-bluetooth-active" : "preferences-system-bluetooth");
