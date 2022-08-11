@@ -128,11 +128,11 @@ msgstr "No usable services on this device"
 
 #: ../plugins/bluetooth/bluetooth.c:1773
 msgid "Disconnect..."
-msgstr "_Disconnect..."
+msgstr "Disconnect..."
 
 #: ../plugins/bluetooth/bluetooth.c:1778
 msgid "Connect..."
-msgstr "_Connect..."
+msgstr "Connect..."
 
 #. add the remove option to the submenu
 #: ../plugins/bluetooth/bluetooth.c:1795

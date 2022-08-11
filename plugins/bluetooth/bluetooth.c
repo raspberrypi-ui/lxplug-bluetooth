@@ -1789,7 +1789,6 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
         lxpanel_plugin_set_menu_icon (bt->panel, icon, "bluetooth-offline");
         smi = gtk_menu_item_new_with_label (_("Connect..."));
     }
-    gtk_menu_item_set_use_underline (GTK_MENU_ITEM (smi), TRUE);
 
     lxpanel_plugin_update_menu_icon (item, icon);
 
@@ -1802,7 +1801,6 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIte
 
     // add the remove option to the submenu
     smi = gtk_menu_item_new_with_label (_("Remove..."));
-    gtk_menu_item_set_use_underline (GTK_MENU_ITEM (smi), TRUE);
     gtk_widget_set_name (smi, path);
     g_signal_connect (smi, "activate", G_CALLBACK (handle_menu_remove), bt);
     gtk_menu_shell_append (GTK_MENU_SHELL (submenu), smi);
