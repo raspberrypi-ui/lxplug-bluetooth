@@ -137,7 +137,7 @@ msgstr "Connect..."
 #. add the remove option to the submenu
 #: ../plugins/bluetooth/bluetooth.c:1795
 msgid "Remove..."
-msgstr "_Remove..."
+msgstr "Remove..."
 
 #: ../plugins/bluetooth/bluetooth.c:2007 ../plugins/bluetooth/bluetooth.c:2009
 msgid "No Bluetooth adapter found"
