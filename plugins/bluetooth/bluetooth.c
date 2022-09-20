@@ -209,6 +209,7 @@ static const gchar introspection_xml[] =
 /*---------------------------------------------------------------------------*/
 
 static void initialise (BluetoothPlugin *bt);
+static gboolean start_search (gpointer user_data);
 static void clear (BluetoothPlugin *bt);
 static void find_hardware (BluetoothPlugin *bt);
 static void cb_name_owned (GDBusConnection *connection, const gchar *name, const gchar *owner, gpointer user_data);
@@ -384,7 +385,14 @@ static void initialise (BluetoothPlugin *bt)
     g_dbus_node_info_unref (introspection_data);
 
     // enable search if autoconnecting
-    if (bt->hid_autopair) set_search (bt, TRUE);
+    if (bt->hid_autopair) g_timeout_add (5000, start_search, bt);
+}
+
+static gboolean start_search (gpointer user_data)
+{
+    BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+    set_search (bt, TRUE);
+    return FALSE;
 }
 
 /* Clear all the BlueZ data if the DBus connection is lost */

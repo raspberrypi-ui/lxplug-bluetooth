@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.32) bullseye; urgency=medium
+
+  * Delay search in auto-pairing mode by 5 seconds
+
+ -- Simon Long <simon@raspberrypi.com>  Tue, 20 Sep 2022 13:08:51 +0100
+
 lxplug-bluetooth (0.31) bullseye; urgency=medium
 
   * Remove spurious underline in menu item
