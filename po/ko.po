@@ -1,0 +1,226 @@
+# English translations for PACKAGE package.
+# Copyright (C) 2017 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#  <simon@raspberrypi.org>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-03-29 10:29+0100\n"
+"PO-Revision-Date: 2023-05-14 17:26+0900\n"
+"Language-Team: English (British)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 2.4.2\n"
+"Last-Translator: Yi Yunseok <ironyunseok@protonmail.com>\n"
+"Language: ko\n"
+
+#: ../plugins/bluetooth/bluetooth.c:1276
+#, c-format
+msgid "Pairing request sent to '%s' - waiting for response..."
+msgstr "'%s' 기기에 페어링 요청을 보냄 - 응답을 기다리는 중..."
+
+#: ../plugins/bluetooth/bluetooth.c:1285
+#, c-format
+msgid "Pairing failed - %s"
+msgstr "페어링에 실패함 - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1293
+#, c-format
+msgid "Pairing successful - connecting..."
+msgstr "페어링 성공 - 연결 중..."
+
+#: ../plugins/bluetooth/bluetooth.c:1301
+#, c-format
+msgid "Connection successful"
+msgstr "연결 성공"
+
+#: ../plugins/bluetooth/bluetooth.c:1309 ../plugins/bluetooth/bluetooth.c:1559
+#, c-format
+msgid "Connection failed - %s"
+msgstr "연결 실패 - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1317
+#, c-format
+msgid "Please enter code '%s' on '%s'"
+msgstr "'%s' 기기에 '%s' 코드 입력"
+
+#: ../plugins/bluetooth/bluetooth.c:1325
+#, c-format
+msgid "Please confirm that '%s' is showing the code '%s' to pair"
+msgstr "'%s' 기기가 페어링 코드 '%s' 를 표시하는지 확인"
+
+#: ../plugins/bluetooth/bluetooth.c:1333
+#, c-format
+msgid "Please enter PIN code shown on '%s'"
+msgstr "'%s' 기기에 표시된 PIN 코드 입력"
+
+#: ../plugins/bluetooth/bluetooth.c:1341
+#, c-format
+msgid "Please enter passcode shown on '%s'"
+msgstr "'%s' 기기에 표시된 패스코드 입력"
+
+#: ../plugins/bluetooth/bluetooth.c:1349
+#, c-format
+msgid "Waiting for response from Bluetooth device..."
+msgstr "블루투스 기기로부터 응답을 기다리는 중..."
+
+#: ../plugins/bluetooth/bluetooth.c:1357
+#, c-format
+msgid "'%s' has requested a pairing. Do you accept the request?"
+msgstr "'%s' 기기로부터 페어링 요청이 왔습니다. 수락하시겠습니까?"
+
+#: ../plugins/bluetooth/bluetooth.c:1365
+#, c-format
+msgid ""
+"Pairing successful - right-click the volume icon to connect as audio device"
+msgstr "페어링 성공 - 음량 아이콘을 우클릭하여 오디오 기기로 연결"
+
+#: ../plugins/bluetooth/bluetooth.c:1373
+#, c-format
+msgid ""
+"Pairing successful - this device has no services which can be used with "
+"Raspberry Pi"
+msgstr "페어링 성공 - 이 기기는 라즈베리 파이와 함께 사용할 수 없음"
+
+#: ../plugins/bluetooth/bluetooth.c:1547
+#, c-format
+msgid "Do you want to unpair '%s'?"
+msgstr "'%s' 기기와 페어링을 해제하시겠습니까?"
+
+#: ../plugins/bluetooth/bluetooth.c:1550
+#, c-format
+msgid "Removing pairing with '%s'..."
+msgstr "'%s' 기기의 페어링을 제거하는 중..."
+
+#: ../plugins/bluetooth/bluetooth.c:1553
+#, c-format
+msgid "Removal failed - %s"
+msgstr "제거 실패 - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1559
+#, c-format
+msgid "Connecting to '%s'..."
+msgstr "'%s' 연결 중..."
+
+#: ../plugins/bluetooth/bluetooth.c:1563
+#, c-format
+msgid "Disconnecting from '%s'..."
+msgstr "'%s' 연결해제 중..."
+
+#: ../plugins/bluetooth/bluetooth.c:1563
+#, c-format
+msgid "Disconnection failed - %s"
+msgstr "연결해제 실패 - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1694
+msgid "Use the audio menu to connect to this device"
+msgstr "오디오 메뉴를 사용해 이 기기에 연결"
+
+#: ../plugins/bluetooth/bluetooth.c:1696
+msgid "No usable services on this device"
+msgstr "이 기기는 사용 불가"
+
+#: ../plugins/bluetooth/bluetooth.c:1773
+msgid "Disconnect..."
+msgstr "연결해제..."
+
+#: ../plugins/bluetooth/bluetooth.c:1778
+msgid "Connect..."
+msgstr "연결..."
+
+#. add the remove option to the submenu
+#: ../plugins/bluetooth/bluetooth.c:1795
+msgid "Remove..."
+msgstr "제거..."
+
+#: ../plugins/bluetooth/bluetooth.c:2007 ../plugins/bluetooth/bluetooth.c:2009
+msgid "No Bluetooth adapter found"
+msgstr "블루투스 어댑터를 찾을 수 없음"
+
+#: ../plugins/bluetooth/bluetooth.c:2018 ../plugins/bluetooth/bluetooth.c:2020
+msgid "Turn On Bluetooth"
+msgstr "블루투스 켜기"
+
+#: ../plugins/bluetooth/bluetooth.c:2031 ../plugins/bluetooth/bluetooth.c:2033
+msgid "Turn Off Bluetooth"
+msgstr "블루투스 끄기"
+
+#: ../plugins/bluetooth/bluetooth.c:2044 ../plugins/bluetooth/bluetooth.c:2046
+msgid "Stop Discoverable"
+msgstr "블루투스 검색 끄기"
+
+#: ../plugins/bluetooth/bluetooth.c:2050 ../plugins/bluetooth/bluetooth.c:2052
+msgid "Make Discoverable"
+msgstr "블루투스 검색 켜기"
+
+#: ../plugins/bluetooth/bluetooth.c:2061 ../plugins/bluetooth/bluetooth.c:2063
+msgid "Add Device..."
+msgstr "기기 추가..."
+
+#: ../plugins/bluetooth/bluetooth.c:2198
+msgid "Manage Bluetooth devices"
+msgstr "블루투스 기기 관리"
+
+#: ../plugins/bluetooth/bluetooth.c:2261
+msgid "Bluetooth"
+msgstr "블루투스"
+
+#: ../plugins/bluetooth/bluetooth.c:2262
+msgid "Manages Bluetooth devices"
+msgstr "블루투스 기기 관리"
+
+#, c-format
+msgid "Pairing Device '%s'"
+msgstr "기기 연결 중 '%s'"
+
+msgid "_Cancel"
+msgstr "취소(_C)"
+
+msgid "_OK"
+msgstr "확인(_O)"
+
+#, c-format
+msgid "Connection failed - %s. Try to connect manually."
+msgstr "연결 실패 - %s. 수동으로 연결하세요."
+
+msgid "Pairing Requested"
+msgstr "페어링 요청됨"
+
+#, c-format
+msgid "Rejecting pairing..."
+msgstr "페어링 거부하는 중..."
+
+#, c-format
+msgid "Removal of pairing failed - %s. Remove the device manually."
+msgstr "페어링 제거 실패 - %s. 기기를 수동으로 제거하세요."
+
+msgid "Add New Device"
+msgstr "새 기기 추가"
+
+#, c-format
+msgid "Remove Device"
+msgstr "기기 제거"
+
+msgid "_Pair"
+msgstr "페어(_P)"
+
+msgid "_Remove"
+msgstr "제거(_R)"
+
+msgid "Searching for Bluetooth devices..."
+msgstr "블루투스 기기를 찾는 중..."
+
+msgid "Paired Bluetooth devices"
+msgstr "페어링된 블루투스 기기"
+
+#, c-format
+msgid "Connect Device"
+msgstr "기기 연결"
+
+#, c-format
+msgid "Disconnect Device"
+msgstr "기기 연결해제"
