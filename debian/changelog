@@ -1,3 +1,9 @@
+lxplug-bluetooth (0.33) bullseye; urgency=medium
+
+  * Add Korean translations
+
+ -- Simon Long <simon@raspberrypi.com>  Thu, 18 May 2023 10:53:57 +0100
+
 lxplug-bluetooth (0.32) bullseye; urgency=medium
 
   * Delay search in auto-pairing mode by 5 seconds
