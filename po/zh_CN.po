@@ -1,0 +1,227 @@
+# Simplified Chinese translation for lxplug-bluetooth package.
+# Copyright (C) 2017 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the lxplug-bluetooth package.
+# ykla <yklaxds@gmail>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: lxplug-bluetooth\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-03-29 10:29+0100\n"
+"PO-Revision-Date: 2024-07-21 23:11+0800\n"
+"Last-Translator: ykla <yklaxds@gmail.com>\n"
+"Language-Team: ykla <yklaxds@gmail.com>\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 3.4.4\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+#: ../plugins/bluetooth/bluetooth.c:1276
+#, c-format
+msgid "Pairing request sent to '%s' - waiting for response..."
+msgstr "配对请求已发送至 '%s'——正在等待响应.……"
+
+#: ../plugins/bluetooth/bluetooth.c:1285
+#, c-format
+msgid "Pairing failed - %s"
+msgstr "配对失败——%s"
+
+#: ../plugins/bluetooth/bluetooth.c:1293
+#, c-format
+msgid "Pairing successful - connecting..."
+msgstr "配对成功——正在连接……"
+
+#: ../plugins/bluetooth/bluetooth.c:1301
+#, c-format
+msgid "Connection successful"
+msgstr "连接成功"
+
+#: ../plugins/bluetooth/bluetooth.c:1309 ../plugins/bluetooth/bluetooth.c:1559
+#, c-format
+msgid "Connection failed - %s"
+msgstr "连接失败——%s"
+
+#: ../plugins/bluetooth/bluetooth.c:1317
+#, c-format
+msgid "Please enter code '%s' on '%s'"
+msgstr "请在 '%2$s' 上输入代码 '%1$s'。"
+
+#: ../plugins/bluetooth/bluetooth.c:1325
+#, c-format
+msgid "Please confirm that '%s' is showing the code '%s' to pair"
+msgstr "请确认 '%1$s' 显示的代码是 '%2$s' 以进行配对"
+
+#: ../plugins/bluetooth/bluetooth.c:1333
+#, c-format
+msgid "Please enter PIN code shown on '%s'"
+msgstr "请输入 '%s' 上显示的 PIN 码。"
+
+#: ../plugins/bluetooth/bluetooth.c:1341
+#, c-format
+msgid "Please enter passcode shown on '%s'"
+msgstr "请输入 '%s' 上显示的密码。"
+
+#: ../plugins/bluetooth/bluetooth.c:1349
+#, c-format
+msgid "Waiting for response from Bluetooth device..."
+msgstr "正在等待蓝牙设备响应……"
+
+#: ../plugins/bluetooth/bluetooth.c:1357
+#, c-format
+msgid "'%s' has requested a pairing. Do you accept the request?"
+msgstr "'%s' 请求配对。您接受该请求吗？"
+
+#: ../plugins/bluetooth/bluetooth.c:1365
+#, c-format
+msgid ""
+"Pairing successful - right-click the volume icon to connect as audio device"
+msgstr "配对成功——右键点击音量图标可将其连接为音频设备"
+
+#: ../plugins/bluetooth/bluetooth.c:1373
+#, c-format
+msgid ""
+"Pairing successful - this device has no services which can be used with "
+"Raspberry Pi"
+msgstr "配对成功——该设备没有可供树莓派使用的功能"
+
+#: ../plugins/bluetooth/bluetooth.c:1547
+#, c-format
+msgid "Do you want to unpair '%s'?"
+msgstr "您要取消配对 '%s' 吗？"
+
+#: ../plugins/bluetooth/bluetooth.c:1550
+#, c-format
+msgid "Removing pairing with '%s'..."
+msgstr "正在取消与 '%s' 的配对……"
+
+#: ../plugins/bluetooth/bluetooth.c:1553
+#, c-format
+msgid "Removal failed - %s"
+msgstr "移除失败——%s"
+
+#: ../plugins/bluetooth/bluetooth.c:1559
+#, c-format
+msgid "Connecting to '%s'..."
+msgstr "正在连接 '%s'..."
+
+#: ../plugins/bluetooth/bluetooth.c:1563
+#, c-format
+msgid "Disconnecting from '%s'..."
+msgstr "正在断开与 '%s' 的连接……"
+
+#: ../plugins/bluetooth/bluetooth.c:1563
+#, c-format
+msgid "Disconnection failed - %s"
+msgstr "连接断开失败——%s"
+
+#: ../plugins/bluetooth/bluetooth.c:1694
+msgid "Use the audio menu to connect to this device"
+msgstr "通过音频菜单连接到该设备"
+
+#: ../plugins/bluetooth/bluetooth.c:1696
+msgid "No usable services on this device"
+msgstr "该设备无可用的服务"
+
+#: ../plugins/bluetooth/bluetooth.c:1773
+msgid "Disconnect..."
+msgstr "断开连接……"
+
+#: ../plugins/bluetooth/bluetooth.c:1778
+msgid "Connect..."
+msgstr "连接……"
+
+#. add the remove option to the submenu
+#: ../plugins/bluetooth/bluetooth.c:1795
+msgid "Remove..."
+msgstr "移除……"
+
+#: ../plugins/bluetooth/bluetooth.c:2007 ../plugins/bluetooth/bluetooth.c:2009
+msgid "No Bluetooth adapter found"
+msgstr "未找到蓝牙适配器"
+
+#: ../plugins/bluetooth/bluetooth.c:2018 ../plugins/bluetooth/bluetooth.c:2020
+msgid "Turn On Bluetooth"
+msgstr "打开蓝牙"
+
+#: ../plugins/bluetooth/bluetooth.c:2031 ../plugins/bluetooth/bluetooth.c:2033
+msgid "Turn Off Bluetooth"
+msgstr "关闭蓝牙"
+
+#: ../plugins/bluetooth/bluetooth.c:2044 ../plugins/bluetooth/bluetooth.c:2046
+msgid "Stop Discoverable"
+msgstr "停止设备可见"
+
+#: ../plugins/bluetooth/bluetooth.c:2050 ../plugins/bluetooth/bluetooth.c:2052
+msgid "Make Discoverable"
+msgstr "使设备可见"
+
+#: ../plugins/bluetooth/bluetooth.c:2061 ../plugins/bluetooth/bluetooth.c:2063
+msgid "Add Device..."
+msgstr "添加设备……"
+
+#: ../plugins/bluetooth/bluetooth.c:2198
+msgid "Manage Bluetooth devices"
+msgstr "管理蓝牙设备"
+
+#: ../plugins/bluetooth/bluetooth.c:2261
+msgid "Bluetooth"
+msgstr "蓝牙"
+
+#: ../plugins/bluetooth/bluetooth.c:2262
+msgid "Manages Bluetooth devices"
+msgstr "管理蓝牙设备"
+
+#, c-format
+#~ msgid "Pairing Device '%s'"
+#~ msgstr "Pairing Device '%s'"
+
+#~ msgid "_Cancel"
+#~ msgstr "_Cancel"
+
+#~ msgid "_OK"
+#~ msgstr "_OK"
+
+#, c-format
+#~ msgid "Connection failed - %s. Try to connect manually."
+#~ msgstr "Connection failed - %s. Try to connect manually."
+
+#~ msgid "Pairing Requested"
+#~ msgstr "Pairing Requested"
+
+#, c-format
+#~ msgid "Rejecting pairing..."
+#~ msgstr "Rejecting pairing..."
+
+#, c-format
+#~ msgid "Removal of pairing failed - %s. Remove the device manually."
+#~ msgstr "Removal of pairing failed - %s. Remove the device manually."
+
+#~ msgid "Add New Device"
+#~ msgstr "Add New Device"
+
+#, c-format
+#~ msgid "Remove Device"
+#~ msgstr "Remove Device"
+
+#~ msgid "_Pair"
+#~ msgstr "_Pair"
+
+#~ msgid "_Remove"
+#~ msgstr "_Remove"
+
+#~ msgid "Searching for Bluetooth devices..."
+#~ msgstr "Searching for Bluetooth devices..."
+
+#~ msgid "Paired Bluetooth devices"
+#~ msgstr "Paired Bluetooth devices"
+
+#, c-format
+#~ msgid "Connect Device"
+#~ msgstr "Connect Device"
+
+#, c-format
+#~ msgid "Disconnect Device"
+#~ msgstr "Disconnect Device"
