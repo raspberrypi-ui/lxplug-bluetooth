@@ -2111,7 +2111,7 @@ static gboolean bluetooth_button_press_event (GtkWidget *widget, GdkEventButton 
     if (event->button == 1)
     {
         show_menu (bt);
-        gtk_menu_popup_at_widget (GTK_MENU (bt->menu), bt->plugin, GDK_GRAVITY_NORTH_WEST, GDK_GRAVITY_NORTH_WEST, (GdkEvent *) event);
+        gtk_menu_popup_at_widget (GTK_MENU (bt->menu), bt->plugin, GDK_GRAVITY_SOUTH_WEST, GDK_GRAVITY_NORTH_WEST, (GdkEvent *) event);
         return TRUE;
     }
     else return FALSE;
@@ -2139,7 +2139,7 @@ static gboolean bluetooth_control_msg (GtkWidget *plugin, const char *cmd)
     if (!g_strcmp0 (cmd, "menu"))
     {
         show_menu (bt);
-        gtk_menu_popup_at_widget (GTK_MENU (bt->menu), bt->plugin, GDK_GRAVITY_NORTH_WEST, GDK_GRAVITY_NORTH_WEST, NULL);
+        gtk_menu_popup_at_widget (GTK_MENU (bt->menu), bt->plugin, GDK_GRAVITY_SOUTH_WEST, GDK_GRAVITY_NORTH_WEST, NULL);
     }
 
     return TRUE;
