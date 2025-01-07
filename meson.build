@@ -1,5 +1,5 @@
 project(
-    'lxplug_bluetooth',
+    'bluetooth',
     'c',
     'cpp',
     version: '0.8.0',
@@ -18,9 +18,6 @@ lresource_dir = join_paths(share_dir, 'lxpanel')
 wresource_dir = join_paths(share_dir, 'wf-panel-pi')
 metadata_dir = join_paths(wresource_dir, 'metadata')
 
-gettext_package = meson.project_name()
-
-add_project_arguments('-DGETTEXT_PACKAGE="' + gettext_package + '"', language : [ 'c', 'cpp' ])
 add_project_arguments('-DPACKAGE_LOCALE_DIR="' + share_dir + '/locale"', language : [ 'c', 'cpp' ])
 
 subdir('src')
