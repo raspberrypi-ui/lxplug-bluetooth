@@ -20,10 +20,7 @@ shared_module('bluetooth', lsources,
         name_prefix: ''
 )
 
-wsources = files(
-  'bluetooth.cpp',
-  'bluetooth.c'
-)
+wsources = lsources + 'bluetooth.cpp'
 
 wdeps = [ gtkmm ]
 
@@ -41,6 +38,5 @@ shared_module('libbluetooth', wsources,
         name_prefix: ''
 )
 
-metadata = files(
-)
+metadata = files()
 install_data(metadata, install_dir: metadata_dir)
