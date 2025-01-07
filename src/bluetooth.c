@@ -2200,11 +2200,9 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
     /* Allocate and initialize plugin context */
     BluetoothPlugin *bt = g_new0 (BluetoothPlugin, 1);
 
-#ifdef ENABLE_NLS
     setlocale (LC_ALL, "");
     bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-#endif
 
     /* Allocate top level widget and set into plugin widget pointer. */
     bt->panel = panel;
