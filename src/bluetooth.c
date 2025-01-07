@@ -32,8 +32,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <glib/gi18n.h>
 #include <gio/gio.h>
 
-#include "bluetooth.h"
-
 #ifdef LXPLUG
 #include "plugin.h"
 #define wrap_new_menu_item(plugin,text,maxlen,icon) lxpanel_plugin_new_menu_item(plugin->panel,text,maxlen,icon)
@@ -51,6 +49,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define wrap_set_taskbar_icon(plugin,image,icon) set_taskbar_icon(image,icon,plugin->icon_size)
 #define wrap_show_menu(plugin,menu) show_menu_with_kbd(plugin,menu)
 #endif
+
+#include "bluetooth.h"
 
 #define DEBUG_ON
 #ifdef DEBUG_ON

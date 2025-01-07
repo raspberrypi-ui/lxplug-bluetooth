@@ -24,3 +24,4 @@ add_project_arguments('-DPACKAGE_LOCALE_DIR="' + share_dir + '/locale"', languag
 
 subdir('src')
 subdir('po')
+subdir('data')
