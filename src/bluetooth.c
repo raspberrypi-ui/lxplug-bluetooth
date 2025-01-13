@@ -1,5 +1,5 @@
-/*
-Copyright (c) 2018 Raspberry Pi (Trading) Ltd.
+/*============================================================================
+Copyright (c) 2018-2025 Raspberry Pi Holdings Ltd.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,9 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+============================================================================*/
+
+#define _GNU_SOURCE
 
 #include <errno.h>
 #include <locale.h>
@@ -39,6 +41,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include "bluetooth.h"
+
+/*----------------------------------------------------------------------------*/
+/* Typedefs and macros */
+/*----------------------------------------------------------------------------*/
 
 #define DEBUG_ON
 #ifdef DEBUG_ON
@@ -1813,7 +1819,7 @@ static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *, GtkTreeIter *it
     // loop forward from the first element, comparing against the new label
     while (l)
     {
-        if (g_strcmp0 (name, lxpanel_plugin_get_menu_label (GTK_WIDGET (l->data))) < 0) break;
+        if (g_strcmp0 (name, wrap_get_menu_label (GTK_WIDGET (l->data))) < 0) break;
         count++;
         l = l->next;
     }
@@ -2085,7 +2091,11 @@ static void update_icon (BluetoothPlugin *bt)
     gtk_widget_set_sensitive (bt->plugin, TRUE);
 }
 
-/* Handler for menu button click */
+/*----------------------------------------------------------------------------*/
+/* wf-panel plugin functions                                                  */
+/*----------------------------------------------------------------------------*/
+
+/* Handler for button click */
 #ifdef LXPLUG
 static gboolean bluetooth_button_press_event (GtkWidget *widget, GdkEventButton *event, LXPanel *)
 {
@@ -2111,6 +2121,7 @@ static void bluetooth_button_press_event (GtkButton *, BluetoothPlugin *bt)
     pressed = PRESS_NONE;
 }
 
+/* Handler for long press gesture */
 static void bluetooth_gesture_pressed (GtkGestureLongPress *, gdouble x, gdouble y, BluetoothPlugin *)
 {
     pressed = PRESS_LONG;
@@ -2125,28 +2136,14 @@ static void bluetooth_gesture_end (GtkGestureLongPress *, GdkEventSequence *, Bl
 #endif
 
 /* Handler for system config changed message from panel */
-#ifdef LXPLUG
-static void bluetooth_configuration_changed (LXPanel *, GtkWidget *widget)
-{
-    BluetoothPlugin *bt = lxpanel_plugin_get_data (widget);
-#else
 void bt_update_display (BluetoothPlugin *bt)
 {
-#endif
-
     update_icon (bt);
 }
 
 /* Handler for control message */
-#ifdef LXPLUG
-static gboolean bluetooth_control_msg (GtkWidget *plugin, const char *cmd)
+gboolean bt_control_msg (BluetoothPlugin *bt, const char *cmd)
 {
-    BluetoothPlugin *bt = lxpanel_plugin_get_data (plugin);
-#else
-gboolean bluetooth_control_msg (BluetoothPlugin *bt, const char *cmd)
-{
-#endif
-
     if (!g_strcmp0 (cmd, "apstop"))
     {
         if (bt->list_dialog == NULL) set_search (bt, FALSE);
@@ -2166,49 +2163,16 @@ gboolean bluetooth_control_msg (BluetoothPlugin *bt, const char *cmd)
     return TRUE;
 }
 
-/* Plugin destructor. */
-void bluetooth_destructor (gpointer user_data)
-{
-    BluetoothPlugin * bt = (BluetoothPlugin *) user_data;
-
-    clear (bt);
-    g_bus_unwatch_name (bt->watch);
-
-    /* Deallocate memory */
-#ifndef LXPLUG
-    if (bt->gesture) g_object_unref (bt->gesture);
-#endif
-    g_free (bt);
-}
-
-/* Plugin constructor. */
-#ifdef LXPLUG
-static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *settings)
-{
-    /* Allocate and initialize plugin context */
-    BluetoothPlugin *bt = g_new0 (BluetoothPlugin, 1);
-
-    setlocale (LC_ALL, "");
-    bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
-    bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-
-    /* Allocate top level widget and set into plugin widget pointer. */
-    bt->panel = panel;
-    bt->settings = settings;
-    bt->plugin = gtk_button_new ();
-    lxpanel_plugin_set_data (bt->plugin, bt, bluetooth_destructor);
-#else
 void bt_init (BluetoothPlugin *bt)
 {
-#endif
+    if (!g_strcmp0 (getenv ("USER"), "rpi-first-boot-wizard")) bt->wizard = TRUE;
+    else bt->wizard = FALSE;
+
     /* Allocate icon as a child of top level */
     bt->tray_icon = gtk_image_new ();
     gtk_container_add (GTK_CONTAINER (bt->plugin), bt->tray_icon);
     wrap_set_taskbar_icon (bt, bt->tray_icon, "preferences-system-bluetooth-inactive");
-#ifndef LXPLUG
-    if (!bt->wizard)
-#endif
-    gtk_widget_set_tooltip_text (bt->tray_icon, _("Manage Bluetooth devices"));
+    if (!bt->wizard) gtk_widget_set_tooltip_text (bt->tray_icon, _("Manage Bluetooth devices"));
 
     /* Set up button */
     gtk_button_set_relief (GTK_BUTTON (bt->plugin), GTK_RELIEF_NONE);
@@ -2237,30 +2201,19 @@ void bt_init (BluetoothPlugin *bt)
     bt->list = NULL;
     clear (bt);
 
-    // is rfkill installed?
+    // Is rfkill installed?
     FILE *fp = popen ("test -e /usr/sbin/rfkill", "r");
     if (pclose (fp)) bt->rfkill = FALSE;
     else bt->rfkill = TRUE;
 
-    // Enable autopairing if in the wizard, but not if wizard started for user change only
+    // Enable autopairing if in the wizard, not renaming user, and flag file set
     bt->hid_autopair = 0;
-#ifdef LXPLUG
-    int val;
-    if (config_setting_lookup_int (settings, "autopair", &val))
+    if (bt->wizard)
     {
-        if (val == 1)
-        {
-            if (!system ("test -f /etc/xdg/autostart/piwiz.desktop"))
-            {
-                if (system ("grep -q useronly /etc/xdg/autostart/piwiz.desktop"))
-                    bt->hid_autopair = AP_MOUSE | AP_KEYBOARD;
-            }
-        }
+        if (system ("grep -q useronly /etc/xdg/autostart/piwiz.desktop"))
+            if (!system ("test -f /boot/firmware/btautopair"))
+                bt->hid_autopair = AP_MOUSE | AP_KEYBOARD;
     }
-#else
-    if (bt->wizard && !system ("test -f /boot/firmware/btautopair"))
-        bt->hid_autopair = AP_MOUSE | AP_KEYBOARD;
-#endif
 
     /* Load icon cache */
     init_icon_cache (bt);
@@ -2270,21 +2223,74 @@ void bt_init (BluetoothPlugin *bt)
 
     /* Show the widget and return */
     gtk_widget_show_all (bt->plugin);
-#ifdef LXPLUG
-    return bt->plugin;
-#endif
 }
+
+void bluetooth_destructor (gpointer user_data)
+{
+    BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
+
+    clear (bt);
+    g_bus_unwatch_name (bt->watch);
+
+#ifndef LXPLUG
+    if (bt->gesture) g_object_unref (bt->gesture);
+#endif
+    g_free (bt);
+}
+
+/*----------------------------------------------------------------------------*/
+/* LXPanel plugin functions                                                   */
+/*----------------------------------------------------------------------------*/
 #ifdef LXPLUG
+
+/* Constructor */
+static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *settings)
+{
+    /* Allocate and initialize plugin context */
+    BluetoothPlugin *bt = g_new0 (BluetoothPlugin, 1);
+
+    setlocale (LC_ALL, "");
+    bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
+    bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+
+    /* Allocate top level widget and set into plugin widget pointer */
+    bt->panel = panel;
+    bt->settings = settings;
+    bt->plugin = gtk_button_new ();
+    lxpanel_plugin_set_data (bt->plugin, bt, bluetooth_destructor);
+
+    bt_init (bt);
+
+    return bt->plugin;
+}
+
+/* Handler for system config changed message from panel */
+static void bluetooth_configuration_changed (LXPanel *, GtkWidget *widget)
+{
+    BluetoothPlugin *bt = lxpanel_plugin_get_data (widget);
+    bt_update_display (bt);
+}
+
+/* Handler for control message */
+static gboolean bluetooth_control (GtkWidget *plugin, const char *cmd)
+{
+    BluetoothPlugin *bt = lxpanel_plugin_get_data (plugin);
+    return bt_control_msg (bt, cmd);
+}
+
 FM_DEFINE_MODULE (lxpanel_gtk, bluetooth)
 
-/* Plugin descriptor. */
+/* Plugin descriptor */
 LXPanelPluginInit fm_module_init_lxpanel_gtk = {
     .name = N_("Bluetooth"),
     .description = N_("Manages Bluetooth devices"),
     .new_instance = bluetooth_constructor,
     .reconfigure = bluetooth_configuration_changed,
     .button_press_event = bluetooth_button_press_event,
-    .control = bluetooth_control_msg,
+    .control = bluetooth_control,
     .gettext_package = GETTEXT_PACKAGE
 };
 #endif
+
+/* End of file */
+/*----------------------------------------------------------------------------*/

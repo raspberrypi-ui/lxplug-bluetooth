@@ -47,7 +47,6 @@ void WayfireBluetooth::init (Gtk::HBox *container)
     bt = g_new0 (BluetoothPlugin, 1);
     bt->plugin = (GtkWidget *)((*plugin).gobj());
     bt->icon_size = icon_size;
-    bt->wizard = WayfireShellApp::get().wizard;
     icon_timer = Glib::signal_idle().connect (sigc::mem_fun (*this, &WayfireBluetooth::set_icon));
     bar_pos_changed_cb ();
 
