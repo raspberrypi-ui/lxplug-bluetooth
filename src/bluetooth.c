@@ -25,12 +25,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ============================================================================*/
 
-#include <errno.h>
 #include <locale.h>
-#include <stdlib.h>
-#include <string.h>
 #include <glib/gi18n.h>
-#include <gio/gio.h>
 
 #ifdef LXPLUG
 #include "plugin.h"
@@ -55,28 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define AP_MOUSE    0x01
 #define AP_KEYBOARD 0x02
-
-/* Name table for cached icons */
-
-const gchar *icon_names[ICON_CACHE_SIZE] =
-{
-    "audio-card",
-    "audio-headset",
-    "computer",
-    "gnome-dev-computer",
-    "gnome-fs-client",
-    "input-keyboard",
-    "input-mouse",
-    "keyboard",
-    "media-removable",
-    "mouse",
-    "phone",
-    "stock_cell-phone",
-    "system",
-    "dialog-question"
-};
-
-/* Plug-in global data */
 
 typedef enum {
     DIALOG_REMOVE,
@@ -113,6 +87,30 @@ typedef enum {
     DEV_AUDIO_SINK,
     DEV_OTHER
 } DEVICE_TYPE;
+
+/*----------------------------------------------------------------------------*/
+/* Plug-in global data                                                        */
+/*----------------------------------------------------------------------------*/
+
+/* Name table for cached icons */
+
+const gchar *icon_names[ICON_CACHE_SIZE] =
+{
+    "audio-card",
+    "audio-headset",
+    "computer",
+    "gnome-dev-computer",
+    "gnome-fs-client",
+    "input-keyboard",
+    "input-mouse",
+    "keyboard",
+    "media-removable",
+    "mouse",
+    "phone",
+    "stock_cell-phone",
+    "system",
+    "dialog-question"
+};
 
 /* Agent data */
 
@@ -254,9 +252,9 @@ static GdkPixbuf *icon_from_cache (BluetoothPlugin *bt, const gchar *icon_name);
 static void show_menu (BluetoothPlugin *bt);
 static void update_icon (BluetoothPlugin *bt);
 
-/*---------------------------------------------------------------------------*/
-/* Function Definitions */
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
+/* Function definitions                                                       */
+/*----------------------------------------------------------------------------*/
 
 static int bt_enabled (BluetoothPlugin *bt)
 {
