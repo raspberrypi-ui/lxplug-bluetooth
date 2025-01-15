@@ -2116,19 +2116,6 @@ static void bluetooth_button_press_event (GtkButton *, BluetoothPlugin *bt)
     }
     pressed = PRESS_NONE;
 }
-
-/* Handler for long press gesture */
-static void bluetooth_gesture_pressed (GtkGestureLongPress *, gdouble x, gdouble y, BluetoothPlugin *)
-{
-    pressed = PRESS_LONG;
-    press_x = x;
-    press_y = y;
-}
-
-static void bluetooth_gesture_end (GtkGestureLongPress *, GdkEventSequence *, BluetoothPlugin *bt)
-{
-    if (pressed == PRESS_LONG) pass_right_click (bt->plugin, press_x, press_y);
-}
 #endif
 
 /* Handler for system config changed message from panel */
@@ -2176,11 +2163,7 @@ void bt_init (BluetoothPlugin *bt)
     g_signal_connect (bt->plugin, "clicked", G_CALLBACK (bluetooth_button_press_event), bt);
 
     /* Set up long press */
-    bt->gesture = gtk_gesture_long_press_new (bt->plugin);
-    gtk_gesture_single_set_touch_only (GTK_GESTURE_SINGLE (bt->gesture), touch_only);
-    g_signal_connect (bt->gesture, "pressed", G_CALLBACK (bluetooth_gesture_pressed), bt);
-    g_signal_connect (bt->gesture, "end", G_CALLBACK (bluetooth_gesture_end), bt);
-    gtk_event_controller_set_propagation_phase (GTK_EVENT_CONTROLLER (bt->gesture), GTK_PHASE_BUBBLE);
+    bt->gesture = add_long_press (bt->plugin);
 #endif
 
     /* Set up variables */
