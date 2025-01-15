@@ -2092,31 +2092,12 @@ static void update_icon (BluetoothPlugin *bt)
 /*----------------------------------------------------------------------------*/
 
 /* Handler for button click */
-#ifdef LXPLUG
-static gboolean bluetooth_button_press_event (GtkWidget *widget, GdkEventButton *event, LXPanel *)
+static void bluetooth_button_clicked (GtkWidget *, BluetoothPlugin *bt)
 {
-    BluetoothPlugin *bt = lxpanel_plugin_get_data (widget);
-
-    /* Show or hide the popup menu on left-click */
-    if (event->button == 1)
-    {
-        show_menu (bt);
-        wrap_show_menu (bt->plugin, bt->menu);
-        return TRUE;
-    }
-    else return FALSE;
+    CHECK_LONGPRESS
+    show_menu (bt);
+    wrap_show_menu (bt->plugin, bt->menu);
 }
-#else
-static void bluetooth_button_press_event (GtkButton *, BluetoothPlugin *bt)
-{
-    if (pressed != PRESS_LONG)
-    {
-        show_menu (bt);
-        wrap_show_menu (bt->plugin, bt->menu);
-    }
-    pressed = PRESS_NONE;
-}
-#endif
 
 /* Handler for system config changed message from panel */
 void bt_update_display (BluetoothPlugin *bt)
@@ -2160,7 +2141,7 @@ void bt_init (BluetoothPlugin *bt)
     /* Set up button */
     gtk_button_set_relief (GTK_BUTTON (bt->plugin), GTK_RELIEF_NONE);
 #ifndef LXPLUG
-    g_signal_connect (bt->plugin, "clicked", G_CALLBACK (bluetooth_button_press_event), bt);
+    g_signal_connect (bt->plugin, "clicked", G_CALLBACK (bluetooth_button_clicked), bt);
 
     /* Set up long press */
     bt->gesture = add_long_press (bt->plugin, NULL, NULL);
@@ -2243,10 +2224,22 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
     return bt->plugin;
 }
 
-/* Handler for system config changed message from panel */
-static void bluetooth_configuration_changed (LXPanel *, GtkWidget *widget)
+/* Handler for button press */
+static gboolean bluetooth_button_press_event (GtkWidget *plugin, GdkEventButton *event, LXPanel *)
 {
-    BluetoothPlugin *bt = lxpanel_plugin_get_data (widget);
+    BluetoothPlugin *bt = lxpanel_plugin_get_data (plugin);
+    if (event->button == 1)
+    {
+        bluetooth_button_clicked (plugin, bt);
+        return TRUE;
+    }
+    else return FALSE;
+}
+
+/* Handler for system config changed message from panel */
+static void bluetooth_configuration_changed (LXPanel *, GtkWidget *plugin)
+{
+    BluetoothPlugin *bt = lxpanel_plugin_get_data (plugin);
     bt_update_display (bt);
 }
 
