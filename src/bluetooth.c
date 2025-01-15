@@ -2163,7 +2163,7 @@ void bt_init (BluetoothPlugin *bt)
     g_signal_connect (bt->plugin, "clicked", G_CALLBACK (bluetooth_button_press_event), bt);
 
     /* Set up long press */
-    bt->gesture = add_long_press (bt->plugin);
+    bt->gesture = add_long_press (bt->plugin, NULL, NULL);
 #endif
 
     /* Set up variables */
