@@ -1,5 +1,5 @@
 Source: pplug-bluetooth
-Section: unknown
+Section: x11
 Priority: optional
 Maintainer: Simon Long <simon@raspberrypi.com>
 Build-Depends:
