@@ -5,7 +5,8 @@ Maintainer: Simon Long <simon@raspberrypi.com>
 Build-Depends:
  debhelper-compat (= 13), meson,
  libgtk-3-dev (>= 3.24), libgtkmm-3.0-dev (>= 3.24),
- lxpanel-dev (>= 0.10.1-1+rpt1), wf-panel-pi-dev (>=0.86)
+ lxpanel-dev (>= 0.10.1-1+rpt1), wf-panel-pi-dev (>=0.86),
+ libgtk-layer-shell-dev (>= 0.6.0), libglm-dev
 Standards-Version: 4.5.1
 Homepage: http://raspberrypi.com/
 
