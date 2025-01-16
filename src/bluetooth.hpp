@@ -46,7 +46,6 @@ class WayfireBluetooth : public WayfireWidget
     WfOption <int> icon_size {"panel/icon_size"};
     WfOption <std::string> bar_pos {"panel/position"};
     sigc::connection icon_timer;
-    bool wizard;
 
     /* plugin */
     BluetoothPlugin *bt;
