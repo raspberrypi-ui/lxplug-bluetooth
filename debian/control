@@ -5,7 +5,7 @@ Maintainer: Simon Long <simon@raspberrypi.com>
 Build-Depends:
  debhelper-compat (= 13), meson,
  libgtk-3-dev (>= 3.24), libgtkmm-3.0-dev (>= 3.24),
- lxpanel-dev (>= 0.10.1-1+rpt1), wf-panel-pi-dev (>=0.86),
+ lxpanel-dev (>= 0.10.1-2+rpt21), wf-panel-pi-dev (>=0.92),
  libgtk-layer-shell-dev (>= 0.6.0), libglm-dev
 Standards-Version: 4.5.1
 Homepage: http://raspberrypi.com/
@@ -13,7 +13,7 @@ Homepage: http://raspberrypi.com/
 Package: lxplug-bluetooth
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends},
- lxpanel (>= 0.10.1-1+rpt1), lxpanel-data (>= 0.10.1-1+rpt1)
+ lxpanel (>= 0.10.1-2+rpt21), lxpanel-data (>= 0.10.1-2+rpt21)
 Recommends: pulseaudio-module-bluetooth | bluealsa, pi-bluetooth
 Description: Bluetooth plugin for lxpanel
  Plugin for lxpanel to control pairing and connection of Bluetooth devices.
@@ -21,7 +21,7 @@ Description: Bluetooth plugin for lxpanel
 Package: wfplug-bluetooth
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends},
-  wf-panel-pi (>=0.86)
+  wf-panel-pi (>=0.92)
 Recommends: pulseaudio-module-bluetooth | bluealsa, pi-bluetooth
 Description: Bluetooth plugin for wf-panel-pi
  Plugin for wf-panel-pi to control pairing and connection of Bluetooth devices.
