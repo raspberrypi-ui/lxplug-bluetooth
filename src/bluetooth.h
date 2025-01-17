@@ -25,13 +25,10 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ============================================================================*/
 
-/*----------------------------------------------------------------------------*/
-/* Typedefs and macros */
-/*----------------------------------------------------------------------------*/
-
 #define ICON_CACHE_SIZE 14
 
-typedef struct {
+typedef struct 
+{
 #ifdef LXPLUG
     LXPanel *panel;                 /* Back pointer to panel */
     config_setting_t *settings;     /* Plugin settings */

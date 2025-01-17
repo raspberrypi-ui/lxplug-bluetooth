@@ -37,7 +37,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "bluetooth.h"
 
 /*----------------------------------------------------------------------------*/
-/* Typedefs and macros */
+/* Typedefs and macros                                                        */
 /*----------------------------------------------------------------------------*/
 
 #define DEBUG_ON
@@ -176,9 +176,9 @@ static const gchar introspection_xml[] =
 "   </interface>\n"
 "</node>\n";
 
-/*---------------------------------------------------------------------------*/
-/* Prototypes */
-/*---------------------------------------------------------------------------*/
+/*----------------------------------------------------------------------------*/
+/* Prototypes                                                                 */
+/*----------------------------------------------------------------------------*/
 
 static void initialise (BluetoothPlugin *bt);
 static gboolean start_search (gpointer user_data);
