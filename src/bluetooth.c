@@ -2123,6 +2123,10 @@ gboolean bt_control_msg (BluetoothPlugin *bt, const char *cmd)
 
 void bt_init (BluetoothPlugin *bt)
 {
+    setlocale (LC_ALL, "");
+    bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
+    bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+
     if (!g_strcmp0 (getenv ("USER"), "rpi-first-boot-wizard")) bt->wizard = TRUE;
     else bt->wizard = FALSE;
 
@@ -2202,10 +2206,6 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
 {
     /* Allocate and initialize plugin context */
     BluetoothPlugin *bt = g_new0 (BluetoothPlugin, 1);
-
-    setlocale (LC_ALL, "");
-    bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
-    bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 
     /* Allocate top level widget and set into plugin widget pointer */
     bt->panel = panel;
