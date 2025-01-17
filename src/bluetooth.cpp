@@ -54,7 +54,7 @@ void WayfireBluetooth::icon_size_changed_cb (void)
 
 void WayfireBluetooth::command (const char *cmd)
 {
-    bluetooth_control_msg (bt, cmd);
+    bt_control_msg (bt, cmd);
 }
 
 bool WayfireBluetooth::set_icon (void)
@@ -88,7 +88,7 @@ void WayfireBluetooth::init (Gtk::HBox *container)
 WayfireBluetooth::~WayfireBluetooth()
 {
     icon_timer.disconnect ();
-    bluetooth_destructor (bt);
+    bt_destructor (bt);
 }
 
 /* End of file */

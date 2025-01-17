@@ -1273,9 +1273,7 @@ static void show_pairing_dialog (BluetoothPlugin *bt, PAIR_STATE state, const gc
     GtkBuilder *builder;
     char *buffer;
 
-#ifdef LXPLUG
     textdomain (GETTEXT_PACKAGE);
-#endif
 
     if (!bt->pair_dialog)
     {
@@ -1520,9 +1518,7 @@ static void show_list_dialog (BluetoothPlugin *bt)
     GtkBuilder *builder;
     GtkCellRenderer *rend;
 
-#ifdef LXPLUG
     textdomain (GETTEXT_PACKAGE);
-#endif
 
     builder = gtk_builder_new_from_file (PACKAGE_DATA_DIR "/ui/lxplug-bluetooth.ui");
     bt->list_dialog = (GtkWidget *) gtk_builder_get_object (builder, "list_dlg");
@@ -1566,9 +1562,7 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STA
     GtkWidget *msg_pb;
     char *buffer;
 
-#ifdef LXPLUG
     textdomain (GETTEXT_PACKAGE);
-#endif
 
     switch (type)
     {
@@ -2185,7 +2179,7 @@ void bt_init (BluetoothPlugin *bt)
     gtk_widget_show_all (bt->plugin);
 }
 
-void bluetooth_destructor (gpointer user_data)
+void bt_destructor (gpointer user_data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) user_data;
 
@@ -2217,7 +2211,7 @@ static GtkWidget *bluetooth_constructor (LXPanel *panel, config_setting_t *setti
     bt->panel = panel;
     bt->settings = settings;
     bt->plugin = gtk_button_new ();
-    lxpanel_plugin_set_data (bt->plugin, bt, bluetooth_destructor);
+    lxpanel_plugin_set_data (bt->plugin, bt, bt_destructor);
 
     bt_init (bt);
 
