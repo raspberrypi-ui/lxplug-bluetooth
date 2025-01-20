@@ -1,2 +1,6 @@
 [encoding: UTF-8]
-plugins/bluetooth/bluetooth.c
+src/bluetooth.c
+src/bluetooth.cpp
+src/bluetooth.h
+src/bluetooth.hpp
+[type: gettext/glade] data/lxplug-bluetooth.ui

@@ -1,85 +1,85 @@
-# English translations for PACKAGE package.
-# Copyright (C) 2017 THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-#  <simon@raspberrypi.org>, 2017.
+# English translations for wf-panel-pi package.
+# Copyright (C) 2024 Raspberry Pi Ltd
+# This file is distributed under the same license as the wf-panel-pi package.
+# Simon Long <simon@raspberrypi.com>, 2024.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-03-29 10:29+0100\n"
+"POT-Creation-Date: 2025-01-20 07:43+0000\n"
 "PO-Revision-Date: 2017-03-06 14:18+0000\n"
-"Last-Translator:  <simon@raspberrypi.org>\n"
+"Last-Translator: Simon Long <simon@raspberrypi.com>\n"
 "Language-Team: English (British)\n"
 "Language: en_GB\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ASCII\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../plugins/bluetooth/bluetooth.c:1276
+#: ../src/bluetooth.c:1298
 #, c-format
 msgid "Pairing request sent to '%s' - waiting for response..."
 msgstr "Pairing request sent to '%s' - waiting for response..."
 
-#: ../plugins/bluetooth/bluetooth.c:1285
+#: ../src/bluetooth.c:1307
 #, c-format
 msgid "Pairing failed - %s"
 msgstr "Pairing failed - %s"
 
-#: ../plugins/bluetooth/bluetooth.c:1293
+#: ../src/bluetooth.c:1315
 #, c-format
 msgid "Pairing successful - connecting..."
 msgstr "Pairing successful - connecting..."
 
-#: ../plugins/bluetooth/bluetooth.c:1301
+#: ../src/bluetooth.c:1323
 #, c-format
 msgid "Connection successful"
 msgstr "Connection successful"
 
-#: ../plugins/bluetooth/bluetooth.c:1309 ../plugins/bluetooth/bluetooth.c:1559
+#: ../src/bluetooth.c:1331 ../src/bluetooth.c:1588
 #, c-format
 msgid "Connection failed - %s"
 msgstr "Connection failed - %s"
 
-#: ../plugins/bluetooth/bluetooth.c:1317
+#: ../src/bluetooth.c:1339
 #, c-format
 msgid "Please enter code '%s' on '%s'"
 msgstr "Please enter code '%s' on '%s'"
 
-#: ../plugins/bluetooth/bluetooth.c:1325
+#: ../src/bluetooth.c:1347
 #, c-format
 msgid "Please confirm that '%s' is showing the code '%s' to pair"
 msgstr "Please confirm that '%s' is showing the code '%s' to pair"
 
-#: ../plugins/bluetooth/bluetooth.c:1333
+#: ../src/bluetooth.c:1355
 #, c-format
 msgid "Please enter PIN code shown on '%s'"
 msgstr "Please enter PIN code shown on '%s'"
 
-#: ../plugins/bluetooth/bluetooth.c:1341
+#: ../src/bluetooth.c:1363
 #, c-format
 msgid "Please enter passcode shown on '%s'"
 msgstr "Please enter passcode shown on '%s'"
 
-#: ../plugins/bluetooth/bluetooth.c:1349
+#: ../src/bluetooth.c:1371
 #, c-format
 msgid "Waiting for response from Bluetooth device..."
 msgstr "Waiting for response from Bluetooth device..."
 
-#: ../plugins/bluetooth/bluetooth.c:1357
+#: ../src/bluetooth.c:1379
 #, c-format
 msgid "'%s' has requested a pairing. Do you accept the request?"
 msgstr "'%s' has requested a pairing. Do you accept the request?"
 
-#: ../plugins/bluetooth/bluetooth.c:1365
+#: ../src/bluetooth.c:1387
 #, c-format
 msgid ""
-"Pairing successful - right-click the volume icon to connect as audio device"
+"Pairing successful - right-click the volume icon to select as audio device"
 msgstr ""
-"Pairing successful - right-click the volume icon to connect as audio device"
+"Pairing successful - right-click the volume icon to select as audio device"
 
-#: ../plugins/bluetooth/bluetooth.c:1373
+#: ../src/bluetooth.c:1395
 #, c-format
 msgid ""
 "Pairing successful - this device has no services which can be used with "
@@ -88,141 +88,115 @@ msgstr ""
 "Pairing successful - this device has no services which can be used with "
 "Raspberry Pi"
 
-#: ../plugins/bluetooth/bluetooth.c:1547
+#: ../src/bluetooth.c:1573
 #, c-format
 msgid "Do you want to unpair '%s'?"
 msgstr "Do you want to unpair '%s'?"
 
-#: ../plugins/bluetooth/bluetooth.c:1550
+#: ../src/bluetooth.c:1576
 #, c-format
 msgid "Removing pairing with '%s'..."
 msgstr "Removing pairing with '%s'..."
 
-#: ../plugins/bluetooth/bluetooth.c:1553
+#: ../src/bluetooth.c:1579
 #, c-format
 msgid "Removal failed - %s"
 msgstr "Removal failed - %s"
 
-#: ../plugins/bluetooth/bluetooth.c:1559
+#: ../src/bluetooth.c:1588
 #, c-format
 msgid "Connecting to '%s'..."
 msgstr "Connecting to '%s'..."
 
-#: ../plugins/bluetooth/bluetooth.c:1563
+#: ../src/bluetooth.c:1592
 #, c-format
 msgid "Disconnecting from '%s'..."
 msgstr "Disconnecting from '%s'..."
 
-#: ../plugins/bluetooth/bluetooth.c:1563
+#: ../src/bluetooth.c:1592
 #, c-format
 msgid "Disconnection failed - %s"
 msgstr "Disconnection failed - %s"
 
-#: ../plugins/bluetooth/bluetooth.c:1694
-msgid "Use the audio menu to connect to this device"
-msgstr "Use the audio menu to connect to this device"
-
-#: ../plugins/bluetooth/bluetooth.c:1696
+#: ../src/bluetooth.c:1706
 msgid "No usable services on this device"
 msgstr "No usable services on this device"
 
-#: ../plugins/bluetooth/bluetooth.c:1773
+#: ../src/bluetooth.c:1771
 msgid "Disconnect..."
 msgstr "Disconnect..."
 
-#: ../plugins/bluetooth/bluetooth.c:1778
+#: ../src/bluetooth.c:1776
 msgid "Connect..."
 msgstr "Connect..."
 
 #. add the remove option to the submenu
-#: ../plugins/bluetooth/bluetooth.c:1795
+#: ../src/bluetooth.c:1789
 msgid "Remove..."
 msgstr "Remove..."
 
-#: ../plugins/bluetooth/bluetooth.c:2007 ../plugins/bluetooth/bluetooth.c:2009
+#. warn if no BT hardware detected
+#: ../src/bluetooth.c:1985
 msgid "No Bluetooth adapter found"
 msgstr "No Bluetooth adapter found"
 
-#: ../plugins/bluetooth/bluetooth.c:2018 ../plugins/bluetooth/bluetooth.c:2020
+#. add enable bt option
+#: ../src/bluetooth.c:1992
 msgid "Turn On Bluetooth"
-msgstr "_Turn On Bluetooth"
+msgstr "Turn On Bluetooth"
 
-#: ../plugins/bluetooth/bluetooth.c:2031 ../plugins/bluetooth/bluetooth.c:2033
+#. add disable bt option
+#: ../src/bluetooth.c:2002
 msgid "Turn Off Bluetooth"
-msgstr "_Turn Off Bluetooth"
+msgstr "Turn Off Bluetooth"
 
-#: ../plugins/bluetooth/bluetooth.c:2044 ../plugins/bluetooth/bluetooth.c:2046
+#: ../src/bluetooth.c:2012
 msgid "Stop Discoverable"
-msgstr "Stop _Discoverable"
+msgstr "Stop Discoverable"
 
-#: ../plugins/bluetooth/bluetooth.c:2050 ../plugins/bluetooth/bluetooth.c:2052
+#: ../src/bluetooth.c:2014
 msgid "Make Discoverable"
-msgstr "Make _Discoverable"
+msgstr "Make Discoverable"
 
-#: ../plugins/bluetooth/bluetooth.c:2061 ../plugins/bluetooth/bluetooth.c:2063
+#. add and remove dialogs
+#: ../src/bluetooth.c:2022
 msgid "Add Device..."
-msgstr "_Add Device..."
+msgstr "Add Device..."
 
-#: ../plugins/bluetooth/bluetooth.c:2198
+#: ../src/bluetooth.c:2137
 msgid "Manage Bluetooth devices"
 msgstr "Manage Bluetooth devices"
 
-#: ../plugins/bluetooth/bluetooth.c:2261
+#: ../src/bluetooth.c:2251 ../src/bluetooth.cpp:39
 msgid "Bluetooth"
 msgstr "Bluetooth"
 
-#: ../plugins/bluetooth/bluetooth.c:2262
+#: ../src/bluetooth.c:2252
 msgid "Manages Bluetooth devices"
 msgstr "Manages Bluetooth devices"
 
-#, c-format
-#~ msgid "Pairing Device '%s'"
-#~ msgstr "Pairing Device '%s'"
+#. End of file
+#. ----------------------------------------------------------------------------
+#: ../data/lxplug-bluetooth.ui.h:1
+msgid "Add New Device"
+msgstr "Add New Device"
 
-#~ msgid "_Cancel"
-#~ msgstr "_Cancel"
+#: ../data/lxplug-bluetooth.ui.h:2
+msgid "_Cancel"
+msgstr "_Cancel"
 
-#~ msgid "_OK"
-#~ msgstr "_OK"
+#: ../data/lxplug-bluetooth.ui.h:3
+msgid "_Pair"
+msgstr "_Pair"
 
-#, c-format
-#~ msgid "Connection failed - %s. Try to connect manually."
-#~ msgstr "Connection failed - %s. Try to connect manually."
+#: ../data/lxplug-bluetooth.ui.h:4
+msgid "Searching for Bluetooth devices..."
+msgstr "Searching for Bluetooth devices..."
 
-#~ msgid "Pairing Requested"
-#~ msgstr "Pairing Requested"
+#: ../data/lxplug-bluetooth.ui.h:5
+msgid "label"
+msgstr "label"
 
-#, c-format
-#~ msgid "Rejecting pairing..."
-#~ msgstr "Rejecting pairing..."
-
-#, c-format
-#~ msgid "Removal of pairing failed - %s. Remove the device manually."
-#~ msgstr "Removal of pairing failed - %s. Remove the device manually."
-
-#~ msgid "Add New Device"
-#~ msgstr "Add New Device"
-
-#, c-format
-#~ msgid "Remove Device"
-#~ msgstr "Remove Device"
-
-#~ msgid "_Pair"
-#~ msgstr "_Pair"
-
-#~ msgid "_Remove"
-#~ msgstr "_Remove"
-
-#~ msgid "Searching for Bluetooth devices..."
-#~ msgstr "Searching for Bluetooth devices..."
-
-#~ msgid "Paired Bluetooth devices"
-#~ msgstr "Paired Bluetooth devices"
-
-#, c-format
-#~ msgid "Connect Device"
-#~ msgstr "Connect Device"
-
-#, c-format
-#~ msgid "Disconnect Device"
-#~ msgstr "Disconnect Device"
+#: ../data/lxplug-bluetooth.ui.h:6
+msgid "_OK"
+msgstr "_OK"
