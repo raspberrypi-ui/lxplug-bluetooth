@@ -9,3 +9,10 @@
 .deps/
 .libs/
 po/LINGUAS
+po/untitled.pot
+debian/*
+!debian/control
+!debian/rules
+!debian/changelog
+!debian/copyright
+!debian/source/format
