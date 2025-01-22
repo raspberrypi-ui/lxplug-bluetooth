@@ -1559,14 +1559,15 @@ static void show_list_dialog (BluetoothPlugin *bt)
 static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STATE state, const gchar *param)
 {
     GtkBuilder *builder;
-    GtkWidget *msg_pb;
-    char *buffer;
+    GtkWidget *msg_entry;
+    char *buffer, *title;
 
     textdomain (GETTEXT_PACKAGE);
 
     switch (type)
     {
         case DIALOG_REMOVE:
+            title = g_strdup_printf (_("Removing..."));
             switch (state)
             {
                 case STATE_CONFIRM:
@@ -1585,10 +1586,12 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STA
             break;
 
         case DIALOG_CONNECT:
+            title = g_strdup_printf (_("Connecting..."));
             buffer = g_strdup_printf (state == STATE_INIT ? _("Connecting to '%s'...") : _("Connection failed - %s"), param);
             break;
 
         case DIALOG_DISCONNECT:
+            title = g_strdup_printf (_("Disconnecting..."));
             buffer = g_strdup_printf (state == STATE_INIT ? _("Disconnecting from '%s'...") : _("Disconnection failed - %s"), param);
             break;
     }
@@ -1597,16 +1600,16 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STA
     {
         case STATE_INIT:
         case STATE_CONFIRM:
-            builder = gtk_builder_new_from_file (PACKAGE_DATA_DIR "/ui/lxpanel-modal.ui");
-
-            bt->conn_dialog = (GtkWidget *) gtk_builder_get_object (builder, "modal");
-            bt->conn_label = (GtkWidget *) gtk_builder_get_object (builder, "modal_msg");
-            bt->conn_ok = (GtkWidget *) gtk_builder_get_object (builder, "modal_ok");
-            bt->conn_cancel = (GtkWidget *) gtk_builder_get_object (builder, "modal_cancel");
-            msg_pb = (GtkWidget *) gtk_builder_get_object (builder, "modal_pb");
-            gtk_widget_hide (msg_pb);
+            builder = gtk_builder_new_from_file (PACKAGE_DATA_DIR "/ui/lxplug-bluetooth.ui");
+            bt->conn_dialog = (GtkWidget *) gtk_builder_get_object (builder, "pair_dlg");
+            bt->conn_label = (GtkWidget *) gtk_builder_get_object (builder, "pair_msg");
+            bt->conn_ok = (GtkWidget *) gtk_builder_get_object (builder, "pair_ok");
+            bt->conn_cancel = (GtkWidget *) gtk_builder_get_object (builder, "pair_cancel");
+            msg_entry = (GtkWidget *) gtk_builder_get_object (builder, "pair_entry");
+            gtk_widget_hide (msg_entry);
             g_object_unref (builder);
 
+            gtk_window_set_title (GTK_WINDOW (bt->conn_dialog), title);
             gtk_label_set_text (GTK_LABEL (bt->conn_label), buffer);
             gtk_widget_set_visible (bt->conn_ok, state == STATE_CONFIRM);
             gtk_widget_set_visible (bt->conn_cancel, state == STATE_CONFIRM);
@@ -1634,6 +1637,7 @@ static void show_connect_dialog (BluetoothPlugin *bt, DIALOG_TYPE type, CONN_STA
             break;
     }
 
+    g_free (title);
     g_free (buffer);
 }
 
