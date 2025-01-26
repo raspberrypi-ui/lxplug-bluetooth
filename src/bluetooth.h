@@ -25,6 +25,10 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ============================================================================*/
 
+/*----------------------------------------------------------------------------*/
+/* Typedefs and macros                                                        */
+/*----------------------------------------------------------------------------*/
+
 #define ICON_CACHE_SIZE 14
 
 typedef struct 
@@ -68,6 +72,10 @@ typedef struct
     gboolean rfkill;
     gboolean wizard;
 } BluetoothPlugin;
+
+/*----------------------------------------------------------------------------*/
+/* Prototypes                                                                 */
+/*----------------------------------------------------------------------------*/
 
 extern void bt_init (BluetoothPlugin *bt);
 extern void bt_update_display (BluetoothPlugin *bt);
