@@ -33,10 +33,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 extern "C" {
 #include "bluetooth.h"
-extern void bt_init (BluetoothPlugin *bt);
-extern void bt_update_display (BluetoothPlugin *bt);
-extern gboolean bt_control_msg (BluetoothPlugin *bt, const char *cmd);
-extern void bt_destructor (gpointer user_data);
 }
 
 class WayfireBluetooth : public WayfireWidget

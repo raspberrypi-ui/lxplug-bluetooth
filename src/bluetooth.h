@@ -69,5 +69,10 @@ typedef struct
     gboolean wizard;
 } BluetoothPlugin;
 
+extern void bt_init (BluetoothPlugin *bt);
+extern void bt_update_display (BluetoothPlugin *bt);
+extern gboolean bt_control_msg (BluetoothPlugin *bt, const char *cmd);
+extern void bt_destructor (gpointer user_data);
+
 /* End of file */
 /*----------------------------------------------------------------------------*/
