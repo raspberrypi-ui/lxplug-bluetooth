@@ -89,7 +89,7 @@ typedef enum {
 } DEVICE_TYPE;
 
 /*----------------------------------------------------------------------------*/
-/* Plug-in global data                                                        */
+/* Global data                                                                */
 /*----------------------------------------------------------------------------*/
 
 /* Name table for cached icons */
@@ -180,6 +180,8 @@ static const gchar introspection_xml[] =
 /* Prototypes                                                                 */
 /*----------------------------------------------------------------------------*/
 
+static int bt_enabled (BluetoothPlugin *bt);
+static void toggle_bt (GtkWidget *, gpointer user_data);
 static void initialise (BluetoothPlugin *bt);
 static gboolean start_search (gpointer user_data);
 static void clear (BluetoothPlugin *bt);
@@ -246,11 +248,13 @@ static gboolean flash_icon (gpointer user_data);
 static void handle_menu_discover (GtkWidget *widget, gpointer user_data);
 static gboolean add_to_menu (GtkTreeModel *model, GtkTreePath *tpath, GtkTreeIter *iter, gpointer user_data);
 static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *lst);
+static gboolean find_path (GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer data);
 static void update_device_list (BluetoothPlugin *bt);
 static void init_icon_cache (BluetoothPlugin *bt);
 static GdkPixbuf *icon_from_cache (BluetoothPlugin *bt, const gchar *icon_name);
 static void show_menu (BluetoothPlugin *bt);
 static void update_icon (BluetoothPlugin *bt);
+static void bluetooth_button_clicked (GtkWidget *, BluetoothPlugin *bt);
 
 /*----------------------------------------------------------------------------*/
 /* Function definitions                                                       */
@@ -1875,7 +1879,7 @@ static void add_device (BluetoothPlugin *bt, GDBusObject *object, GtkListStore *
     g_object_unref (interface);
 }
 
-gboolean find_path (GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer data)
+static gboolean find_path (GtkTreeModel *model, GtkTreePath *, GtkTreeIter *iter, gpointer data)
 {
     BluetoothPlugin *bt = (BluetoothPlugin *) data;
 
