@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <widget.hpp>
 #include <gtkmm/button.h>
+#include <gtkmm/gesturelongpress.h>
 
 extern "C" {
 #include "lxutils.h"
@@ -39,6 +40,7 @@ extern "C" {
 class WayfireBluetooth : public WayfireWidget
 {
     std::unique_ptr <Gtk::Button> plugin;
+    Glib::RefPtr<Gtk::GestureLongPress> gesture;
 
     WfOption <int> icon_size {"panel/icon_size"};
     WfOption <std::string> bar_pos {"panel/position"};

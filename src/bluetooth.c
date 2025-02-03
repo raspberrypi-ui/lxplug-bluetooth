@@ -2148,9 +2148,6 @@ void bt_init (BluetoothPlugin *bt)
     gtk_button_set_relief (GTK_BUTTON (bt->plugin), GTK_RELIEF_NONE);
 #ifndef LXPLUG
     g_signal_connect (bt->plugin, "clicked", G_CALLBACK (bluetooth_button_clicked), bt);
-
-    /* Set up long press */
-    bt->gesture = add_long_press (bt->plugin, NULL, NULL);
 #endif
 
     /* Set up variables */
@@ -2198,9 +2195,6 @@ void bt_destructor (gpointer user_data)
     clear (bt);
     g_bus_unwatch_name (bt->watch);
 
-#ifndef LXPLUG
-    if (bt->gesture) g_object_unref (bt->gesture);
-#endif
     g_free (bt);
 }
 
