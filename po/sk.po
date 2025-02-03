@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-06 14:18+0000\n"
-"PO-Revision-Date: 2020-11-28 22:06+0100\n"
+"POT-Creation-Date: 2025-02-03 11:04+0000\n"
+"PO-Revision-Date: 2025-01-31 22:27+0100\n"
 "Last-Translator: Jose Riha <jose1711@gmail.com>\n"
 "Language-Team: Slovak\n"
 "Language: sk\n"
@@ -16,231 +16,212 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.4.1\n"
+"X-Generator: Poedit 3.5\n"
 
-#. create the dialog, asking user to accept the pairing
-#: ../plugins/bluetooth/bluetooth.c:987
+#: ../src/bluetooth.c:1302
 #, c-format
-msgid "Do you accept pairing from device '%s'?"
-msgstr "Chcete prijať požiadavku na párovanie od zariadenia '%s'?"
-
-#: ../plugins/bluetooth/bluetooth.c:988
-msgid "Pairing Request"
-msgstr "Požiadavka na párovanie"
-
-#: ../plugins/bluetooth/bluetooth.c:1113
-#, c-format
-msgid "Pairing Device '%s'"
-msgstr "Párovanie so zariadením '%s'"
-
-#: ../plugins/bluetooth/bluetooth.c:1120
-msgid "Pairing request sent to device - waiting for response..."
+msgid "Pairing request sent to '%s' - waiting for response..."
 msgstr ""
-"Požiadavka na párovanie bola odoslaná zariadeniu - čakám na odpoveď..."
+"Požiadavka na párovanie bola odoslaná zariadeniu „%s“ - čakám na odpoveď..."
 
-#. add the buttons
-#: ../plugins/bluetooth/bluetooth.c:1127 ../plugins/bluetooth/bluetooth.c:1222
-#: ../plugins/bluetooth/bluetooth.c:1376
-msgid "_Cancel"
-msgstr "_Zrušiť"
-
-#: ../plugins/bluetooth/bluetooth.c:1128 ../plugins/bluetooth/bluetooth.c:1223
-#: ../plugins/bluetooth/bluetooth.c:1455
-msgid "_OK"
-msgstr "_OK"
-
-#: ../plugins/bluetooth/bluetooth.c:1141
+#: ../src/bluetooth.c:1311
 #, c-format
 msgid "Pairing failed - %s"
 msgstr "Chyba počas párovania - %s"
 
-#: ../plugins/bluetooth/bluetooth.c:1150
-msgid "Pairing successful - creating connection..."
-msgstr "Párovanie bolo úspešné - vytváram spojenie..."
+#: ../src/bluetooth.c:1319
+#, c-format
+msgid "Pairing successful - connecting..."
+msgstr "Párovanie bolo úspešné - pripájam sa..."
 
-#: ../plugins/bluetooth/bluetooth.c:1157
-msgid "Connected successfully"
+#: ../src/bluetooth.c:1327
+#, c-format
+msgid "Connection successful"
 msgstr "Úspešne pripojené"
 
-#: ../plugins/bluetooth/bluetooth.c:1164
-#, c-format
-msgid "Connection failed - %s. Try to connect manually."
-msgstr "Chyba pri pripájaní - %s. Skúste sa pripojiť manuálne."
-
-#: ../plugins/bluetooth/bluetooth.c:1172
-#, c-format
-msgid "Please enter code '%s' on device '%s'"
-msgstr "Prosím, zadajte kód '%s' na zariadení '%s'"
-
-#: ../plugins/bluetooth/bluetooth.c:1180
-#, c-format
-msgid "Please confirm that device '%s' is showing the code '%s' to connect"
-msgstr "Prosím, potvrďte, že zariadenie '%s' zobrazuje kód '%s' pre spojenie"
-
-#: ../plugins/bluetooth/bluetooth.c:1190
-#, c-format
-msgid "Please enter PIN code for device '%s'"
-msgstr "Prosím, zadajte kód PIN pre zariadenie '%s'"
-
-#: ../plugins/bluetooth/bluetooth.c:1203
-msgid "Waiting for response from device..."
-msgstr "Čaká sa na odpoveď od zariadenia..."
-
-#: ../plugins/bluetooth/bluetooth.c:1211
-msgid "Pairing Requested"
-msgstr "Obdržaná požiadavka na párovanie"
-
-#: ../plugins/bluetooth/bluetooth.c:1216
-#, c-format
-msgid "Device '%s' has requested a pairing. Do you accept the request?"
-msgstr "Zariadenie '%s' poslalo požiadavku na párovanie. Chcete ho prijať?"
-
-#: ../plugins/bluetooth/bluetooth.c:1232
-#, c-format
-msgid "Rejecting pairing..."
-msgstr "Odmietnutie párovania..."
-
-#: ../plugins/bluetooth/bluetooth.c:1239
-#, c-format
-msgid "Removal of pairing failed - %s. Remove the device manually."
-msgstr "Chyba pri odstraňovaní párovania - %s. Odstráňte zariadenie manuálne."
-
-#: ../plugins/bluetooth/bluetooth.c:1247
-msgid "Paired successfully. Use the audio menu to select as output device."
-msgstr "Párovanie bolo úspešné. Výstupné zariadenie nastavíte v ponuke zvuku."
-
-#: ../plugins/bluetooth/bluetooth.c:1254
-msgid ""
-"Paired successfully, but this device has no services which can be used with "
-"Raspberry Pi."
-msgstr ""
-"Párovanie bolo úspešné, ale toto zariadenie neposkytuje žiadne služby, "
-"ktoré by vedelo Raspberry Pi využiť."
-
-#. create the window
-#: ../plugins/bluetooth/bluetooth.c:1367
-msgid "Add New Device"
-msgstr "Pridať nové zariadenie"
-
-#: ../plugins/bluetooth/bluetooth.c:1367 ../plugins/bluetooth/bluetooth.c:1421
-#, c-format
-msgid "Remove Device"
-msgstr "Odstrániť zariadenie"
-
-#: ../plugins/bluetooth/bluetooth.c:1377
-msgid "_Pair"
-msgstr "_Párovať"
-
-#: ../plugins/bluetooth/bluetooth.c:1377
-msgid "_Remove"
-msgstr "_Odstrániť"
-
-#. add a label
-#: ../plugins/bluetooth/bluetooth.c:1383
-msgid "Searching for Bluetooth devices..."
-msgstr "Hľadanie zariadení Bluetooth..."
-
-#: ../plugins/bluetooth/bluetooth.c:1383
-msgid "Paired Bluetooth devices"
-msgstr "Spárované zariadenia Bluetooth"
-
-#: ../plugins/bluetooth/bluetooth.c:1422
-#, c-format
-msgid "Removing paired device '%s'..."
-msgstr "Odstraňovanie spárovaného zariadenia '%s'..."
-
-#: ../plugins/bluetooth/bluetooth.c:1422
-#, c-format
-msgid "Removal failed - %s"
-msgstr "Odstránenie zlyhalo - %s"
-
-#: ../plugins/bluetooth/bluetooth.c:1426
-#, c-format
-msgid "Connect Device"
-msgstr "Pripojiť zariadenie"
-
-#: ../plugins/bluetooth/bluetooth.c:1427
-#, c-format
-msgid "Connecting to device '%s'..."
-msgstr "Prebieha pripájanie k zariadeniu '%s'..."
-
-#: ../plugins/bluetooth/bluetooth.c:1427
+#: ../src/bluetooth.c:1335 ../src/bluetooth.c:1594
 #, c-format
 msgid "Connection failed - %s"
-msgstr "Chyba pri pripájaní - %s"
+msgstr "Chyba pripojenia - %s"
 
-#: ../plugins/bluetooth/bluetooth.c:1431
+#: ../src/bluetooth.c:1343
 #, c-format
-msgid "Disconnect Device"
-msgstr "Odpojiť zariadenie"
+msgid "Please enter code '%s' on '%s'"
+msgstr "Prosím, zadajte kód „%s“ na zariadení „%s“"
 
-#: ../plugins/bluetooth/bluetooth.c:1432
+#: ../src/bluetooth.c:1351
 #, c-format
-msgid "Disconnecting from device '%s'..."
-msgstr "Prebieha rušenie pripojenia k zariadeniu '%s'..."
+msgid "Please confirm that '%s' is showing the code '%s' to pair"
+msgstr ""
+"Ak chcete potvrdiť párovanie, potvrďte, že zariadenie „%s“ zobrazuje kód „%s“"
 
-#: ../plugins/bluetooth/bluetooth.c:1432
+#: ../src/bluetooth.c:1359
+#, c-format
+msgid "Please enter PIN code shown on '%s'"
+msgstr "Prosím, zadajte kód PIN pre zariadenie „%s“"
+
+#: ../src/bluetooth.c:1367
+#, c-format
+msgid "Please enter passcode shown on '%s'"
+msgstr "Prosím, zadajte kód „zobrazený na zariadení „%s“"
+
+#: ../src/bluetooth.c:1375
+#, c-format
+msgid "Waiting for response from Bluetooth device..."
+msgstr "Čakám na odpoveď od Bluetooth zariadenia..."
+
+#: ../src/bluetooth.c:1383
+#, c-format
+msgid "'%s' has requested a pairing. Do you accept the request?"
+msgstr "Zariadenie „%s“ poslalo požiadavku na párovanie. Chcete ho prijať?"
+
+#: ../src/bluetooth.c:1391
+#, fuzzy, c-format
+msgid ""
+"Pairing successful - right-click the volume icon to select as audio device"
+msgstr ""
+"Párovanie bolo úspešné - kliknite pravým tlačidlom na ikonu hlasitosti, ak "
+"ho chcete použiť pre výstup zvuku"
+
+#: ../src/bluetooth.c:1399
+#, c-format
+msgid ""
+"Pairing successful - this device has no services which can be used with "
+"Raspberry Pi"
+msgstr ""
+"Párovanie bolo úspešné - toto zariadenie však neposkytuje žiadne služby, "
+"ktoré by vedelo Raspberry Pi využiť"
+
+#: ../src/bluetooth.c:1574
+#, fuzzy, c-format
+msgid "Removing..."
+msgstr "Odstrániť..."
+
+#: ../src/bluetooth.c:1578
+#, c-format
+msgid "Do you want to unpair '%s'?"
+msgstr "Chcete zrušiť párovanie zariadenia „%s“?"
+
+#: ../src/bluetooth.c:1581
+#, c-format
+msgid "Removing pairing with '%s'..."
+msgstr "Ruším párovanie zariadenia „%s“..."
+
+#: ../src/bluetooth.c:1584
+#, c-format
+msgid "Removal failed - %s"
+msgstr "Rušenie párovania zlyhalo - %s"
+
+#: ../src/bluetooth.c:1593
+#, fuzzy, c-format
+msgid "Connecting..."
+msgstr "Pripojiť..."
+
+#: ../src/bluetooth.c:1594
+#, c-format
+msgid "Connecting to '%s'..."
+msgstr "Pripájam sa k zariadeniu „%s“..."
+
+#: ../src/bluetooth.c:1598
+#, fuzzy, c-format
+msgid "Disconnecting..."
+msgstr "Odpojiť..."
+
+#: ../src/bluetooth.c:1599
+#, c-format
+msgid "Disconnecting from '%s'..."
+msgstr "Ruším pripojenie k zariadeniu „%s“..."
+
+#: ../src/bluetooth.c:1599
 #, c-format
 msgid "Disconnection failed - %s"
 msgstr "Chyba počas rušenia pripojenia - %s"
 
-#: ../plugins/bluetooth/bluetooth.c:1515
-msgid "Use the audio menu to connect to this device"
-msgstr "Použite ponuku zvuku na pripojenie sa k tomuto zariadeniu"
-
-#: ../plugins/bluetooth/bluetooth.c:1517
+#: ../src/bluetooth.c:1714
 msgid "No usable services on this device"
 msgstr "Zariadenie neposkytuje žiadne využiteľné služby"
 
-#: ../plugins/bluetooth/bluetooth.c:1585
+#: ../src/bluetooth.c:1779
 msgid "Disconnect..."
 msgstr "Odpojiť..."
 
-#: ../plugins/bluetooth/bluetooth.c:1591
+#: ../src/bluetooth.c:1784
 msgid "Connect..."
 msgstr "Pripojiť..."
 
+#. add the remove option to the submenu
+#: ../src/bluetooth.c:1797
+msgid "Remove..."
+msgstr "Odstrániť..."
+
 #. warn if no BT hardware detected
-#: ../plugins/bluetooth/bluetooth.c:1788
+#: ../src/bluetooth.c:1993
 msgid "No Bluetooth adapter found"
 msgstr "Nebol nájdený Bluetooth adaptér"
 
 #. add enable bt option
-#: ../plugins/bluetooth/bluetooth.c:1795
+#: ../src/bluetooth.c:2000
 msgid "Turn On Bluetooth"
 msgstr "Zapnúť Bluetooth"
 
 #. add disable bt option
-#: ../plugins/bluetooth/bluetooth.c:1804
+#: ../src/bluetooth.c:2010
 msgid "Turn Off Bluetooth"
 msgstr "Vypnúť Bluetooth"
 
-#. discoverable toggle
-#: ../plugins/bluetooth/bluetooth.c:1812
+#: ../src/bluetooth.c:2020
 msgid "Stop Discoverable"
 msgstr "Vypnúť viditeľnosť"
 
-#: ../plugins/bluetooth/bluetooth.c:1813
+#: ../src/bluetooth.c:2022
 msgid "Make Discoverable"
 msgstr "Zapnúť viditeľnosť"
 
 #. add and remove dialogs
-#: ../plugins/bluetooth/bluetooth.c:1820
+#: ../src/bluetooth.c:2030
 msgid "Add Device..."
 msgstr "Pridať zariadenie..."
 
-#: ../plugins/bluetooth/bluetooth.c:1823
-msgid "Remove Device..."
-msgstr "Odstrániť zariadenie..."
-
-#: ../plugins/bluetooth/bluetooth.c:1905
+#: ../src/bluetooth.c:2145
 msgid "Manage Bluetooth devices"
 msgstr "Správa zariadení Bluetooth"
 
-#: ../plugins/bluetooth/bluetooth.c:1940
+#: ../src/bluetooth.c:2253 ../src/bluetooth.cpp:40
 msgid "Bluetooth"
 msgstr "Bluetooth"
 
-#: ../plugins/bluetooth/bluetooth.c:1941
+#: ../src/bluetooth.c:2254
 msgid "Manages Bluetooth devices"
 msgstr "Spravuje zariadenia Bluetooth"
+
+#. End of file
+#. ----------------------------------------------------------------------------
+#: ../data/lxplug-bluetooth.ui.h:1
+msgid "Add New Device"
+msgstr "Pridať nové zariadenie"
+
+#: ../data/lxplug-bluetooth.ui.h:2
+msgid "_Cancel"
+msgstr "_Zrušiť"
+
+#: ../data/lxplug-bluetooth.ui.h:3
+msgid "_Pair"
+msgstr "_Párovať"
+
+#: ../data/lxplug-bluetooth.ui.h:4
+msgid "Searching for Bluetooth devices..."
+msgstr "Hľadanie zariadení Bluetooth..."
+
+#: ../data/lxplug-bluetooth.ui.h:5
+msgid "label"
+msgstr "menovka"
+
+#: ../data/lxplug-bluetooth.ui.h:6
+msgid "_OK"
+msgstr "_OK"
+
+#: ../data/lxplug-bluetooth.ui.h:7
+#, fuzzy
+msgid "Pairing..."
+msgstr "Odmietnutie párovania..."
+
